@@ -12,14 +12,27 @@
 
 ## Dev Instructions
 
+### Install
+
 1. Download `git clone https://github.com/uavaustin/target-finder-model`
-2. Get Darknet (required Linux or [WSL](https://docs.microsoft.com/en-us/windows/wsl/install-win10))
-  * `cd target-finder-model && git clone https://github.com/AlexeyAB/darknet.git`
-  * `cd darknet` and edit `MakeFile`
-    * If CPU `AVX=1` `OPENMP=1` `LIBSO=1`
-    * If GPU `CPU=1` `CUDNN=1` `LIBSO=1`
-    * `make`
+2. Get Darknet (requires Linux or [WSL](https://docs.microsoft.com/en-us/windows/wsl/install-win10))
+    * `cd target-finder-model && git clone https://github.com/AlexeyAB/darknet.git`
+    * `cd darknet` and edit `MakeFile`
+        * If CPU `AVX=1` `OPENMP=1` `LIBSO=1`
+        * If GPU `CPU=1` `CUDNN=1` `LIBSO=1`
+        * `make`
 3. Download Assets `???`
+
+### Generate
+
+##### Data Generation
+* `generate/create_full_images.py` Create full-sized artificial images
+* `generate/create_clf_data.py` Convert full-sized images to training data for classifier
+* `generate/create_detection_data.py` Convert full-sized images to training data for detection model
+
+##### Training Darknet
+* `generate/train_clf.py` Train classifier model
+* `generate/train_detector.py` Train detection model
 
 ## Testing
 

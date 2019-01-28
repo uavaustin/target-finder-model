@@ -1,5 +1,17 @@
 #!/usr/bin/env python3
+"""
+This script should generate fullsized training images
+which contain several artificial shapes.
 
+Save Format:
+    data/{train, val}/images/exX.png <- image X
+    data/{train, val}/images/exX.txt <- bboxes for image X
+
+BBox Format:
+    shape_ALPHA x y width height
+    shape2_ALPHA2 x y width height
+    ...
+"""
 import glob
 import multiprocessing
 import os
@@ -18,16 +30,15 @@ FULL_SIZE = config.FULL_SIZE
 TARGET_COLORS = config.TARGET_COLORS
 ALPHA_COLORS = config.ALPHA_COLORS
 COLORS = config.COLORS
-DIR = 'train'
 
 
-def generate_all_shapes():
+def generate_all_shapes(gen_type):
 
     os.makedirs(config.DATA_DIR, exist_ok=True)
-    os.makedirs(os.path.join(config.DATA_DIR, DIR, 'images'), exist_ok=True)
+    os.makedirs(os.path.join(config.DATA_DIR, gen_type, 'images'), exist_ok=True)
 
     r_state = random.getstate()
-    random.seed(0)
+    random.seed(gen_type)
 
     # All the random selection is generated ahead of time, that way
     # the process can be resumed without the shapes changing on each
@@ -81,14 +92,14 @@ def generate_all_shapes():
 
     # Put everything into one large iterable so that we can split up
     # data across thread pools.
-    data = zip(numbers, backgrounds, flip_bg, mirror_bg, blurs, shape_params)
+    data = zip(numbers, backgrounds, flip_bg, mirror_bg, blurs, shape_params, [gen_type] * NUM_GEN)
 
     random.setstate(r_state)
 
     num_width = str(len(str(NUM_GEN)))
     bar_suffix = '%(index)' + num_width + 'd/%(max)d [%(elapsed_td)s]'
 
-    bar = Bar('Data Generation',
+    bar = Bar('Data Generation for ' + gen_type,
               max=NUM_GEN, suffix=bar_suffix)
 
     # Generate in a pool. If specificed, use a given number of
@@ -103,7 +114,7 @@ def generate_all_shapes():
 # One iteration in the function above, runs in a pool.
 def _generate_single_example(data):
 
-    number, background, flip_bg, mirror_bg, blur, shape_params = data
+    number, background, flip_bg, mirror_bg, blur, shape_params, gen_type = data
 
     background = background.copy()
     if flip_bg:
@@ -115,8 +126,8 @@ def _generate_single_example(data):
 
     shape_bboxes, full_img = _add_shapes(background, shape_imgs, shape_params, blur)
 
-    img_fn = os.path.join(config.DATA_DIR, DIR, 'images', 'ex{}.png'.format(number))
-    labels_fn = os.path.join(config.DATA_DIR, DIR, 'images', 'ex{}.txt'.format(number))
+    img_fn = os.path.join(config.DATA_DIR, gen_type, 'images', 'ex{}.png'.format(number))
+    labels_fn = os.path.join(config.DATA_DIR, gen_type, 'images', 'ex{}.txt'.format(number))
 
     full_img.save(img_fn)
 
@@ -300,4 +311,5 @@ def _rotate_shape(image, shape, angle):
 
 
 if __name__ == '__main__':
-    generate_all_shapes()
+    generate_all_shapes('train')
+    generate_all_shapes('val')
