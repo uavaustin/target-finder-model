@@ -1,0 +1,5 @@
+classes= 10
+train  = /mnt/c/Users/Shriv/Desktop/UAVA_RESEARCH/new/shapes/trainc/trainc_shapes_list.txt
+valid  = /mnt/c/Users/Shriv/Desktop/UAVA_RESEARCH/new/shapes/valc/valc_shapes_list.txt
+names = /mnt/c/Users/Shriv/Desktop/UAVA_RESEARCH/darknet-alt/data/uava2.names
+backup = backup/

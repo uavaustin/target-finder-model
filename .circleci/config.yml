@@ -21,83 +21,19 @@ jobs:
           path: test-shapes.tar.gz
           destination: test-shapes.tar.gz
 
-  # Running a job to build not-a-shapes.
-  nas-gen:
-    <<: *defaults
-    steps:
-      - checkout
-      - attach_workspace:
-          at: generate
-      - run: pip install --user -r requirements-dev.txt
-      - run: python generate/nas_gen.py
-      - persist_to_workspace:
-          root: generate
-          paths:
-            - shapes/nas
-
   # Parallel jobs to build each type of shape.
-  circle-gen: &shape-job
+  full-gen: &image-job
     <<: *defaults
     environment:
-      - SHAPE_TYPES: circle
+      - NUM_IMAGES: 10
     steps:
       - checkout
       - attach_workspace:
           at: generate
       - run: pip install --user -r requirements-dev.txt
-      - run: python generate/shape_gen.py
+      - run: python generate/create_full_images.py
       - persist_to_workspace:
           root: generate
-          paths:
-            - shapes/*
-  cross-gen:
-    <<: *shape-job
-    environment:
-      - SHAPE_TYPES: cross
-  pentagon-gen:
-    <<: *shape-job
-    environment:
-      - SHAPE_TYPES: pentagon
-  quarter-circle-gen:
-    <<: *shape-job
-    environment:
-      - SHAPE_TYPES: quarter-circle
-  rectangle-gen:
-    <<: *shape-job
-    environment:
-      - SHAPE_TYPES: rectangle
-  semicircle-gen:
-    <<: *shape-job
-    environment:
-      - SHAPE_TYPES: semicircle
-  square-gen:
-    <<: *shape-job
-    environment:
-      - SHAPE_TYPES: square
-  star-gen:
-    <<: *shape-job
-    environment:
-      - SHAPE_TYPES: star
-  trapezoid-gen:
-    <<: *shape-job
-    environment:
-      - SHAPE_TYPES: trapezoid
-  triangle-gen:
-    <<: *shape-job
-    environment:
-      - SHAPE_TYPES: triangle
-
-  # Training job using the shapes from the shapes above.
-  train:
-    <<: *defaults
-    steps:
-      - checkout
-      - attach_workspace:
-          at: generate
-      - run: pip install --user -r requirements-dev.txt
-      - run: python generate/train.py
-      - persist_to_workspace:
-          root: target_finder_model
           paths:
             - data/*
 
@@ -142,49 +78,8 @@ workflows:
           filters:
             tags:
               only: /.*/
-      - nas-gen: &gen-job
-          requires:
-            - test
-          filters: &release-filters
-            tags:
-              only: /^v.*/
-            branches:
-              ignore: /.*/
-      - circle-gen:
+      - full-gen:
           <<: *gen-job
-      - cross-gen:
-          <<: *gen-job
-      - pentagon-gen:
-          <<: *gen-job
-      - quarter-circle-gen:
-          <<: *gen-job
-      - rectangle-gen:
-          <<: *gen-job
-      - semicircle-gen:
-          <<: *gen-job
-      - square-gen:
-          <<: *gen-job
-      - star-gen:
-          <<: *gen-job
-      - trapezoid-gen:
-          <<: *gen-job
-      - triangle-gen:
-          <<: *gen-job
-      - train:
-          requires:
-            - nas-gen
-            - circle-gen
-            - cross-gen
-            - pentagon-gen
-            - quarter-circle-gen
-            - rectangle-gen
-            - semicircle-gen
-            - square-gen
-            - star-gen
-            - trapezoid-gen
-            - triangle-gen
-          filters:
-            <<: *release-filters
       - release:
           requires:
             - train
