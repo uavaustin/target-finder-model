@@ -4,24 +4,6 @@ defaults: &defaults
 
 version: 2
 jobs:
-  # Testing job which builds a small model and runs sanity tests
-  # against it.
-  test:
-    <<: *defaults
-    steps:
-      - checkout
-      - run: pip install --user tox
-      - run: python -m tox
-      - persist_to_workspace:
-          root: generate
-          paths:
-            - assets
-      - run: tar -cvzf test-shapes.tar.gz test/shapes
-      - store_artifacts:
-          path: test-shapes.tar.gz
-          destination: test-shapes.tar.gz
-
-  # Parallel jobs to build each type of shape.
   full-gen: &image-job
     <<: *defaults
     environment:
@@ -72,14 +54,14 @@ jobs:
 
 workflows:
   version: 2
-  test-generate-train:
+  generate-images:
     jobs:
-      - test:
-          filters:
+      - full-gen: &gen-job
+          filters: &release-filters
             tags:
-              only: /.*/
-      - full-gen:
-          <<: *gen-job
+              only: /^v.*/
+            branches:
+              ignore: /.*/
       - release:
           requires:
             - train

@@ -3,3 +3,7 @@
 import os
 
 import target_finder_model
+
+
+def do_fake_test():
+    pass

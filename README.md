@@ -15,7 +15,10 @@
 1. Download `git clone https://github.com/uavaustin/target-finder-model`
 2. Get Darknet
   * `cd target-finder-model && git clone https://github.com/AlexeyAB/darknet.git`
-  * `cd darknet && make`
+  * `cd darknet` and edit `MakeFile`
+    * If CPU `AVX=1` `OPENMP=1` `LIBSO=1`
+    * If GPU `CPU=1` `CUDNN=1` `LIBSO=1`
+    * `make`
 3. Download Assets `???`
 
 ## Testing
