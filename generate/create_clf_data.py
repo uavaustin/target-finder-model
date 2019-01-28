@@ -68,7 +68,7 @@ def create_cropped_data(gen_type, i, full_img, bboxes):
             if len(cropped_bboxes) == 0:
                 label = "background"
             else:
-                label = "target"
+                label = "shape_target"
 
             name = '{}_{}'.format(k, label)
 

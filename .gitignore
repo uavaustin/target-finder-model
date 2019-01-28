@@ -117,3 +117,4 @@ venv.bak/
 # Model
 *.weights
 darknet/
+bad.list

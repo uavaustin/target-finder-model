@@ -21,18 +21,19 @@
         * If CPU `AVX=1` `OPENMP=1` `LIBSO=1`
         * If GPU `CPU=1` `CUDNN=1` `LIBSO=1`
         * `make`
+    * Download this [darknet53.conv.74](https://pjreddie.com/media/files/darknet53.conv.74)
 3. Download Assets `???`
 
 ### Generate
 
 ##### Data Generation
-* `generate/create_full_images.py` Create full-sized artificial images
-* `generate/create_clf_data.py` Convert full-sized images to training data for classifier
-* `generate/create_detection_data.py` Convert full-sized images to training data for detection model
+* `python generate/create_full_images.py` Create full-sized artificial images
+* `python generate/create_clf_data.py` Convert full-sized images to training data for classifier
+* `python generate/create_detection_data.py` Convert full-sized images to training data for detection model
 
 ##### Training Darknet
-* `generate/train_clf.py` Train classifier model
-* `generate/train_detector.py` Train detection model
+* `source scripts/train-detector.sh` Train detection model
+* `source scripts/train-preclf.sh` Train classifier model
 
 ## Testing
 
