@@ -79,3 +79,6 @@ COLORS = {
 
 # Model Specifics
 FULL_SIZE = (4240, 2400)
+CROP_SIZE = (400, 400)
+DETECTOR_SIZE = (608, 608)
+PRECLF_SIZE = (64, 64)

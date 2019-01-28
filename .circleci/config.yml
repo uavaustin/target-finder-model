@@ -63,8 +63,6 @@ workflows:
             branches:
               ignore: /.*/
       - release:
-          requires:
-            - train
           filters:
             <<: *release-filters
       - publish:
