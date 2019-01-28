@@ -4,7 +4,7 @@ import os
 
 
 ### Asset Settings and Files
-BACKGROUNDS_VERSION = 'v1'
+BACKGROUNDS_VERSION = 'v2'
 BASE_SHAPES_VERSION = 'v1'
 
 DOWNLOAD_BASE = (
