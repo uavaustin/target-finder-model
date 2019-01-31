@@ -2,4 +2,4 @@ classes = 10
 train  = generate/data/detector_train/detector_train_list.txt
 valid  = generate/data/detector_val/detector_val_list.txt
 names = model/cfgs/yolo3detector.names
-backup = models/weights
+backup = model/weights
