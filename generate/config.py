@@ -32,7 +32,7 @@ DATA_DIR = os.environ.get('DATA_DIR',
                           os.path.join(os.path.dirname(__file__), 'data'))
 
 ### Number of Images
-NUM_IMAGES = int(os.environ.get('NUM_IMAGES', '10'))
+NUM_IMAGES = int(os.environ.get('NUM_IMAGES', '30'))
 NUM_VAL_IMAGES = int(os.environ.get('NUM_VAL_IMAGES', '10'))
 
 # Max images to generate per image
@@ -48,6 +48,8 @@ SHAPE_TYPES = os.environ.get(
     'circle,cross,pentagon,quarter-circle,rectangle,semicircle,square,star,'
     'trapezoid,triangle'
 ).split(',')
+
+CLF_TYPES = ['background', 'shape_target']
 
 TARGET_COLORS = ['black', 'red', 'blue',
                  'green', 'yellow', 'purple', 'orange']

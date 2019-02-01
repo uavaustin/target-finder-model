@@ -19,11 +19,11 @@ import random
 import sys
 
 from PIL import Image, ImageDraw, ImageFilter, ImageFont, ImageOps
-from progress.bar import Bar
+from tqdm import tqdm
 
 import config
 
-# fix me
+
 NUM_GEN = int(config.NUM_IMAGES)
 MAX_SHAPES = int(config.MAX_PER_SHAPE)
 FULL_SIZE = config.FULL_SIZE
@@ -32,7 +32,7 @@ ALPHA_COLORS = config.ALPHA_COLORS
 COLORS = config.COLORS
 
 
-def generate_all_shapes(gen_type):
+def generate_all_shapes(gen_type, num_gen):
 
     os.makedirs(config.DATA_DIR, exist_ok=True)
     os.makedirs(os.path.join(config.DATA_DIR, gen_type, 'images'), exist_ok=True)
@@ -48,17 +48,17 @@ def generate_all_shapes(gen_type):
     for shape in config.SHAPE_TYPES:
         base_shapes[shape] = _get_base_shapes(shape)
 
-    numbers = list(range(0, NUM_GEN))
+    numbers = list(range(0, num_gen))
 
-    backgrounds = _random_list(_get_backgrounds())
-    flip_bg = _random_list([False, True])
-    mirror_bg = _random_list([False, True])
-    blurs = _random_list(range(1, 2))
-    num_targets = _random_list(range(1, MAX_SHAPES))
+    backgrounds = _random_list(_get_backgrounds(), num_gen)
+    flip_bg = _random_list([False, True], num_gen)
+    mirror_bg = _random_list([False, True], num_gen)
+    blurs = _random_list(range(1, 2), num_gen)
+    num_targets = _random_list(range(1, MAX_SHAPES), num_gen)
 
     shape_params = []
 
-    for i in range(NUM_GEN):
+    for i in range(num_gen):
 
         n = num_targets[i]
 
@@ -92,23 +92,15 @@ def generate_all_shapes(gen_type):
 
     # Put everything into one large iterable so that we can split up
     # data across thread pools.
-    data = zip(numbers, backgrounds, flip_bg, mirror_bg, blurs, shape_params, [gen_type] * NUM_GEN)
+    data = zip(numbers, backgrounds, flip_bg, mirror_bg, blurs, shape_params, [gen_type] * num_gen)
 
     random.setstate(r_state)
-
-    num_width = str(len(str(NUM_GEN)))
-    bar_suffix = '%(index)' + num_width + 'd/%(max)d [%(elapsed_td)s]'
-
-    bar = Bar('Data Generation for ' + gen_type,
-              max=NUM_GEN, suffix=bar_suffix)
 
     # Generate in a pool. If specificed, use a given number of
     # threads.
     with multiprocessing.Pool(None) as pool:
-        for i in pool.imap_unordered(_generate_single_example, data):
-            bar.next()
-
-    bar.finish()
+        for i in tqdm(pool.imap_unordered(_generate_single_example, data), total=num_gen):
+            pass
 
 
 # One iteration in the function above, runs in a pool.
@@ -176,7 +168,7 @@ def _get_base_shapes(shape):
 
 
 # Return a list with items randomly chosen.
-def _random_list(items, count=NUM_GEN):
+def _random_list(items, count):
     return [random.choice(items) for i in range(0, count)]
 
 
@@ -311,5 +303,5 @@ def _rotate_shape(image, shape, angle):
 
 
 if __name__ == '__main__':
-    generate_all_shapes('train')
-    generate_all_shapes('val')
+    generate_all_shapes('train', config.NUM_IMAGES)
+    generate_all_shapes('val', config.NUM_VAL_IMAGES)

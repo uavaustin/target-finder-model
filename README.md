@@ -14,7 +14,7 @@
     * `cd target-finder-model && git clone https://github.com/AlexeyAB/darknet.git`
     * `cd darknet` and edit `MakeFile`
         * If CPU `AVX=1` `OPENMP=1` `LIBSO=1`
-        * If GPU `CPU=1` `CUDNN=1` `LIBSO=1`
+        * If GPU `GPU=1` `CUDNN=1` `LIBSO=1`
         * `make`
     * Download this [darknet53.conv.74](https://pjreddie.com/media/files/darknet53.conv.74)
 

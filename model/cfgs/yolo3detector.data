@@ -1,5 +1,5 @@
 classes = 10
-train  = generate/data/detector_train/detector_train_list.txt
-valid  = generate/data/detector_val/detector_val_list.txt
+train  = generate/data/detector_train/images/detector_train_list.txt
+valid  = generate/data/detector_val/images/detector_val_list.txt
 names = model/cfgs/yolo3detector.names
 backup = model/weights
