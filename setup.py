@@ -44,8 +44,8 @@ setup(
     packages=find_packages(),
     package_data={
         'target_finder_model': [
-            'model/cfgs/preclf-test.cfg',
-            'model/cfgs/yolo3detector-test.cfg'
+            'data/preclf-test.cfg',
+            'data/yolo3detector-test.cfg'
         ]
     },
     license='MIT'

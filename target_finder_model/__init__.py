@@ -10,8 +10,8 @@ from .version import __version__
 
 
 # Darknet Config
-preclf_file = resource_filename(__name__, 'model/cfgs/preclf-test.cfg')
-yolo3_file = resource_filename(__name__, 'model/cfgs/yolo3detector-test.cfg')
+preclf_file = resource_filename(__name__, 'data/preclf-test.cfg')
+yolo3_file = resource_filename(__name__, 'data/yolo3detector-test.cfg')
 
 # Model Classes
 CLF_CLASSES = ['background', 'shape_target']
