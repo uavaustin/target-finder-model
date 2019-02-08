@@ -103,9 +103,6 @@ venv.bak/
 # mypy
 .mypy_cache/
 
-# target-finder-model files
-/target_finder_model/data/
-
 # Output from the create-release.sh script
 /release/
 
