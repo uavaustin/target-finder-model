@@ -7,6 +7,7 @@ import glob
 import os
 
 
+# Get constants from config
 DET_WIDTH, DET_HEIGHT = config.DETECTOR_SIZE
 CROP_WIDTH, CROP_HEIGHT = config.CROP_SIZE
 OVERLAP = config.CROP_OVERLAP
@@ -16,7 +17,7 @@ CLASSES = config.SHAPE_TYPES
 
 
 def get_converted_bboxes(x1, y1, x2, y2, data):
-
+    """Find bboxes in coords and convert them to yolo format"""
     bboxes = []
 
     for shape_desc, bx, by, bw, bh in data:
@@ -25,6 +26,8 @@ def get_converted_bboxes(x1, y1, x2, y2, data):
 
         if x1 < bx < bx + bw < x2 and y1 < by < by + bh < y2:
 
+            # Yolo3 Format
+            # class_idx center_x/im_w center_y/im_h w/im_w h/im_h
             bboxes.append((CLASSES.index(shape_name),
                           (bx - x1 + bw / 2) * RATIO / DET_WIDTH,
                           (by - y1 + bh / 2) * RATIO / DET_HEIGHT,
@@ -35,7 +38,7 @@ def get_converted_bboxes(x1, y1, x2, y2, data):
 
 
 def create_detector_data(dataset_name, dataset_path, image_name, image, data):
-
+    """Generate data for the detector model"""
     full_width, full_height = image.size
 
     k = 0
@@ -50,6 +53,7 @@ def create_detector_data(dataset_name, dataset_path, image_name, image, data):
             cropped_bboxes = get_converted_bboxes(x1, y1, x2, y2, data)
 
             if len(cropped_bboxes) == 0:
+                # discard crop b/c no shape
                 continue
 
             k += 1
@@ -60,8 +64,8 @@ def create_detector_data(dataset_name, dataset_path, image_name, image, data):
             name = '{}_crop{}'.format(image_name, k)
             bbox_fn = os.path.join(dataset_path, name + '.txt')
             image_fn = os.path.join(FILE_PATH, dataset_path, name + '.png')
-            list_fn = os.path.join(dataset_path,
-                                    '{}_list.txt'.format(dataset_name))
+            list_fn = '{}_list.txt'.format(dataset_name)
+            list_path = os.path.join(dataset_path, list_fn)
 
             cropped_img.save(image_fn)
 
@@ -69,9 +73,8 @@ def create_detector_data(dataset_name, dataset_path, image_name, image, data):
                 for bbox in cropped_bboxes:
                     label_file.write('{} {} {} {} {}\n'.format(*bbox))
 
-            with open(list_fn, 'a') as list_file:
+            with open(list_path, 'a') as list_file:
                 list_file.write(image_fn + "\n")
-
 
 
 def convert_data(dataset_type):
@@ -82,8 +85,9 @@ def convert_data(dataset_type):
 
     os.makedirs(new_images_path, exist_ok=True)
 
-    with open(os.path.join(new_images_path,
-                '{}_list.txt'.format(new_dataset)), 'w') as list_file:
+    # Clear/create data index
+    new_list_fn = '{}_list.txt'.format(new_dataset)
+    with open(os.path.join(new_images_path, new_list_fn), 'w') as list_file:
         list_file.write("")
 
     dataset_images = glob.glob(os.path.join(images_path, '*.png'))

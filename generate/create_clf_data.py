@@ -8,6 +8,7 @@ import glob
 import os
 
 
+# Get constants from config
 CLF_WIDTH, CLF_HEIGHT = config.PRECLF_SIZE
 CROP_WIDTH, CROP_HEIGHT = config.CROP_SIZE
 OVERLAP = config.CROP_OVERLAP
@@ -17,7 +18,7 @@ CLASSES = config.CLF_TYPES
 
 
 def contains_shape(x1, y1, x2, y2, data):
-
+    """Check if their is a bbox within these coords"""
     for shape_desc, bx, by, bw, bh in data:
 
         if x1 < bx < bx + bw < x2 and y1 < by < by + bh < y2:
@@ -27,7 +28,7 @@ def contains_shape(x1, y1, x2, y2, data):
 
 
 def create_clf_data(dataset_name, dataset_path, image_name, image, data):
-
+    """Generate data for the classifier model"""
     full_width, full_height = image.size
 
     backgrounds = []
@@ -48,22 +49,21 @@ def create_clf_data(dataset_name, dataset_path, image_name, image, data):
             else:
                 backgrounds.append(cropped_img)
 
+    # Keep classes balanced and randomize data
     num_data = min(len(backgrounds), len(shapes))
-
     random.shuffle(backgrounds)
     random.shuffle(shapes)
 
     list_fn = os.path.join(dataset_path,
-                            '{}_list.txt'.format(dataset_name))
+                           '{}_list.txt'.format(dataset_name))
 
     for i in range(num_data):
 
-        shape_fn = os.path.join(FILE_PATH,
-                                dataset_path,
-                                '{}_{}_{}.png'.format(CLASSES[1], image_name, i))
-        bg_fn = os.path.join(FILE_PATH,
-                             dataset_path,
-                             '{}_{}_{}.png'.format(CLASSES[0], image_name, i))
+        shape_fn = '{}_{}_{}.png'.format(CLASSES[1], image_name, i)
+        shape_path = os.path.join(FILE_PATH, dataset_path, shape_fn)
+
+        bg_fn = '{}_{}_{}.png'.format(CLASSES[0], image_name, i)
+        bg_path = os.path.join(FILE_PATH, dataset_path, bg_fn)
 
         shapes[i].save(shape_fn)
         backgrounds[i].save(bg_fn)
@@ -71,7 +71,6 @@ def create_clf_data(dataset_name, dataset_path, image_name, image, data):
         with open(list_fn, 'a') as list_file:
             list_file.write(shape_fn + "\n")
             list_file.write(bg_fn + "\n")
-
 
 
 def convert_data(dataset_type):
@@ -82,8 +81,8 @@ def convert_data(dataset_type):
 
     os.makedirs(new_images_path, exist_ok=True)
 
-    with open(os.path.join(new_images_path,
-                '{}_list.txt'.format(new_dataset)), 'w') as list_file:
+    new_list_fn = '{}_list.txt'.format(new_dataset)
+    with open(os.path.join(new_images_path, new_list_fn), 'w') as list_file:
         list_file.write("")
 
     dataset_images = glob.glob(os.path.join(images_path, '*.png'))
