@@ -4,20 +4,67 @@ defaults: &defaults
 
 version: 2
 jobs:
-  full-gen: &image-job
+  # Testing job which builds a small model and runs sanity tests
+  # against it.
+  test:
+    <<: *defaults
+    steps:
+      - checkout
+      - run: pip install --user tox
+      - run: python -m tox
+      - persist_to_workspace:
+          root: generate
+          paths:
+            - assets
+      - run: tar -cvzf test-data.tar.gz test/data
+      - store_artifacts:
+          path: test-data.tar.gz
+          destination: test-data.tar.gz
+
+  # Parallel jobs to build shapes.
+  part-a-gen: &image-gen-job
     <<: *defaults
     environment:
+      - NUM_OFFSET: 0
       - NUM_IMAGES: 10
+      - NUM_VAL_OFFSET: 0
+      - NUM_VAL_IMAGES: 10
     steps:
       - checkout
       - attach_workspace:
           at: generate
       - run: pip install --user -r requirements-dev.txt
       - run: python generate/create_full_images.py
+      - run: python generate/create_clf_data.py
+      - run: python generate/create_detection_data.py
       - persist_to_workspace:
           root: generate
           paths:
             - data/*
+  part-b-gen:
+    <<: *image-gen-job
+    environment:
+      - NUM_OFFSET: 10
+      - NUM_IMAGES: 10
+      - NUM_VAL_OFFSET: 10
+      - NUM_VAL_IMAGES: 10
+
+  # Training job using the shapes from the shapes above.
+  train: &image-train-job
+    <<: *defaults
+    steps:
+      - checkout
+      - attach_workspace:
+          at: generate
+      - run: pip install --user -r requirements-dev.txt
+      - run: git clone https://github.com/AlexeyAB/darknet.git
+      - run: make -C ./darknet
+      - persist_to_workspace:
+          root: target_finder_model
+          paths:
+            - data/*
+  train-clf:
+    <<: *image-train-job
 
   # Job that creates a tar archive for the python library.
   release:
@@ -54,15 +101,35 @@ jobs:
 
 workflows:
   version: 2
-  generate-images:
+  test-generate-train:
     jobs:
-      - full-gen: &gen-job
+      - test:
+          filters:
+            tags:
+              only: /.*/
+      - part-a-gen: &gen-job
+          requires:
+            - test
           filters: &release-filters
             tags:
               only: /^v.*/
             branches:
               ignore: /.*/
+      - part-b-gen:
+          <<: *gen-job
+      - train: &train-job
+          requires:
+            - part-a-gen
+            - part-b-gen
+          filters:
+            <<: *release-filters
+      - train-clf:
+          filters:
+            <<: *train-job
       - release:
+          requires:
+            - train
+            - train-clf
           filters:
             <<: *release-filters
       - publish:
