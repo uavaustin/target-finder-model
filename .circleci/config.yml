@@ -16,7 +16,7 @@ jobs:
           root: generate
           paths:
             - assets
-      - run: tar -cvzf test-data.tar.gz test/data
+      - run: tar -cvzf test-data.tar.gz generate/data
       - store_artifacts:
           path: test-data.tar.gz
           destination: test-data.tar.gz
