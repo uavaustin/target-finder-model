@@ -124,8 +124,7 @@ workflows:
           filters:
             <<: *release-filters
       - train-clf:
-          filters:
-            <<: *train-job
+          <<: *train-job
       - release:
           requires:
             - train
