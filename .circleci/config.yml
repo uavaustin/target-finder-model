@@ -63,8 +63,8 @@ jobs:
       - persist_to_workspace:
           root: target_finder_model
           paths:
-            - data/*
-            - model/*
+            - data/detector_train
+            - data/detector_val
   train-clf:
     <<: *defaults
     steps:
@@ -78,8 +78,8 @@ jobs:
       - persist_to_workspace:
           root: target_finder_model
           paths:
-            - data/*
-            - model/*
+            - data/clf_train
+            - data/clf_val
 
   # Job that creates a tar archive for the python library.
   release:
