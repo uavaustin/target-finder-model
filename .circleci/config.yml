@@ -59,12 +59,27 @@ jobs:
       - run: pip install --user -r requirements-dev.txt
       - run: git clone https://github.com/AlexeyAB/darknet.git
       - run: make -C ./darknet
+      - run: source scripts/train-detector.sh
       - persist_to_workspace:
           root: target_finder_model
           paths:
             - data/*
+            - model/*
   train-clf:
-    <<: *image-train-job
+    <<: *defaults
+    steps:
+      - checkout
+      - attach_workspace:
+          at: generate
+      - run: pip install --user -r requirements-dev.txt
+      - run: git clone https://github.com/AlexeyAB/darknet.git
+      - run: make -C ./darknet
+      - run: source scripts/train-preclf.sh
+      - persist_to_workspace:
+          root: target_finder_model
+          paths:
+            - data/*
+            - model/*
 
   # Job that creates a tar archive for the python library.
   release:
@@ -103,36 +118,19 @@ workflows:
   version: 2
   test-generate-train:
     jobs:
-      - test:
-          filters:
-            tags:
-              only: /.*/
+      - test
       - part-a-gen: &gen-job
           requires:
             - test
-          filters: &release-filters
-            tags:
-              only: /^v.*/
-            branches:
-              ignore: /.*/
       - part-b-gen:
           <<: *gen-job
       - train: &train-job
           requires:
             - part-a-gen
             - part-b-gen
-          filters:
-            <<: *release-filters
       - train-clf:
           <<: *train-job
       - release:
           requires:
             - train
             - train-clf
-          filters:
-            <<: *release-filters
-      - publish:
-          requires:
-            - release
-          filters:
-            <<: *release-filters
