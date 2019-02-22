@@ -76,9 +76,9 @@ jobs:
       - attach_workspace:
           at: generate
       - run: cat generate/data/detector_train/images/detector_train_list_*.txt > generate/data/detector_train/images/detector_train_list.txt
-      - run: cat generate/data/detector_train/images/detector_val_list_*.txt > generate/data/detector_train/images/detector_val_list.txt
-      - run: cat generate/data/detector_train/images/clf_train_list_*.txt > generate/data/detector_train/images/clf_train_list.txt
-      - run: cat generate/data/detector_train/images/clf_val_list_*.txt > generate/data/detector_train/images/clf_val_list.txt
+      - run: cat generate/data/detector_val/images/detector_val_list_*.txt > generate/data/detector_val/images/detector_val_list.txt
+      - run: cat generate/data/clf_train/images/clf_train_list_*.txt > generate/data/clf_train/images/clf_train_list.txt
+      - run: cat generate/data/clf_val/images/clf_val_list_*.txt > generate/data/clf_val/images/clf_val_list.txt
 
   setup-darknet:
     <<: *defaults
