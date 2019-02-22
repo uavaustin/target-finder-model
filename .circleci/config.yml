@@ -134,11 +134,11 @@ jobs:
           at: '..'
       - run: git clone https://github.com/AlexeyAB/darknet.git
       - run: make -C ./darknet
-      - run: ls
       - persist_to_workspace:
           root: darknet
           paths:
             - '*'
+            - 'darknet'
 
   # Training job using the shapes from the shapes above.
   train: &image-train-job
@@ -147,6 +147,8 @@ jobs:
       - checkout
       - attach_workspace:
           at: '..'
+      - run: ls
+      - run: ls darknet
       - run: source scripts/train-detector.sh
       - persist_to_workspace:
           root: model
