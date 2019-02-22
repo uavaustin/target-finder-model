@@ -68,6 +68,52 @@ jobs:
           root: generate
           paths:
             - data/*
+  part-c-gen:
+    <<: *defaults
+    environment:
+      - NUM_OFFSET: 20
+      - NUM_IMAGES: 10
+      - NUM_VAL_OFFSET: 20
+      - NUM_VAL_IMAGES: 10
+    steps:
+      - checkout
+      - attach_workspace:
+          at: generate
+      - run: pip install --user -r requirements-dev.txt
+      - run: python generate/create_full_images.py
+      - run: python generate/create_clf_data.py
+      - run: python generate/create_detection_data.py
+      - run: mv generate/data/detector_train/images/detector_train_list.txt generate/data/detector_train/images/detector_train_list_c.txt
+      - run: mv generate/data/detector_val/images/detector_val_list.txt generate/data/detector_val/images/detector_val_list_c.txt
+      - run: mv generate/data/clf_train/images/clf_train_list.txt generate/data/clf_train/images/clf_train_list_c.txt
+      - run: mv generate/data/clf_val/images/clf_val_list.txt generate/data/clf_val/images/clf_val_list_c.txt
+      - persist_to_workspace:
+          root: generate
+          paths:
+            - data/*
+  part-d-gen:
+    <<: *defaults
+    environment:
+      - NUM_OFFSET: 30
+      - NUM_IMAGES: 10
+      - NUM_VAL_OFFSET: 30
+      - NUM_VAL_IMAGES: 10
+    steps:
+      - checkout
+      - attach_workspace:
+          at: generate
+      - run: pip install --user -r requirements-dev.txt
+      - run: python generate/create_full_images.py
+      - run: python generate/create_clf_data.py
+      - run: python generate/create_detection_data.py
+      - run: mv generate/data/detector_train/images/detector_train_list.txt generate/data/detector_train/images/detector_train_list_d.txt
+      - run: mv generate/data/detector_val/images/detector_val_list.txt generate/data/detector_val/images/detector_val_list_d.txt
+      - run: mv generate/data/clf_train/images/clf_train_list.txt generate/data/clf_train/images/clf_train_list_d.txt
+      - run: mv generate/data/clf_val/images/clf_val_list.txt generate/data/clf_val/images/clf_val_list_d.txt
+      - persist_to_workspace:
+          root: generate
+          paths:
+            - data/*
 
   merge-data:
     <<: *defaults
@@ -97,7 +143,7 @@ jobs:
     steps:
       - checkout
       - attach_workspace:
-          at: generate
+          at: '.'
       - run: source scripts/train-detector.sh
       - persist_to_workspace:
           root: model
@@ -108,7 +154,7 @@ jobs:
     steps:
       - checkout
       - attach_workspace:
-          at: generate
+          at: '.'
       - run: source scripts/train-preclf.sh
       - persist_to_workspace:
           root: model
@@ -121,7 +167,7 @@ jobs:
     steps:
       - checkout
       - attach_workspace:
-          at: target_finder_model
+          at: '.'
       - run: ./scripts/create-release.sh
       - store_artifacts:
           path: release
@@ -153,7 +199,9 @@ workflows:
   test-generate-train:
     jobs:
       - test
-      - setup-darknet
+      - setup-darknet:
+          requires:
+            - test
       - part-a-gen: &gen-job
           requires:
             - test
@@ -163,6 +211,8 @@ workflows:
           requires:
             - part-a-gen
             - part-b-gen
+            - part-c-gen
+            - part-d-gen
       - train: &train-job
           requires:
             - merge-data
