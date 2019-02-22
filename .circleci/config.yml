@@ -143,9 +143,8 @@ jobs:
     steps:
       - checkout
       - attach_workspace:
-          at: '.'
+          at: '..'
       - run: ls
-      - run: ls darknet
       - run: source scripts/train-detector.sh
       - persist_to_workspace:
           root: model
@@ -156,7 +155,7 @@ jobs:
     steps:
       - checkout
       - attach_workspace:
-          at: '.'
+          at: '..'
       - run: source scripts/train-preclf.sh
       - persist_to_workspace:
           root: model
