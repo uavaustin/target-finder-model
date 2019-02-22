@@ -59,9 +59,9 @@ jobs:
       - run: git clone https://github.com/AlexeyAB/darknet.git
       - run: make -C ./darknet
       - persist_to_workspace:
-          root: target_finder_model
+          root: darknet
           paths:
-            - darknet
+            - *
 
   # Training job using the shapes from the shapes above.
   train: &image-train-job
@@ -69,25 +69,23 @@ jobs:
     steps:
       - checkout
       - attach_workspace:
-          at: generate
+          at: target_finder_model
       - run: source scripts/train-detector.sh
       - persist_to_workspace:
-          root: target_finder_model
+          root: model
           paths:
-            - data/detector_train
-            - data/detector_val
+            - weights/*
   train-clf:
     <<: *defaults
     steps:
       - checkout
       - attach_workspace:
-          at: generate
+          at: target_finder_model
       - run: source scripts/train-preclf.sh
       - persist_to_workspace:
-          root: target_finder_model
+          root: model
           paths:
-            - data/clf_train
-            - data/clf_val
+            - weights/*
 
   # Job that creates a tar archive for the python library.
   release:
