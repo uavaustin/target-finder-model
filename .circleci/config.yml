@@ -61,7 +61,7 @@ jobs:
       - persist_to_workspace:
           root: darknet
           paths:
-            - *
+            - ./*
 
   # Training job using the shapes from the shapes above.
   train: &image-train-job
