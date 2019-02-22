@@ -207,6 +207,10 @@ workflows:
             - test
       - part-b-gen:
           <<: *gen-job
+      - part-c-gen:
+          <<: *gen-job
+      - part-d-gen:
+          <<: *gen-job
       - merge-data:
           requires:
             - part-a-gen
