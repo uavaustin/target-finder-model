@@ -135,7 +135,7 @@ jobs:
       - persist_to_workspace:
           root: darknet
           paths:
-            - ./*
+            - '*'
 
   # Training job using the shapes from the shapes above.
   train: &image-train-job
@@ -199,9 +199,7 @@ workflows:
   test-generate-train:
     jobs:
       - test
-      - setup-darknet:
-          requires:
-            - test
+      - setup-darknet
       - part-a-gen: &gen-job
           requires:
             - test
