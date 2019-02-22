@@ -54,7 +54,7 @@ jobs:
     steps:
       - checkout
       - attach_workspace:
-          at: generate
+          at: target_finder_model
       - run: pip install --user -r requirements-dev.txt
       - run: git clone https://github.com/AlexeyAB/darknet.git
       - run: make -C ./darknet
