@@ -144,6 +144,8 @@ jobs:
       - checkout
       - attach_workspace:
           at: '.'
+      - run: ls
+      - run: ls darknet
       - run: source scripts/train-detector.sh
       - persist_to_workspace:
           root: model
