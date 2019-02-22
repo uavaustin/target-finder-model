@@ -37,10 +37,10 @@ jobs:
       - run: python generate/create_full_images.py
       - run: python generate/create_clf_data.py
       - run: python generate/create_detection_data.py
-      - run: mv data/detector_train/images/detector_train_list.txt data/detector_train/images/detector_train_list_a.txt
-      - run: mv data/detector_val/images/detector_val_list.txt data/detector_val/images/detector_val_list_a.txt
-      - run: mv data/clf_train/images/clf_train_list.txt data/clf_train/images/clf_train_list_a.txt
-      - run: mv data/clf_val/images/clf_val_list.txt data/clf_val/images/clf_val_list_a.txt
+      - run: mv generate/data/detector_train/images/detector_train_list.txt generate/data/detector_train/images/detector_train_list_a.txt
+      - run: mv generate/data/detector_val/images/detector_val_list.txt generate/data/detector_val/images/detector_val_list_a.txt
+      - run: mv generate/data/clf_train/images/clf_train_list.txt generate/data/clf_train/images/clf_train_list_a.txt
+      - run: mv generate/data/clf_val/images/clf_val_list.txt generate/data/clf_val/images/clf_val_list_a.txt
       - persist_to_workspace:
           root: generate
           paths:
@@ -60,25 +60,25 @@ jobs:
       - run: python generate/create_full_images.py
       - run: python generate/create_clf_data.py
       - run: python generate/create_detection_data.py
-      - run: mv data/detector_train/images/detector_train_list.txt data/detector_train/images/detector_train_list_b.txt
-      - run: mv data/detector_val/images/detector_val_list.txt data/detector_val/images/detector_val_list_b.txt
-      - run: mv data/clf_train/images/clf_train_list.txt data/clf_train/images/clf_train_list_b.txt
-      - run: mv data/clf_val/images/clf_val_list.txt data/clf_val/images/clf_val_list_b.txt
+      - run: mv generate/data/detector_train/images/detector_train_list.txt generate/data/detector_train/images/detector_train_list_b.txt
+      - run: mv generate/data/detector_val/images/detector_val_list.txt generate/data/detector_val/images/detector_val_list_b.txt
+      - run: mv generate/data/clf_train/images/clf_train_list.txt generate/data/clf_train/images/clf_train_list_b.txt
+      - run: mv generate/data/clf_val/images/clf_val_list.txt generate/data/clf_val/images/clf_val_list_b.txt
       - persist_to_workspace:
           root: generate
           paths:
             - data/*
-            
+
   merge-data:
     <<: *defaults
     steps:
       - checkout
       - attach_workspace:
           at: generate
-      - run: cat data/detector_train/images/detector_train_list_*.txt > data/detector_train/images/detector_train_list.txt
-      - run: cat data/detector_train/images/clf_train_list_*.txt > data/detector_train/images/clf_train_list.txt
-      - run: cat data/detector_train/images/clf_val_list_*.txt > data/detector_train/images/clf_val_list.txt
-      - run: cat data/detector_train/images/detector_val_list_*.txt > data/detector_train/images/detector_train_list.txt
+      - run: cat generate/data/detector_train/images/detector_train_list_*.txt > generate/data/detector_train/images/detector_train_list.txt
+      - run: cat generate/data/detector_train/images/clf_train_list_*.txt > generate/data/detector_train/images/clf_train_list.txt
+      - run: cat generate/data/detector_train/images/clf_val_list_*.txt > generate/data/detector_train/images/clf_val_list.txt
+      - run: cat generate/data/detector_train/images/detector_val_list_*.txt > generate/data/detector_train/images/detector_train_list.txt
 
   setup-darknet:
     <<: *defaults
