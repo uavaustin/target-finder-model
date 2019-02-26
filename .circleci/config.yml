@@ -134,6 +134,7 @@ jobs:
           at: '..'
       - run: git clone https://github.com/AlexeyAB/darknet.git
       - run: make -C ./darknet
+      - run: ls
       - persist_to_workspace:
           root: '.'
           paths:
@@ -145,7 +146,7 @@ jobs:
     steps:
       - checkout
       - attach_workspace:
-          at: '..'
+          at: 'darknet'
       - run: ls
       - run: source scripts/train-detector.sh
       - persist_to_workspace:
