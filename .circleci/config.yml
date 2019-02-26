@@ -136,7 +136,7 @@ jobs:
       - run: make -C ./darknet
       - run: ls
       - persist_to_workspace:
-          root: '.'
+          root: 'darknet'
           paths:
             - 'darknet'
 
@@ -148,7 +148,8 @@ jobs:
       - attach_workspace:
           at: 'darknet'
       - run: ls
-      - run: source scripts/train-detector.sh
+      - run: ls darknet
+      - run: darknet/darknet detector train model/cfgs/yolo3detector.data model/cfgs/yolo3detector-train.cfg darknet/darknet53.conv.74
       - persist_to_workspace:
           root: model
           paths:
