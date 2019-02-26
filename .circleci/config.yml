@@ -140,6 +140,7 @@ jobs:
           root: 'darknet'
           paths:
             - 'darknet'
+            - 'darknet53.conv.74'
 
   # Training job using the shapes from the shapes above.
   train: &image-train-job
@@ -148,6 +149,8 @@ jobs:
       - checkout
       - attach_workspace:
           at: 'darknet'
+      - attach_workspace:
+          at: 'generate'
       - run: ls
       - run: ls darknet
       - run: darknet/darknet detector train model/cfgs/yolo3detector.data model/cfgs/yolo3detector-train.cfg darknet/darknet53.conv.74
@@ -161,6 +164,8 @@ jobs:
       - checkout
       - attach_workspace:
           at: 'darknet'
+      - attach_workspace:
+          at: 'generate'
       - run: darknet/darknet classifier train model/cfgs/preclf.data model/cfgs/preclf-train.cfg
       - persist_to_workspace:
           root: model
