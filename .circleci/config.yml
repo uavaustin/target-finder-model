@@ -134,6 +134,7 @@ jobs:
           at: '..'
       - run: git clone https://github.com/AlexeyAB/darknet.git
       - run: make -C ./darknet
+      - run: wget -P darknet https://pjreddie.com/media/files/darknet53.conv.74
       - run: ls
       - persist_to_workspace:
           root: 'darknet'
@@ -159,8 +160,8 @@ jobs:
     steps:
       - checkout
       - attach_workspace:
-          at: '..'
-      - run: source scripts/train-preclf.sh
+          at: 'darknet'
+      - run: darknet/darknet classifier train model/cfgs/preclf.data model/cfgs/preclf-train.cfg
       - persist_to_workspace:
           root: model
           paths:
