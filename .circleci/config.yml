@@ -26,9 +26,9 @@ jobs:
     <<: *defaults
     environment:
       - NUM_OFFSET: 0
-      - NUM_IMAGES: 10
+      - NUM_IMAGES: 2
       - NUM_VAL_OFFSET: 0
-      - NUM_VAL_IMAGES: 10
+      - NUM_VAL_IMAGES: 2
     steps:
       - checkout
       - attach_workspace:
@@ -48,10 +48,10 @@ jobs:
   part-b-gen:
     <<: *defaults
     environment:
-      - NUM_OFFSET: 10
-      - NUM_IMAGES: 10
-      - NUM_VAL_OFFSET: 10
-      - NUM_VAL_IMAGES: 10
+      - NUM_OFFSET: 2
+      - NUM_IMAGES: 2
+      - NUM_VAL_OFFSET: 2
+      - NUM_VAL_IMAGES: 2
     steps:
       - checkout
       - attach_workspace:
@@ -157,11 +157,10 @@ jobs:
       - run: ls
       - run: ls darknet
       - run: ls generate/data
-      - run: cat generate/data/detector_train/images/detector_train_list.txt
       - run:
           name: DarknetDetector
           command: darknet/darknet detector train model/cfgs/yolo3detector.data model/cfgs/yolo3detector-train.cfg darknet/darknet53.conv.74
-          no_output_timeout: 10m
+          no_output_timeout: 1h
       - persist_to_workspace:
           root: model
           paths:
@@ -174,11 +173,10 @@ jobs:
           at: 'darknet'
       - attach_workspace:
           at: 'generate'
-      - run: cat generate/data/clf_train/images/clf_train_list.txt
       - run:
           name: DarknetClf
           command: darknet/darknet classifier train model/cfgs/preclf.data model/cfgs/preclf-train.cfg
-          no_output_timeout: 10m
+          no_output_timeout: 1h
       - persist_to_workspace:
           root: model
           paths:
@@ -228,16 +226,16 @@ workflows:
             - test
       - part-b-gen:
           <<: *gen-job
-      - part-c-gen:
-          <<: *gen-job
-      - part-d-gen:
-          <<: *gen-job
+      # - part-c-gen:
+      #     <<: *gen-job
+      # - part-d-gen:
+      #     <<: *gen-job
       - merge-data:
           requires:
             - part-a-gen
             - part-b-gen
-            - part-c-gen
-            - part-d-gen
+            # - part-c-gen
+            # - part-d-gen
       - train: &train-job
           requires:
             - merge-data
