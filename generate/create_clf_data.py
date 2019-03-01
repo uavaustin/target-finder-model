@@ -16,6 +16,8 @@ RATIO = CLF_WIDTH / CROP_WIDTH
 FILE_PATH = os.path.abspath(os.path.dirname(__file__))
 CLASSES = config.CLF_TYPES
 
+print(FILE_PATH)
+
 
 def contains_shape(x1, y1, x2, y2, data):
     """Check if their is a bbox within these coords"""
