@@ -23,7 +23,7 @@ archive_name="target-finder-model-""$version"".tar.gz"
 
 # Create the staging directory and the target-finder folder.
 echo "Staging files"
-mkdir -p "$tf_stage_dir"
+mkdir -p "$tf_stage_dir""/target_finder_model/data/"
 cp "$yolo_weights_file" "$tf_stage_dir""/target_finder_model/data/"
 cp "$clf_weights_file" "$tf_stage_dir""/target_finder_model/data/"
 cp "$yolo_cfg_file" "$tf_stage_dir""/target_finder_model/data/"
