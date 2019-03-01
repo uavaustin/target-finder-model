@@ -157,6 +157,7 @@ jobs:
       - run: ls
       - run: ls darknet
       - run: ls generate/data
+      - run: rm model/weights/*
       - run:
           name: DarknetDetector
           command: darknet/darknet detector train model/cfgs/yolo3detector.data model/cfgs/yolo3detector-train.cfg darknet/darknet53.conv.74
@@ -173,6 +174,7 @@ jobs:
           at: 'darknet'
       - attach_workspace:
           at: 'generate'
+      - run: rm model/weights/*
       - run:
           name: DarknetClf
           command: darknet/darknet classifier train model/cfgs/preclf.data model/cfgs/preclf-train.cfg
@@ -188,7 +190,11 @@ jobs:
     steps:
       - checkout
       - attach_workspace:
-          at: '.'
+          at: 'model'
+      - run: mv model/weights/yolo3detector-train_final.weights target_finder_model/data/yolo3detector-train_final.weights
+      - run: mv model/weights/preclf-train_final.weights target_finder_model/data/preclf-train_final.weights
+      - run: cp model/cfgs/preclf-test.cfg target_finder_model/data/preclf-test.cfg
+      - run: cp model/cfgs/yolo3detector-test.cfg target_finder_model/data/yolo3detector-test.cfg
       - run: ./scripts/create-release.sh
       - store_artifacts:
           path: release
