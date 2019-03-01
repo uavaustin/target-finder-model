@@ -157,7 +157,11 @@ jobs:
       - run: ls
       - run: ls darknet
       - run: ls generate/data
-      - run: darknet/darknet detector train model/cfgs/yolo3detector.data model/cfgs/yolo3detector-train.cfg darknet/darknet53.conv.74
+      - run: cat generate/data/detector_train/images/detector_train_list.txt
+      - run:
+          name: DarknetDetector
+          command: darknet/darknet detector train model/cfgs/yolo3detector.data model/cfgs/yolo3detector-train.cfg darknet/darknet53.conv.74
+          no_output_timeout: 10m
       - persist_to_workspace:
           root: model
           paths:
@@ -171,7 +175,10 @@ jobs:
       - attach_workspace:
           at: 'generate'
       - run: cat generate/data/clf_train/images/clf_train_list.txt
-      - run: darknet/darknet classifier train model/cfgs/preclf.data model/cfgs/preclf-train.cfg
+      - run:
+          name: DarknetClf
+          command: darknet/darknet classifier train model/cfgs/preclf.data model/cfgs/preclf-train.cfg
+          no_output_timeout: 10m
       - persist_to_workspace:
           root: model
           paths:

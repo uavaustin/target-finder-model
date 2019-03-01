@@ -16,8 +16,6 @@ RATIO = CLF_WIDTH / CROP_WIDTH
 FILE_PATH = os.path.abspath(os.path.dirname(__file__))
 CLASSES = config.CLF_TYPES
 
-print(FILE_PATH)
-
 
 def contains_shape(x1, y1, x2, y2, data):
     """Check if their is a bbox within these coords"""
@@ -71,8 +69,8 @@ def create_clf_data(dataset_name, dataset_path, image_name, image, data):
         backgrounds[i].save(bg_path)
 
         with open(list_fn, 'a') as list_file:
-            list_file.write(shape_fn + "\n")
-            list_file.write(bg_fn + "\n")
+            list_file.write(shape_path + "\n")
+            list_file.write(bg_path + "\n")
 
 
 def convert_data(dataset_type, num, offset=0):
