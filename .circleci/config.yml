@@ -125,6 +125,10 @@ jobs:
       - run: cat generate/data/detector_val/images/detector_val_list_*.txt > generate/data/detector_val/images/detector_val_list.txt
       - run: cat generate/data/clf_train/images/clf_train_list_*.txt > generate/data/clf_train/images/clf_train_list.txt
       - run: cat generate/data/clf_val/images/clf_val_list_*.txt > generate/data/clf_val/images/clf_val_list.txt
+      - persist_to_workspace:
+          root: generate
+          paths:
+            - data/*
 
   setup-darknet:
     <<: *defaults
@@ -153,6 +157,7 @@ jobs:
           at: 'generate'
       - run: ls
       - run: ls darknet
+      - run: ls generate/data
       - run: darknet/darknet detector train model/cfgs/yolo3detector.data model/cfgs/yolo3detector-train.cfg darknet/darknet53.conv.74
       - persist_to_workspace:
           root: model
