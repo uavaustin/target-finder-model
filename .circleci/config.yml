@@ -36,8 +36,6 @@ jobs:
       - run:
           name: DarknetClfTest
           command: darknet/darknet classifier train model/cfgs/preclf.tox.data model/cfgs/preclf-tox.cfg
-      - run: pip install -e .
-      - run: pip install pytest
       - run: pytest test
 
   # Parallel jobs to build shapes.
