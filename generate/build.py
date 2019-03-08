@@ -7,7 +7,7 @@ import sys
 from pull_assets import pull_all
 from create_full_images import generate_all_shapes
 from create_detection_data import convert_data as det_convert_data
-from create_clf_data import clf_convert_data
+from create_clf_data import convert_data as clf_convert_data
 
 
 if __name__ == '__main__':
