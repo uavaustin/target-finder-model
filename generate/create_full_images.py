@@ -192,7 +192,10 @@ def _create_shape(shape, base, alpha,
     image = _strip_image(image)
     image = _add_alphanumeric(image, shape, alpha, alpha_rgb, font_file)
 
-    image = image.resize((size, size))
+    w, h = image.size
+    ratio = min(size / w, size / h)
+    image = image.resize((int(w * ratio), int(h * ratio)))
+    
     image = _rotate_shape(image, shape, angle)
     image = _strip_image(image)
 
