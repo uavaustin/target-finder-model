@@ -195,7 +195,7 @@ def _create_shape(shape, base, alpha,
     w, h = image.size
     ratio = min(size / w, size / h)
     image = image.resize((int(w * ratio), int(h * ratio)))
-    
+
     image = _rotate_shape(image, shape, angle)
     image = _strip_image(image)
 
