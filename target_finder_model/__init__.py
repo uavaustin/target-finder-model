@@ -9,14 +9,14 @@ from pkg_resources import resource_filename
 from .version import __version__
 
 
-# Darknet Config
-preclf_file = resource_filename(__name__, 'data/preclf-test.cfg')
-yolo3_file = resource_filename(__name__, 'data/yolo3detector-test.cfg')
-
-preclf_weights = resource_filename(__name__,
-                                   'data/preclf-train_final.weights')
-yolo3_weights = resource_filename(__name__,
-                                  'data/yolo3detector-train_final.weights')
+### Darknet Config
+##preclf_file = resource_filename(__name__, 'data/preclf-test.cfg')
+##yolo3_file = resource_filename(__name__, 'data/yolo3detector-test.cfg')
+##
+##preclf_weights = resource_filename(__name__,
+##                                   'data/preclf-train_final.weights')
+##yolo3_weights = resource_filename(__name__,
+##                                  'data/yolo3detector-train_final.weights')
 
 # Model Classes
 CLF_CLASSES = ['background', 'shape_target']
