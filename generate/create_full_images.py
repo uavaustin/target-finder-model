@@ -161,7 +161,10 @@ def _get_backgrounds():
     filenames = glob.glob(os.path.join(config.BACKGROUNDS_DIR, '*.png'))
     filenames += glob.glob(os.path.join(config.BACKGROUNDS_DIR, '*.jpg'))
 
-    return [Image.open(filename).resize(FULL_SIZE)
+    ## TODO REMOVE
+    filenames = filenames[:10]
+
+    return [Image.open(filename).resize(FULL_SIZE, 1)
             for filename in sorted(filenames)]
 
 
@@ -194,7 +197,7 @@ def _create_shape(shape, base, alpha,
 
     w, h = image.size
     ratio = min(size / w, size / h)
-    image = image.resize((int(w * ratio), int(h * ratio)))
+    image = image.resize((int(w * ratio), int(h * ratio)), 1)
 
     image = _rotate_shape(image, shape, angle)
     image = _strip_image(image)
@@ -214,7 +217,7 @@ def _augment_color(color_rgb):
 def _get_base(base, target_rgb, size):
     """Copy and recolor the base shape"""
     image = base.copy()
-    image = image.resize((256, 256), 0)
+    image = image.resize((256, 256), 1)
     image = image.convert('RGBA')
 
     r, g, b = target_rgb
