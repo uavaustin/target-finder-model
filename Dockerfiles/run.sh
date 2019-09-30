@@ -9,5 +9,4 @@ else
   -v /tmp/.X11-unix:/tmp/.X11-unix \
   -v $1:/host/mounted/ \
   uavaustin/target_finder_model:latest /bin/bash
-
 fi
