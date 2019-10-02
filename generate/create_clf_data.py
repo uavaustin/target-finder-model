@@ -2,6 +2,7 @@
 
 from tqdm import tqdm
 from PIL import Image
+import multiprocessing
 import random
 import config
 import glob
@@ -27,8 +28,9 @@ def contains_shape(x1, y1, x2, y2, data):
     return False
 
 
-def create_clf_data(dataset_name, dataset_path, image_name, image, data):
+def create_clf_data(data_zip):
     """Generate data for the classifier model"""
+    dataset_name, dataset_path, image_name, image, data = data_zip
     full_width, full_height = image.size
 
     backgrounds = []
@@ -75,43 +77,45 @@ def create_clf_data(dataset_name, dataset_path, image_name, image, data):
 
 def convert_data(dataset_type, num, offset=0):
 
-    new_dataset = 'clf_' + dataset_type
+    new_dataset = ('clf_' + dataset_type, ) * num # Broadcast our data to an num-len tuple for multithreading
     images_path = os.path.join(config.DATA_DIR, dataset_type, 'images')
-    new_images_path = os.path.join(config.DATA_DIR, new_dataset, 'images')
+    new_images_path = (os.path.join(config.DATA_DIR, new_dataset[0], 'images'), ) * num
 
-    os.makedirs(new_images_path, exist_ok=True)
+    os.makedirs(new_images_path[0], exist_ok=True)
 
     if offset == 0:
-        new_list_fn = '{}_list.txt'.format(new_dataset)
-        with open(os.path.join(new_images_path, new_list_fn), 'w') as im_list:
+        new_list_fn = '{}_list.txt'.format(new_dataset[0])
+        with open(os.path.join(new_images_path[0], new_list_fn), 'w') as im_list:
             im_list.write("")
 
     dataset_images = [os.path.join(images_path, f'ex{i}.png')
-                      for i in range(offset, num + offset)]
-
-    for img_fn in tqdm(dataset_images):
-
+            for i in range(offset, num + offset)]
+    image_names = []
+    images = []
+    image_data_zip = []
+    for img_fn in dataset_images:
+        image_names.append(os.path.basename(img_fn).replace('.png', ''))
+        images.append(Image.open(img_fn))
         label_fn = img_fn.replace('.png', '.txt')
-
         image_data = []
-
         with open(label_fn, 'r') as label_file:
             for line in label_file.readlines():
                 shape_desc, x, y, w, h = line.strip().split(' ')
                 x, y, w, h = int(x), int(y), int(w), int(h)
                 image_data.append((shape_desc, x, y, w, h))
-
-        image_name = os.path.basename(img_fn).replace('.png', '')
-
-        create_clf_data(new_dataset,
-                        new_images_path,
-                        image_name,
-                        Image.open(img_fn),
-                        image_data)
-
+        image_data_zip.append(image_data)
         if config.DELETE_ON_CONVERT:
             os.remove(img_fn)
             os.remove(label_fn)
+
+    data = zip(new_dataset, new_images_path, image_names, images, image_data_zip)
+
+    # Generate in a pool. If specificed, use a given number of
+    # threads.
+    with multiprocessing.Pool(None) as pool:
+        processes = pool.imap_unordered(create_clf_data, data)
+        for i in tqdm(processes, total=num):
+            pass
 
 
 if __name__ == "__main__":
