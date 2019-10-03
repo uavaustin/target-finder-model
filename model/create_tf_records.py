@@ -13,20 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
+"""
+AFTER running create_full_images.py and create_detection_data.py:
 
-r"""Convert raw COCO dataset to TFRecord for object_detection.
-
-Please note that this tool creates sharded output files.
-
-Example usage:
-    python create_coco_tf_record.py --logtostderr \
-      --train_image_dir="${TRAIN_IMAGE_DIR}" \
-      --val_image_dir="${VAL_IMAGE_DIR}" \
-      --test_image_dir="${TEST_IMAGE_DIR}" \
-      --train_annotations_file="${TRAIN_ANNOTATIONS_FILE}" \
-      --val_annotations_file="${VAL_ANNOTATIONS_FILE}" \
-      --testdev_annotations_file="${TESTDEV_ANNOTATIONS_FILE}" \
-      --output_dir="${OUTPUT_DIR}"
+$ python model/create_tf_records.py --image_dir ./generate/data
 """
 from __future__ import absolute_import
 from __future__ import division
@@ -46,6 +36,10 @@ import tensorflow as tf
 from object_detection.dataset_tools import tf_record_creation_util
 from object_detection.utils import dataset_util
 
+CLASSES = (
+    'circle,cross,pentagon,quarter-circle,rectangle,semicircle,square,star,'
+    'trapezoid,triangle'
+).split(',') + list('ABCDEFGHIJKLMNOPQRSTUVWXYZ4')
 
 flags = tf.app.flags
 tf.flags.DEFINE_string('image_dir', '',
@@ -79,8 +73,6 @@ def create_tf_example(image_path_prefix, image_dir):
   with open(image_path_prefix + '.txt', 'r') as annotations_fp:
     annotations = parse_annotation_data(annotations_fp.read())
 
-  print(annotations)
-
   xmin = []
   xmax = []
   ymin = []
@@ -88,15 +80,21 @@ def create_tf_example(image_path_prefix, image_dir):
   category_names = []
   category_ids = []
   
-  for (obj_id, cent_x, cent_y, w, h) in annotations:
+  for idx, (obj_id, cent_x, cent_y, w_prop, h_prop) in enumerate(annotations):
+
+    w = w_prop * image_width
+    h = h_prop * image_height
+    x = (cent_x * image_width) - w // 2
+    y = (cent_y * image_height) - h // 2
 
     xmin.append(float(x) / image_width)
-    xmax.append(float(x + width) / image_width)
+    xmax.append(float(x + w) / image_width)
     ymin.append(float(y) / image_height)
-    ymax.append(float(y + height) / image_height)
+    ymax.append(float(y + h) / image_height)
+
     category_id = int(obj_id)
     category_ids.append(category_id)
-    category_names.append(str(obj_id)) # todo look up name
+    category_names.append(CLASSES[category_id].encode('utf8'))
 
   feature_dict = {
       'image/height':
