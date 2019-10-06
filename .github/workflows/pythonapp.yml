@@ -18,5 +18,8 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements-dev.txt
     - name: test
-      run: tox
+    - name: docker
+      runs: 
+        using: 'docker'
+        image: 'Dockerfiles/Dockerfile'
 
