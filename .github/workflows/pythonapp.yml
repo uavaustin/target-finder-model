@@ -1,0 +1,15 @@
+name: Target Finder Model
+
+on: [push]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Build target-finder-model-env
+      working-directory: ./Dockerfiles
+      run: make image

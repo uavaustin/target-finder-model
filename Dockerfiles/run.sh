@@ -7,7 +7,7 @@ if [ $# -eq 0 ] ; then
 else 
   sudo docker run --runtime=nvidia -ti --net=host --ipc=host -e DISPLAY=$DISPLAY \
   -v /tmp/.X11-unix:/tmp/.X11-unix \
-  -v $1:/data/sources/host \
-  alexwitt23/target_finder_model:latest /bin/bash
+  -v $1:/host/mounted/ \
+  uavaustin/target_finder_model:latest /bin/bash
 
 fi

@@ -3,5 +3,7 @@ contextlib2
 pillow
 lxml
 jupyter
+requests
 matplotlib
 absl-py
+tqdm
