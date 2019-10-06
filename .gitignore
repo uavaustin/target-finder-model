@@ -114,3 +114,9 @@ venv.bak/
 # Model
 *.weights
 bad.list
+models/*/saved_model
+models/*/checkpoint
+models/*/*.pb
+models/*/*.index
+models/*/*.meta
+models/*/model.*
