@@ -49,7 +49,8 @@ def get_converted_bboxes(x1, y1, x2, y2, data):
 
 def create_detector_data(data_zip):
     """Generate data for the detector model"""
-    dataset_name, dataset_path, image_name, image, data = data_zip
+    dataset_name, dataset_path, image_name, image_fn, data = data_zip
+    image = Image.open(image_fn)
     full_width, full_height = image.size
 
     k = 0
@@ -108,11 +109,9 @@ def convert_data(dataset_type, num, offset=0):
                       for i in range(offset, num + offset)]
 
     image_names = []
-    images = []
     image_data_zip = []
     for img_fn in dataset_images:
         image_names.append(os.path.basename(img_fn).replace('.png', ''))
-        images.append(Image.open(img_fn))
         label_fn = img_fn.replace('.png', '.txt')
         image_data = []
         with open(label_fn, 'r') as label_file:
@@ -125,7 +124,7 @@ def convert_data(dataset_type, num, offset=0):
             os.remove(img_fn)
             os.remove(label_fn)
 
-    data = zip(new_dataset, new_images_path, image_names, images, image_data_zip)
+    data = zip(new_dataset, new_images_path, image_names, dataset_images, image_data_zip)
 
     # Generate in a pool. If specificed, use a given number of
     # threads.
