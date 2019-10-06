@@ -89,7 +89,8 @@ def convert_data(dataset_type, num, offset=0):
             im_list.write("")
 
     dataset_images = [os.path.join(images_path, f'ex{i}.png')
-            for i in range(offset, num + offset)]
+                      for i in range(offset, num + offset)]
+
     image_names = []
     images = []
     image_data_zip = []
