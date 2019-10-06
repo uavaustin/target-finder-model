@@ -19,7 +19,7 @@ jobs:
         pip install -r requirements-dev.txt
     - name: test
     - name: docker
-      runs: 
+      run: 
         using: 'docker'
         image: 'Dockerfiles/Dockerfile'
 
