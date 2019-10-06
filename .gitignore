@@ -107,8 +107,8 @@ venv.bak/
 /release/
 
 # Shape generation directories
-/generate/assets/
-/generate/data/
+/scripts_generate/assets/
+/scripts_generate/data/
 /test/shapes/
 
 # Model

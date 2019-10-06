@@ -16,7 +16,7 @@
 """
 AFTER running create_full_images.py and create_detection_data.py:
 
-$ python model/create_tf_records.py --image_dir ./generate/data
+$ python scripts_tf/create_tf_records.py --image_dir ./scripts_generate/data
 """
 from __future__ import absolute_import
 from __future__ import division
@@ -44,7 +44,7 @@ CLASSES = (
 flags = tf.app.flags
 tf.flags.DEFINE_string('image_dir', '',
                        'Training image directory.')
-tf.flags.DEFINE_string('output_dir', 'tf_data', 'Output data directory.')
+tf.flags.DEFINE_string('output_dir', 'model_data', 'Output data directory.')
 
 FLAGS = flags.FLAGS
 
