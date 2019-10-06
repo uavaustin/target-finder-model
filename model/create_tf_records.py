@@ -44,7 +44,7 @@ CLASSES = (
 flags = tf.app.flags
 tf.flags.DEFINE_string('image_dir', '',
                        'Training image directory.')
-tf.flags.DEFINE_string('output_dir', 'tmp', 'Output data directory.')
+tf.flags.DEFINE_string('output_dir', 'tf_data', 'Output data directory.')
 
 FLAGS = flags.FLAGS
 
@@ -93,7 +93,7 @@ def create_tf_example(image_path_prefix, image_dir):
     ymax.append(float(y + h) / image_height)
 
     category_id = int(obj_id)
-    category_ids.append(category_id)
+    category_ids.append(category_id + 1)
     category_names.append(CLASSES[category_id].encode('utf8'))
 
   feature_dict = {
@@ -120,7 +120,9 @@ def create_tf_example(image_path_prefix, image_dir):
       'image/object/bbox/ymax':
           dataset_util.float_list_feature(ymax),
       'image/object/class/text':
-          dataset_util.bytes_list_feature(category_names)
+          dataset_util.bytes_list_feature(category_names),
+      'image/object/class/label': 
+          dataset_util.int64_list_feature(category_ids)
   }
   example = tf.train.Example(features=tf.train.Features(feature=feature_dict))
   return key, example
