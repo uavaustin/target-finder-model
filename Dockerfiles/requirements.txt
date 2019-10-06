@@ -1,7 +1,0 @@
-Cython
-contextlib2
-pillow
-lxml
-jupyter
-matplotlib
-absl-py
