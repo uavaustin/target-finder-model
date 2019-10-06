@@ -1,185 +1,185 @@
 item {
  id: 1
- name: 'circle'
+ name: circle
 }
 
 item {
  id: 2
- name: 'cross'
+ name: cross
 }
 
 item {
  id: 3
- name: 'pentagon'
+ name: pentagon
 }
 
 item {
  id: 4
- name: 'quarter-circle'
+ name: quarter-circle
 }
 
 item {
  id: 5
- name: 'rectangle'
+ name: rectangle
 }
 
 item {
  id: 6
- name: 'semicircle'
+ name: semicircle
 }
 
 item {
  id: 7
- name: 'square'
+ name: square
 }
 
 item {
  id: 8
- name: 'star'
+ name: star
 }
 
 item {
  id: 9
- name: 'trapezoid'
+ name: trapezoid
 }
 
 item {
  id: 10
- name: 'triangle'
+ name: triangle
 }
 
 item {
  id: 11
- name: 'A'
+ name: A
 }
 
 item {
  id: 12
- name: 'B'
+ name: B
 }
 
 item {
  id: 13
- name: 'C'
+ name: C
 }
 
 item {
  id: 14
- name: 'D'
+ name: D
 }
 
 item {
  id: 15
- name: 'E'
+ name: E
 }
 
 item {
  id: 16
- name: 'F'
+ name: F
 }
 
 item {
  id: 17
- name: 'G'
+ name: G
 }
 
 item {
  id: 18
- name: 'H'
+ name: H
 }
 
 item {
  id: 19
- name: 'I'
+ name: I
 }
 
 item {
  id: 20
- name: 'J'
+ name: J
 }
 
 item {
  id: 21
- name: 'K'
+ name: K
 }
 
 item {
  id: 22
- name: 'L'
+ name: L
 }
 
 item {
  id: 23
- name: 'M'
+ name: M
 }
 
 item {
  id: 24
- name: 'N'
+ name: N
 }
 
 item {
  id: 25
- name: 'O'
+ name: O
 }
 
 item {
  id: 26
- name: 'P'
+ name: P
 }
 
 item {
  id: 27
- name: 'Q'
+ name: Q
 }
 
 item {
  id: 28
- name: 'R'
+ name: R
 }
 
 item {
  id: 29
- name: 'S'
+ name: S
 }
 
 item {
  id: 30
- name: 'T'
+ name: T
 }
 
 item {
  id: 31
- name: 'U'
+ name: U
 }
 
 item {
  id: 32
- name: 'V'
+ name: V
 }
 
 item {
  id: 33
- name: 'W'
+ name: W
 }
 
 item {
  id: 34
- name: 'X'
+ name: X
 }
 
 item {
  id: 35
- name: 'Y'
+ name: Y
 }
 
 item {
  id: 36
- name: 'Z'
+ name: Z
 }
 
 item {
  id: 37
- name: '4'
+ name: 4
 }
 
