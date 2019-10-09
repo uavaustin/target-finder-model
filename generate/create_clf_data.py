@@ -60,23 +60,38 @@ def create_clf_data(data_zip):
     list_fn = os.path.join(dataset_path,
                            '{}_list.txt'.format(dataset_name))
 
+    shape_paths = []
+    bg_paths = []
+
     for i in range(num_data):
 
         shape_fn = '{}_{}_{}.png'.format(CLASSES[1], image_name, i)
         shape_path = os.path.join(FILE_PATH, dataset_path, shape_fn)
+        shape_paths.append(shape_path)
 
         bg_fn = '{}_{}_{}.png'.format(CLASSES[0], image_name, i)
         bg_path = os.path.join(FILE_PATH, dataset_path, bg_fn)
+        bg_paths.append(bg_path)
 
         shapes[i].save(shape_path)
         backgrounds[i].save(bg_path)
+
+    return (shape_paths, bg_paths, list_fn, num_data)
+
+def write_data(shape_paths, bg_paths, list_fn, num_data):
+    for i in range(num_data):
+
+        shape_path = shape_paths[i]
+        bg_path = bg_paths[i]
 
         with open(list_fn, 'a') as list_file:
             list_file.write(shape_path + "\n")
             list_file.write(bg_path + "\n")
 
-
 def convert_data(dataset_type, num, offset=0):
+
+    if(num == 0):
+        return
 
     new_dataset = ('clf_' + dataset_type, ) * num # Broadcast our data to an num-len tuple for multithreading
     images_path = os.path.join(config.DATA_DIR, dataset_type, 'images')
@@ -112,10 +127,16 @@ def convert_data(dataset_type, num, offset=0):
 
     # Generate in a pool. If specificed, use a given number of
     # threads.
+    outputs = []
     with multiprocessing.Pool(None) as pool:
         processes = pool.imap_unordered(create_clf_data, data)
         for i in tqdm(processes, total=num):
-            pass
+            # create_clf_data returns information on writing to the _list txt file
+            outputs.append(i)
+
+    # Write to the _list txt file outside of the multithreaded operation
+    for i in range(num):
+        write_data(outputs[i][0], outputs[i][1], outputs[i][2], outputs[i][3])
 
 
 if __name__ == "__main__":
