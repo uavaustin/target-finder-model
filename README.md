@@ -14,7 +14,7 @@
 * `python scripts_generate/pull_assets.py` Download base shapes and background images
 * `python scripts_generate/create_full_images.py` Create full-sized artificial images
 * `python scripts_generate/create_detection_data.py` Convert full-sized images to training data for detection model
-* `python scripts_tf/create_tf_records.py --image_dir ./scripts_generate/data` Reformat training files
+* `python scripts_tf/create_tf_records.py --image_dir ./scripts_generate/data --output_dir ./model_data` Reformat training files
 
 #### Train Model
 1. In a seperate folder `git clone https://github.com/tensorflow/models.git`
@@ -27,7 +27,15 @@ python path/to/models/research/object_detection/model_main.py \
     --sample_1_of_n_eval_examples=1 \
     --alsologtostderr
 ```
-
+#### Freeze Model 
+This create a `frozen_inference_graph.pb` that will be optimized with tensorrt.
+```
+python path/to/models/research/object_detection/export_inference_graph.py \
+    --input_type=image_tensor \
+    --pipeline_config_path=/path/to/MODEL_NAME/pipeline.config \
+    --trained_checkpoint_prefix=/path/to/MODEL_NAME//model.ckpt-XXXXX \
+    --output_directory=/path/to/MODEL_NAME/frozen
+```
 ## Repository Contents
 
 #### Model Files

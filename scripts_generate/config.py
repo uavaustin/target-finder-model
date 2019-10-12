@@ -34,9 +34,9 @@ DATA_DIR = os.environ.get('DATA_DIR',
 # [Number of Images]
 # Generate num - offset images
 NUM_OFFSET = int(os.environ.get('NUM_OFFSET', '0'))
-NUM_IMAGES = int(os.environ.get('NUM_IMAGES', '30'))
+NUM_IMAGES = int(os.environ.get('NUM_IMAGES', '50000'))
 NUM_VAL_OFFSET = int(os.environ.get('NUM_VAL_OFFSET', '0'))
-NUM_VAL_IMAGES = int(os.environ.get('NUM_VAL_IMAGES', '10'))
+NUM_VAL_IMAGES = int(os.environ.get('NUM_VAL_IMAGES', '5000'))
 
 # Max images to generate per image
 MAX_PER_SHAPE = int(os.environ.get('MAX_PER_SHAPE', '16'))

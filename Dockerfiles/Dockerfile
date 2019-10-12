@@ -8,11 +8,13 @@ RUN apt-get update \
         protobuf-compiler \ 
     && rm -rf /var/lib/apt/lists/*
 
-COPY Dockerfiles/requirements.txt .
+COPY Dockerfiles/requirements-docker.txt .
 
 
-RUN apt install python3-pip 
-RUN pip3 install -r requirements.txt 
+RUN apt install python3-pip \
+  && pip3 install --upgrade pip
+
+RUN pip3 install -r requirements-docker.txt
 
 RUN git clone https://github.com/tensorflow/models.git
 
@@ -26,3 +28,7 @@ WORKDIR /sources/models/research
 RUN protoc object_detection/protos/*.proto --python_out=.
 
 ENV PYTHONPATH=$PYTHONPATH:/sources/models/research:/sources/models/research/slim
+
+RUN python setup.py install --user
+
+WORKDIR /host/mounted
