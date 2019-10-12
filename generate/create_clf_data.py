@@ -109,16 +109,22 @@ def convert_data(dataset_type, num, offset=0):
 
     image_names = []
     image_data_zip = []
+
     for img_fn in dataset_images:
+
         image_names.append(os.path.basename(img_fn).replace('.png', ''))
         label_fn = img_fn.replace('.png', '.txt')
         image_data = []
+
         with open(label_fn, 'r') as label_file:
+
             for line in label_file.readlines():
                 shape_desc, x, y, w, h = line.strip().split(' ')
                 x, y, w, h = int(x), int(y), int(w), int(h)
                 image_data.append((shape_desc, x, y, w, h))
+
         image_data_zip.append(image_data)
+        
         if config.DELETE_ON_CONVERT:
             os.remove(img_fn)
             os.remove(label_fn)
