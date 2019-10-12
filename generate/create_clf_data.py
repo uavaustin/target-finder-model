@@ -79,6 +79,7 @@ def create_clf_data(data_zip):
     return (shape_paths, bg_paths, list_fn, num_data)
 
 def write_data(shape_paths, bg_paths, list_fn, num_data):
+
     for i in range(num_data):
 
         shape_path = shape_paths[i]
@@ -90,10 +91,10 @@ def write_data(shape_paths, bg_paths, list_fn, num_data):
 
 def convert_data(dataset_type, num, offset=0):
 
-    if(num == 0):
+    if (num == 0):
         return
-
-    new_dataset = ('clf_' + dataset_type, ) * num # Broadcast our data to an num-len tuple for multithreading
+    # Broadcast our data to an num-len tuple for multithreading
+    new_dataset = ('clf_' + dataset_type, ) * num 
     images_path = os.path.join(config.DATA_DIR, dataset_type, 'images')
     new_images_path = (os.path.join(config.DATA_DIR, new_dataset[0], 'images'), ) * num
 
@@ -124,7 +125,7 @@ def convert_data(dataset_type, num, offset=0):
                 image_data.append((shape_desc, x, y, w, h))
 
         image_data_zip.append(image_data)
-        
+
         if config.DELETE_ON_CONVERT:
             os.remove(img_fn)
             os.remove(label_fn)
