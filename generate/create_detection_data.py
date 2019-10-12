@@ -95,6 +95,7 @@ def create_detector_data(data_zip):
     return (list_paths, image_fns, k)
 
 def write_data(list_paths, image_fns, k):
+
     for i in range(k):
         list_path = list_paths[i]
         image_fn = image_fns[i]
@@ -103,7 +104,7 @@ def write_data(list_paths, image_fns, k):
 
 def convert_data(dataset_type, num, offset=0):
 
-    if(num == 0):
+    if (num == 0):
         return
 
     new_dataset = ('detector_' + dataset_type, ) * num
@@ -138,7 +139,7 @@ def convert_data(dataset_type, num, offset=0):
                 image_data.append((shape_desc, x, y, w, h))
 
         image_data_zip.append(image_data)
-        
+
         if config.DELETE_ON_CONVERT:
             os.remove(img_fn)
             os.remove(label_fn)
