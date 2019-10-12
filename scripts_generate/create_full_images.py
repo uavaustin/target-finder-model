@@ -123,7 +123,7 @@ def _generate_single_example(data):
                                          shape_params, blur)
 
     data_path = os.path.join(config.DATA_DIR, gen_type, 'images')
-    img_fn = os.path.join(data_path, 'ex{}.png'.format(number))
+    img_fn = os.path.join(data_path, 'ex{}.jpeg'.format(number))
     labels_fn = os.path.join(data_path, 'ex{}.txt'.format(number))
 
     full_img.save(img_fn)

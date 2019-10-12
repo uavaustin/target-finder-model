@@ -3,23 +3,13 @@ name: Target Finder Model
 on: [push]
 
 jobs:
+
   build:
 
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v1
-    - name: Set up Python 3.7
-      uses: actions/setup-python@v1
-      with:
-        python-version: 3.7
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements-dev.txt
-    - name: test
-    - name: docker
-      run: 
-        using: 'docker'
-        image: 'Dockerfiles/Dockerfile'
-
+    - name: Build target-finder-model-env
+      working-directory: ./Dockerfiles
+      run: make image

@@ -72,7 +72,7 @@ def create_detector_data(dataset_name, dataset_path, image_name, image, data):
 
             name = '{}_crop{}'.format(image_name, k)
             bbox_fn = os.path.join(dataset_path, name + '.txt')
-            image_fn = os.path.join(FILE_PATH, dataset_path, name + '.png')
+            image_fn = os.path.join(FILE_PATH, dataset_path, name + '.jpeg')
             list_fn = '{}_list.txt'.format(dataset_name)
             list_path = os.path.join(dataset_path, list_fn)
 
@@ -100,12 +100,12 @@ def convert_data(dataset_type, num, offset=0):
         with open(os.path.join(new_images_path, new_list_fn), 'w') as im_list:
             im_list.write("")
 
-    dataset_images = [os.path.join(images_path, f'ex{i}.png')
+    dataset_images = [os.path.join(images_path, f'ex{i}.jpeg')
                       for i in range(offset, num + offset)]
 
     for img_fn in tqdm(dataset_images):
 
-        label_fn = img_fn.replace('.png', '.txt')
+        label_fn = img_fn.replace('.jpeg', '.txt')
 
         image_data = []
 
@@ -115,7 +115,7 @@ def convert_data(dataset_type, num, offset=0):
                 x, y, w, h = int(x), int(y), int(w), int(h)
                 image_data.append((shape_desc, x, y, w, h))
 
-        image_name = os.path.basename(img_fn).replace('.png', '')
+        image_name = os.path.basename(img_fn).replace('.jpeg', '')
 
         create_detector_data(new_dataset,
                              new_images_path,

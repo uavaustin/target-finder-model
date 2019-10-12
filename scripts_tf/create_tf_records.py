@@ -62,13 +62,15 @@ def parse_annotation_data(data):
 def create_tf_example(image_path_prefix, image_dir):
   """Converts image and txt annotations to a tf.Example proto.
   """
-  print(image_path_prefix)
-
   image_id = os.path.basename(image_path_prefix)
-  filename = image_path_prefix + '.png'
-  image = Image.open(filename)
-  image_height, image_width = image.size
-  key = hashlib.sha256(image.tobytes()).hexdigest()
+  filename = image_path_prefix + '.jpeg'
+  with tf.gfile.GFile(filename, 'rb') as fid:
+      encoded_jpg = fid.read()
+  encoded_jpg_io = io.BytesIO(encoded_jpg)
+  image = Image.open(encoded_jpg_io)
+  image_width, image_height = image.size
+
+  image_format = b'jpeg'
 
   with open(image_path_prefix + '.txt', 'r') as annotations_fp:
     annotations = parse_annotation_data(annotations_fp.read())
@@ -105,12 +107,10 @@ def create_tf_example(image_path_prefix, image_dir):
           dataset_util.bytes_feature(filename.encode('utf8')),
       'image/source_id':
           dataset_util.bytes_feature(image_id.encode('utf8')),
-      'image/key/sha256':
-          dataset_util.bytes_feature(key.encode('utf8')),
       'image/encoded':
-          dataset_util.bytes_feature(image.tobytes()),
+          dataset_util.bytes_feature(encoded_jpg),
       'image/format':
-          dataset_util.bytes_feature('png'.encode('utf8')),
+          dataset_util.bytes_feature(image_format),
       'image/object/bbox/xmin':
           dataset_util.float_list_feature(xmin),
       'image/object/bbox/xmax':
@@ -125,7 +125,7 @@ def create_tf_example(image_path_prefix, image_dir):
           dataset_util.int64_list_feature(category_ids)
   }
   example = tf.train.Example(features=tf.train.Features(feature=feature_dict))
-  return key, example
+  return example
 
 
 def _create_tf_record_from_images(data_dir, output_path, num_shards):
@@ -137,13 +137,13 @@ def _create_tf_record_from_images(data_dir, output_path, num_shards):
     output_tfrecords = tf_record_creation_util.open_sharded_output_tfrecords(
         tf_record_close_stack, output_path, num_shards)
 
-    image_fns = glob.glob(os.path.join(data_dir, 'ex*.png'))
+    image_fns = glob.glob(os.path.join(data_dir, 'ex*.jpeg'))
 
     for idx, image_fn in enumerate(image_fns):
       if idx % 100 == 0:
         tf.logging.info('On image %d of %d', idx, len(image_fns))
-      image_path_prefix = image_fn.replace('.png', '')
-      _, tf_example = create_tf_example(image_path_prefix, data_dir)
+      image_path_prefix = image_fn.replace('.jpeg', '')
+      tf_example = create_tf_example(image_path_prefix, data_dir)
       shard_idx = idx % num_shards
       output_tfrecords[shard_idx].write(tf_example.SerializeToString())
     tf.logging.info('Finished writing.')
@@ -151,6 +151,7 @@ def _create_tf_record_from_images(data_dir, output_path, num_shards):
 
 def main(_):
   assert FLAGS.image_dir, '`image_dir` missing.'
+  assert FLAGS.output_dir, '`output_dir` missing.'
 
   if not tf.gfile.IsDirectory(FLAGS.output_dir):
     tf.gfile.MakeDirs(FLAGS.output_dir)
@@ -161,7 +162,7 @@ def main(_):
   _create_tf_record_from_images(
       os.path.join(FLAGS.image_dir, 'detector_train', 'images'),
       train_output_path,
-      num_shards=2)
+      num_shards=10)
 
   _create_tf_record_from_images(
       os.path.join(FLAGS.image_dir, 'detector_val', 'images'),
