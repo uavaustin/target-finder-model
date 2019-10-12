@@ -110,7 +110,6 @@ def convert_data(dataset_type, num, offset=0):
     new_dataset = ('detector_' + dataset_type, ) * num
     images_path = os.path.join(config.DATA_DIR, dataset_type, 'images')
     new_images_path = (os.path.join(config.DATA_DIR, new_dataset[0], 'images'), ) * num
-
     os.makedirs(new_images_path[0], exist_ok=True)
 
     # Clear/create data index
