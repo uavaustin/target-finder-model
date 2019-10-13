@@ -1,0 +1,67 @@
+classes:
+  shapes:
+    - circle
+    - cross
+    - pentagon 
+    - quarter-circle 
+    - rectangle 
+    - semicircle 
+    - square 
+    - star
+    - trapezoid 
+    - triangle
+  alphas:
+    - A
+    - B
+    - C
+    - D
+    - E
+    - F
+    - G
+    - H
+    - I
+    - J
+    - K
+    - L
+    - M
+    - N
+    - O
+    - P
+    - Q
+    - R
+    - S
+    - T
+    - U
+    - V
+    - W
+    - X
+    - Y
+    - Z
+    - 4
+inputs:
+  full_image:
+    width: 4240
+    height: 2400
+  cropping:
+    width: 400
+    height: 400
+    overlap: 100
+  detector:
+    width: 608
+    height: 608
+  preclf:
+    width: 64
+    height: 64
+generate:
+  backgrounds_version: v3
+  base_shapes_version: v1
+  download_base_url: https://bintray.com/uavaustin/target-finder-assets/download_file?file_path=
+  max_shapes_per_image: 16
+  threads: 0
+  delete_on_convert: false
+  train_batch:
+    offset: 0
+    images: 10
+  eval_batch:
+    offset: 0
+    images: 5

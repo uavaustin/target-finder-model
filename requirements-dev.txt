@@ -6,3 +6,4 @@ requests
 tqdm
 tensorflow-gpu>=1.14
 git+https://github.com/tensorflow/tensorrt.git
+pyyaml

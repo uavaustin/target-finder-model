@@ -36,10 +36,12 @@ import tensorflow as tf
 from object_detection.dataset_tools import tf_record_creation_util
 from object_detection.utils import dataset_util
 
-CLASSES = (
-    'circle,cross,pentagon,quarter-circle,rectangle,semicircle,square,star,'
-    'trapezoid,triangle'
-).split(',') + list('ABCDEFGHIJKLMNOPQRSTUVWXYZ4')
+with open(os.path.join(os.path.dirname(__file__), 
+        os.pardir, 'config.yaml'), 'r') as stream:
+    import yaml
+    config = yaml.safe_load(stream)
+
+CLASSES = config['classes']['shapes'] + config['classes']['alphas']
 
 flags = tf.app.flags
 tf.flags.DEFINE_string('image_dir', '',

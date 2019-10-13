@@ -7,7 +7,7 @@ import tarfile
 
 import requests
 
-import config
+import generate_config as config
 
 
 def pull_all():

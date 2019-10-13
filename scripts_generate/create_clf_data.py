@@ -4,7 +4,7 @@ from tqdm import tqdm
 from PIL import Image
 import multiprocessing
 import random
-import config
+import generate_config as config
 import glob
 import os
 
