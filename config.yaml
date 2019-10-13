@@ -37,7 +37,7 @@ classes:
     - X
     - Y
     - Z
-    - 4
+    - '4'
 inputs:
   full_image:
     width: 4240

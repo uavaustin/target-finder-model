@@ -9,10 +9,11 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 COPY Dockerfiles/requirements-docker.txt .
-
+COPY Dockerfiles/entrypoint.sh /entrypoint.sh
 
 RUN apt install python3-pip \
-  && pip3 install --upgrade pip
+  && pip3 install --upgrade pip \
+  && pip3 install tox
 
 RUN pip3 install -r requirements-docker.txt
 
@@ -32,3 +33,5 @@ ENV PYTHONPATH=$PYTHONPATH:/sources/models/research:/sources/models/research/sli
 RUN python setup.py install --user
 
 WORKDIR /host/mounted
+
+ENTRYPOINT ["/entrypoint.sh"]
