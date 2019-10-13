@@ -1,7 +1,7 @@
 """Contains configuration settings for generation."""
 
 import os
-
+import random
 
 # [Asset Settings and Files]
 BACKGROUNDS_VERSION = 'v2'
@@ -54,47 +54,100 @@ SHAPE_TYPES = os.environ.get(
 
 CLF_TYPES = ['background', 'shape_target']
 
-TARGET_COLORS = ['black', 'red', 'blue',
-                 'green', 'yellow', 'purple', 'orange']
+TARGET_COLORS = ['white', 'black','gray', 'red', 'blue',
+                 'green', 'yellow', 'purple', 'orange', 'brown']
 
 ALPHA_COLORS = ['white', 'black', 'gray', 'red', 'blue',
-                'green', 'yellow', 'purple', 'orange']
+                'green', 'yellow', 'purple', 'orange', 'brown']
+
+def red():
+    if(random.randint(0,1) == 3):
+        r = random.randint(220,255)
+        g = random.randint(0,180)
+        b = g + random.randint(-26,25)
+        if(b < 0):
+            b = 0   
+        return (r,g,b)
+    else:
+        r = random.randint(175,219)
+        g = (int)(r/2) + random.randint(-10,10)
+        b = g + random.randint(-10,10)
+        return (r,g,b)
+
+
+def blue():
+    r = random.randint(0,100)
+    g = random.randint(80,145)
+    b = random.randint(180,255)
+    return (r,g,b)
+
+def green():
+    g = random.randint(130,255)
+    r = g - random.randint(40,100)
+    b = r + random.randint(-30,30)
+    return (r,g,b)
+
+def purple():
+    r = random.randint(100,160)
+    g = r - random.randint(50,100)
+    b = r + random.randint(30,80)
+    return (r,g,b)
+
+def orange():
+    r = random.randint(235,255)
+    g = random.randint(130,180)
+    b = g - random.randint(70,120)
+    return (r,g,b)
+
+def yellow():
+    r = random.randint(235,255)
+    g = random.randint(220,240)
+    b = g - random.randint(80,240)
+    if(b<0):
+        b = 0
+    return (r,g,b)
+
+def white():
+    r = random.randint(245,255)
+    g = r + random.randint(245,255)
+    b = r + random.randint(245,255)
+    return (r,g,b)
+
+def black():
+    r = random.randint(20,75)
+    g = r + random.randint(-6,5)
+    b = r + random.randint(10,30)
+    return (r,g,b)
+
+def brown():
+    if(random.randint(0,1) == 0):
+        r = random.randint(90,110)
+        g = r - random.randint(30,50)
+        b = g - random.randint(0,10)
+        return (r,g,b)
+    else:
+        r = random.randint(190,220)
+        g = r - random.randint(30,50)
+        b = g - random.randint(30,50)
+        return (r,g,b)
+
+def gray():
+    r = random.randint(150,215)
+    g = r + random.randint(-6,5)
+    b = r + random.randint(-6,5)
+    return (r,g,b)
 
 COLORS = {
-    'white': [
-        (250, 250, 250)],
-    'black': [
-        (5, 5, 5)],
-    'gray': [
-        (128, 128, 128)],
-    'red': [
-        (188, 60, 60),
-        (255, 80, 80),
-        (255, 0, 0),
-        (154, 0, 0)],
-    'blue': [
-        (0, 0, 255),
-        (0, 0, 135)],
-    'green': [
-        (64, 115, 64),
-        (148, 255, 148),
-        (0, 255, 0),
-        (0, 128, 4)],
-    'yellow': [
-        (225, 221, 104),
-        (255, 252, 122),
-        (255, 247, 0),
-        (210, 203, 0)],
-    'purple': [
-        (127, 127, 255),
-        (128, 0, 128)
-    ],
-    'orange': [
-        (153, 76, 0),
-        (216, 172, 83),
-        (255, 204, 101),
-        (255, 165, 0),
-        (210, 140, 0)]
+    'white': [white()],
+    'black': [black()],
+    'gray': [gray()],
+    'red': [red()],
+    'blue': [blue()],
+    'green': [green()],
+    'yellow': [yellow()],
+    'purple': [purple()],
+    'orange': [orange()],
+    'brown': [brown()]
 }
 
 ALPHAS = list('ABCDEFGHIJKLMNOPQRSTUVWXYZ4')
