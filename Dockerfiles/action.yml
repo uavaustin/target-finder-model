@@ -1,0 +1,13 @@
+# action.yml
+name: 'Run Docker Container'
+description: 'Run Docker Container'
+inputs:
+  tox-test:  # id of input
+    description: 'tox testing'
+    required: true
+    default: 'tox'
+runs:
+  using: 'docker'
+  image: 'docker://uavaustin/target-finder-model-env:test'
+  args:
+    - ${{ inputs.tox-test }}

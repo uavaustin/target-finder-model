@@ -1,6 +1,6 @@
 defaults: &defaults
   docker:
-    - image: circleci/python:3.6
+    - image: uavaustin/target-finder-model-env:latest
 
 version: 2
 jobs:
@@ -9,7 +9,7 @@ jobs:
   test-gen:
     <<: *defaults
     steps:
-      - checkout
+      - checkouts
       - run: pip install --user tox
       - run: python -m tox
       - persist_to_workspace:

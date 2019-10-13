@@ -1,0 +1,9 @@
+FROM uavaustin/target-finder-model-env:latest
+
+WORKDIR /host/mounted/
+
+COPY . /host/mounted/
+
+RUN mv /host/mounted/Dockerfiles/entrypoint.sh /host/mounted/entrypoint.sh
+
+ENTRYPOINT ["/host/mounted/entrypoint.sh"]

@@ -1,0 +1,43 @@
+name: Target Finder Model
+
+on: [push]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Build target-finder-model-env Docker image
+      working-directory: ./Dockerfiles
+      run: make image
+
+  test:
+
+    runs-on: ubuntu-latest
+    name: Run Tox Test through Entrypoint
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v1
+
+    - uses: ./Dockerfiles
+    - name: run tox in docker image
+      id: tox
+      uses: uavaustin/target-finder-model/Dockerfiles@tfrt-update
+      with:
+        tox-test: tox
+
+    - name: Build Sample Data
+      id: build data
+      uses: uavaustin/target-finder-model/Dockerfiles@tfrt-update
+      with:
+        tox-test: |
+          echo NUM_IMAGES = 10 && 
+          NUM_VAL_IMAGES = 5 && 
+          IMAGE_DIR = ./scripts_generate/data && 
+          OUTPUT_DIR = ./model_data/records &&
+          python3 scripts_generate/build.py
+
