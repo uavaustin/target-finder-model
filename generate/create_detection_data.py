@@ -2,6 +2,7 @@
 
 from tqdm import tqdm
 from PIL import Image
+import multiprocessing
 import config
 import glob
 import os
@@ -46,10 +47,16 @@ def get_converted_bboxes(x1, y1, x2, y2, data):
     return bboxes
 
 
-def create_detector_data(dataset_name, dataset_path, image_name, image, data):
+def create_detector_data(data_zip):
     """Generate data for the detector model"""
+    dataset_name, dataset_path, image_name, image_fn, data = data_zip
+    image = Image.open(image_fn)
     full_width, full_height = image.size
 
+    k = 0
+
+    image_fns = []
+    list_paths = []
     k = 0
 
     for y1 in range(0, full_height - CROP_HEIGHT, CROP_HEIGHT - OVERLAP):
@@ -82,50 +89,74 @@ def create_detector_data(dataset_name, dataset_path, image_name, image, data):
                 for bbox in cropped_bboxes:
                     label_file.write('{} {} {} {} {}\n'.format(*bbox))
 
-            with open(list_path, 'a') as list_file:
-                list_file.write(image_fn + "\n")
+            list_paths.append(list_path)
+            image_fns.append(image_fn)
 
+    return (list_paths, image_fns, k)
+
+def write_data(list_paths, image_fns, k):
+
+    for i in range(k):
+        list_path = list_paths[i]
+        image_fn = image_fns[i]
+        with open(list_path, 'a') as list_file:
+            list_file.write(image_fn + "\n")
 
 def convert_data(dataset_type, num, offset=0):
 
-    new_dataset = 'detector_' + dataset_type
-    images_path = os.path.join(config.DATA_DIR, dataset_type, 'images')
-    new_images_path = os.path.join(config.DATA_DIR, new_dataset, 'images')
+    if (num == 0):
+        return
 
-    os.makedirs(new_images_path, exist_ok=True)
+    new_dataset = ('detector_' + dataset_type, ) * num
+    images_path = os.path.join(config.DATA_DIR, dataset_type, 'images')
+    new_images_path = (os.path.join(config.DATA_DIR, new_dataset[0], 'images'), ) * num
+    os.makedirs(new_images_path[0], exist_ok=True)
 
     # Clear/create data index
     if offset == 0:
-        new_list_fn = '{}_list.txt'.format(new_dataset)
-        with open(os.path.join(new_images_path, new_list_fn), 'w') as im_list:
+        new_list_fn = '{}_list.txt'.format(new_dataset[0])
+        with open(os.path.join(new_images_path[0], new_list_fn), 'w') as im_list:
             im_list.write("")
 
     dataset_images = [os.path.join(images_path, f'ex{i}.png')
                       for i in range(offset, num + offset)]
 
-    for img_fn in tqdm(dataset_images):
+    image_names = []
+    image_data_zip = []
 
+    for img_fn in dataset_images:
+
+        image_names.append(os.path.basename(img_fn).replace('.png', ''))
         label_fn = img_fn.replace('.png', '.txt')
-
         image_data = []
 
         with open(label_fn, 'r') as label_file:
+
             for line in label_file.readlines():
                 shape_desc, x, y, w, h = line.strip().split(' ')
                 x, y, w, h = int(x), int(y), int(w), int(h)
                 image_data.append((shape_desc, x, y, w, h))
 
-        image_name = os.path.basename(img_fn).replace('.png', '')
-
-        create_detector_data(new_dataset,
-                             new_images_path,
-                             image_name,
-                             Image.open(img_fn),
-                             image_data)
+        image_data_zip.append(image_data)
 
         if config.DELETE_ON_CONVERT:
             os.remove(img_fn)
             os.remove(label_fn)
+
+    data = zip(new_dataset, new_images_path, image_names, dataset_images, image_data_zip)
+
+    outputs = []
+
+    # Generate in a pool
+    with multiprocessing.Pool(None) as pool:
+        processes = pool.imap_unordered(create_detector_data, data)
+        for i in tqdm(processes, total=num):
+            # create_detector_data returns information on writing to the _list txt file
+            outputs.append(i)
+
+    # Write to the _list txt file outside of the multithreaded operation
+    for i in range(num):
+        write_data(outputs[i][0], outputs[i][1], outputs[i][2])
 
 
 if __name__ == "__main__":
