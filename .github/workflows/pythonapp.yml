@@ -10,6 +10,25 @@ jobs:
 
     steps:
     - uses: actions/checkout@v1
-    - name: Build target-finder-model-env
+    - name: Build target-finder-model-env Docker image
       working-directory: ./Dockerfiles
       run: make image
+
+  test:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: run tox in docker image
+      inputs:
+        command:  # id of input
+        description: 'Which command to run in docker image'
+        required: true
+        default: 'tox'
+      working-directory: ./Dockerfiles
+      runs:
+  	using: 'docker'
+  	image: 'Dockerfile'
+  	args:
+    	- ${{ inputs.command }}

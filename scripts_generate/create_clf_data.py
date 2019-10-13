@@ -4,7 +4,7 @@ from tqdm import tqdm
 from PIL import Image
 import multiprocessing
 import random
-import config
+import generate_config as config
 import glob
 import os
 
@@ -65,11 +65,11 @@ def create_clf_data(data_zip):
 
     for i in range(num_data):
 
-        shape_fn = '{}_{}_{}.png'.format(CLASSES[1], image_name, i)
+        shape_fn = '{}_{}_{}.jpeg'.format(CLASSES[1], image_name, i)
         shape_path = os.path.join(FILE_PATH, dataset_path, shape_fn)
         shape_paths.append(shape_path)
 
-        bg_fn = '{}_{}_{}.png'.format(CLASSES[0], image_name, i)
+        bg_fn = '{}_{}_{}.jpeg'.format(CLASSES[0], image_name, i)
         bg_path = os.path.join(FILE_PATH, dataset_path, bg_fn)
         bg_paths.append(bg_path)
 
@@ -105,7 +105,7 @@ def convert_data(dataset_type, num, offset=0):
         with open(os.path.join(new_images_path[0], new_list_fn), 'w') as im_list:
             im_list.write("")
 
-    dataset_images = [os.path.join(images_path, f'ex{i}.png')
+    dataset_images = [os.path.join(images_path, f'ex{i}.jpeg')
                       for i in range(offset, num + offset)]
 
     image_names = []
@@ -113,8 +113,8 @@ def convert_data(dataset_type, num, offset=0):
 
     for img_fn in dataset_images:
 
-        image_names.append(os.path.basename(img_fn).replace('.png', ''))
-        label_fn = img_fn.replace('.png', '.txt')
+        image_names.append(os.path.basename(img_fn).replace('.jpeg', ''))
+        label_fn = img_fn.replace('.jpeg', '.txt')
         image_data = []
 
         with open(label_fn, 'r') as label_file:

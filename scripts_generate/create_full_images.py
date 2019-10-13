@@ -21,7 +21,7 @@ import sys
 from PIL import Image, ImageDraw, ImageFilter, ImageFont, ImageOps
 from tqdm import tqdm
 
-import config
+import generate_config as config
 
 
 # Get constants from config

@@ -3,7 +3,7 @@
 from tqdm import tqdm
 from PIL import Image
 import multiprocessing
-import config
+import generate_config as config
 import glob
 import os
 
@@ -124,14 +124,12 @@ def convert_data(dataset_type, num, offset=0):
     image_names = []
     image_data_zip = []
 
-<<<<<<< HEAD
-    for img_fn in dataset_images:
-=======
-        label_fn = img_fn.replace('.jpeg', '.txt')
->>>>>>> f983b20... updates to docker and directions on freezing model
 
-        image_names.append(os.path.basename(img_fn).replace('.png', ''))
-        label_fn = img_fn.replace('.png', '.txt')
+    for img_fn in dataset_images:
+        label_fn = img_fn.replace('.jpeg', '.txt')
+
+        image_names.append(os.path.basename(img_fn).replace('jpeg', ''))
+        label_fn = img_fn.replace('.jpeg', '.txt')
         image_data = []
 
         with open(label_fn, 'r') as label_file:
@@ -141,13 +139,8 @@ def convert_data(dataset_type, num, offset=0):
                 x, y, w, h = int(x), int(y), int(w), int(h)
                 image_data.append((shape_desc, x, y, w, h))
 
+        image_data_zip.append(image_data)
         image_name = os.path.basename(img_fn).replace('.jpeg', '')
-
-        create_detector_data(new_dataset,
-                             new_images_path,
-                             image_name,
-                             Image.open(img_fn),
-                             image_data)
 
         if config.DELETE_ON_CONVERT:
             os.remove(img_fn)

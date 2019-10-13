@@ -1,16 +1,22 @@
-"""Contains configuration settings for generation."""
+"""
+Contains configuration settings for generation.
+
+#TODO Replace w/config.yaml
+"""
 
 import os
 
+with open(os.path.join(os.path.dirname(__file__), 
+        os.pardir, 'config.yaml'), 'r') as stream:
+    import yaml
+    config = yaml.safe_load(stream)
+
 
 # [Asset Settings and Files]
-BACKGROUNDS_VERSION = 'v3'
-BASE_SHAPES_VERSION = 'v1'
+BACKGROUNDS_VERSION = config['generate']['backgrounds_version']
+BASE_SHAPES_VERSION = config['generate']['base_shapes_version']
 
-DOWNLOAD_BASE = (
-    'https://bintray.com/uavaustin/target-finder-assets/'
-    'download_file?file_path='
-)
+DOWNLOAD_BASE = config['generate']['download_base_url']
 
 BACKGROUNDS_URL = (
     DOWNLOAD_BASE + 'backgrounds-' + BACKGROUNDS_VERSION + '.tar.gz'
@@ -33,24 +39,20 @@ DATA_DIR = os.environ.get('DATA_DIR',
 
 # [Number of Images]
 # Generate num - offset images
-NUM_OFFSET = int(os.environ.get('NUM_OFFSET', '0'))
-NUM_IMAGES = int(os.environ.get('NUM_IMAGES', '50000'))
-NUM_VAL_OFFSET = int(os.environ.get('NUM_VAL_OFFSET', '0'))
-NUM_VAL_IMAGES = int(os.environ.get('NUM_VAL_IMAGES', '5000'))
+NUM_OFFSET = config['generate']['train_batch']['offset']
+NUM_IMAGES = config['generate']['train_batch']['images']
+NUM_VAL_OFFSET = config['generate']['eval_batch']['offset']
+NUM_VAL_IMAGES = config['generate']['eval_batch']['images']
 
 # Max images to generate per image
-MAX_PER_SHAPE = int(os.environ.get('MAX_PER_SHAPE', '16'))
+MAX_PER_SHAPE = config['generate']['max_shapes_per_image']
 
 # Specify number of threads to use for shape generation. Default lets
 # the multiprocessing library determine.
-NUM_THREADS = int(os.environ.get('NUM_THREADS', 0))
+NUM_THREADS = config['generate']['threads']
 
 # [Shape Specs]
-SHAPE_TYPES = os.environ.get(
-    'SHAPE_TYPES',
-    'circle,cross,pentagon,quarter-circle,rectangle,semicircle,square,star,'
-    'trapezoid,triangle'
-).split(',')
+SHAPE_TYPES = config['classes']['shapes']
 
 CLF_TYPES = ['background', 'shape_target']
 
@@ -97,7 +99,7 @@ COLORS = {
         (210, 140, 0)]
 }
 
-ALPHAS = list('ABCDEFGHIJKLMNOPQRSTUVWXYZ4')
+ALPHAS = config['classes']['alphas']
 
 ALPHA_FONT_DIR = os.path.join(os.path.dirname(__file__), 'vendor', 'fonts')
 ALPHA_FONTS = [
@@ -112,13 +114,25 @@ ALPHA_FONTS = [
 YOLO_CLASSES = SHAPE_TYPES + ALPHAS
 
 # [Model Dimensions]
-FULL_SIZE = (4240, 2400)
-CROP_SIZE = (400, 400)
-CROP_OVERLAP = 100
-DETECTOR_SIZE = (608, 608)
-PRECLF_SIZE = (64, 64)
+FULL_SIZE = (
+    config['inputs']['full_image']['width'], 
+    config['inputs']['full_image']['height']
+)
+CROP_SIZE = (
+    config['inputs']['cropping']['width'], 
+    config['inputs']['cropping']['height']
+)
+CROP_OVERLAP = config['inputs']['cropping']['overlap']
+DETECTOR_SIZE = (
+    config['inputs']['detector']['width'], 
+    config['inputs']['detector']['height']
+)
+PRECLF_SIZE = (
+    config['inputs']['preclf']['width'], 
+    config['inputs']['preclf']['height']
+)
 
 # [Darknet Models]
 
 # Whether to delete full image data when they are converted
-DELETE_ON_CONVERT = False
+DELETE_ON_CONVERT = config['generate']['delete_on_convert']
