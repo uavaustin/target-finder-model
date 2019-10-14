@@ -21,9 +21,9 @@ jobs:
     steps:
 
     - uses: actions/checkout@v1
-      working-directory: ${{ github.workspace }}
     - uses: ./
     - name: run tox in docker image
+      working-directory: ./
       id: tox
       uses: actions/hello-world-docker-action@v1
       with:
