@@ -9,6 +9,7 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 COPY Dockerfiles/requirements-docker.txt .
+
 COPY Dockerfiles/entrypoint.sh /entrypoint.sh
 
 RUN apt install python3-pip \
