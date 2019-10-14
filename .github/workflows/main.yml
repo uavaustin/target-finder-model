@@ -19,16 +19,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+
     - uses: actions/checkout@v1
+
+    - uses: ./github/actions/
     - name: run tox in docker image
-      inputs:
-        command:  # id of input
-        description: 'Which command to run in docker image'
-        required: true
-        default: 'tox'
-      working-directory: ./Dockerfiles
-      runs:
-  	using: 'docker'
-  	image: 'Dockerfile'
-  	args:
-    	- ${{ inputs.command }}
+      id: tox
+      uses: docker-action@v1
+      with:
+        tox-test: tox
+
