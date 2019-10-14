@@ -19,11 +19,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: checkout code
-      uses: actions/checkout@v1
+    - uses: ./
     - name: run action.yml
-      uses: ./
-      name: run tox in docker image
         id: tox
         uses: uavaustin/target-finder-model/action@v1
         with:
