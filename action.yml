@@ -6,7 +6,6 @@ inputs:
     description: 'tox testing'
     required: true
     default: 'tox'
-working-directory: ./
 runs:
   using: 'docker'
   image: 'Dockerfiles/Dockerfile'
