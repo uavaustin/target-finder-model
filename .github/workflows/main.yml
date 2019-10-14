@@ -21,11 +21,10 @@ jobs:
     steps:
 
     - uses: actions/checkout@v1
-
-    - uses: ./github/actions/
+    - uses: ./
     - name: run tox in docker image
       id: tox
-      uses: docker-action@v1
+      uses: actions/hello-world-docker-action@v1
       with:
         tox-test: tox
 
