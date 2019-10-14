@@ -21,10 +21,10 @@ jobs:
     steps:
 
     - uses: actions/checkout@v1
-    - uses: ./
+    - uses: ./Dockerfiles
     - name: run tox in docker image
       id: tox
-      uses: uavaustin/target-finder-model/action@v1
+      uses: actions/hello-world-docker-action@v1
       with:
         tox-test: tox
 

@@ -8,6 +8,6 @@ inputs:
     default: 'tox'
 runs:
   using: 'docker'
-  image: 'Dockerfiles/Dockerfile'
+  image: 'Dockerfile'
   args:
     - ${{ inputs.tox-test }}
