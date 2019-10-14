@@ -23,7 +23,6 @@ jobs:
     - uses: actions/checkout@v1
     - uses: ./
     - name: run tox in docker image
-      working-directory: ./
       id: tox
       uses: actions/hello-world-docker-action@v1
       with:
