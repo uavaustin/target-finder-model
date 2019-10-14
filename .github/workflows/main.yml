@@ -21,6 +21,8 @@ jobs:
     steps:
 
     - uses: actions/checkout@v1
+      working-directory: ${{ github.workspace }}
+      run: ls -la
     - uses: ./
     - name: run tox in docker image
       id: tox
