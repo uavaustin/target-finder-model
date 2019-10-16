@@ -17,10 +17,13 @@ jobs:
   test:
 
     runs-on: ubuntu-latest
+    name: Run Tox Test through Entrypoint
 
     steps:
-    - uses: actions/checkout@v1
-    - uses: ./
+    - name: Checkout
+      uses: actions/checkout@v1
+
+    - uses: ./Dockerfiles
     - name: run tox in docker image
       id: tox
       uses: uavaustin/target-finder-model/Dockerfiles@tfrt-update
