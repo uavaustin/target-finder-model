@@ -20,7 +20,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v1
-    - uses: ./Dockerfiles
+    - uses: ./
     - name: run tox in docker image
       id: tox
       uses: uavaustin/target-finder-model/Dockerfiles@tfrt-update
