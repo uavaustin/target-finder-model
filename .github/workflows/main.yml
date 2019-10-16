@@ -24,7 +24,7 @@ jobs:
     - uses: ./Dockerfiles
     - name: run tox in docker image
       id: tox
-      uses: actions/hello-world-docker-action@v1
+      uses: target-finder-model/Dockerfiles/action@v1
       with:
         tox-test: tox
 
