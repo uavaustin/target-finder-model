@@ -23,7 +23,7 @@ jobs:
     - uses: ./Dockerfiles
     - name: run tox in docker image
       id: tox
-      uses: uavaustin/target-finder-model@tfrt-update
+      uses: uavaustin/target-finder-model/Dockerfiles@tfrt-update
       with:
         tox-test: tox
 
