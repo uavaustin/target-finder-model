@@ -8,9 +8,7 @@ RUN apt-get update \
         protobuf-compiler \ 
     && rm -rf /var/lib/apt/lists/*
 
-COPY Dockerfiles/requirements-docker.txt .
-
-COPY Dockerfiles/entrypoint.sh /entrypoint.sh
+COPY requirements-docker.txt .
 
 RUN apt install python3-pip \
   && pip3 install --upgrade pip \

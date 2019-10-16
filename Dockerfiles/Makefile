@@ -12,7 +12,7 @@ all: image
 
 .PHONY: image
 image:
-	docker build -t $(IMAGE_NAME):$(IMAGE_TAG) -f Dockerfile $(DOCKERFLAGS) ..
+	docker build -t $(IMAGE_NAME):$(IMAGE_TAG) -f Dockerfile $(DOCKERFLAGS) .
 
 .PHONY: run
 run:

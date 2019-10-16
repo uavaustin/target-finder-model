@@ -1,0 +1,5 @@
+FROM uavaustin/target-finder-model-env:latest
+
+COPY entrypoint.sh /entrypoint.sh
+
+ENTRYPOINT ["/entrypoint.sh"]
