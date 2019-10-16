@@ -19,12 +19,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-
     - uses: actions/checkout@v1
     - uses: ./Dockerfiles
     - name: run tox in docker image
       id: tox
-      uses: action@v1
+      uses: uavaustin/target-finder-model@tfrt-update
       with:
         tox-test: tox
 
