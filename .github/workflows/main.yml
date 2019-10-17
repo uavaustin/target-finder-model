@@ -31,7 +31,7 @@ jobs:
         tox-test: tox
 
     - name: Build Sample Data
-      id: build data
+      id: build_data
       uses: uavaustin/target-finder-model/Dockerfiles@tfrt-update
       with:
         tox-test: |
