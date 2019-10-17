@@ -33,11 +33,11 @@ jobs:
     - name: Build Sample Data
       id: build_data
       uses: uavaustin/target-finder-model/Dockerfiles@tfrt-update
+      env:
+	NUM_IMAGES: 10
+	NUM_VAL_IMAGES: 5
+	IMAGE_DIR: scripts_generate/data
+	OUTPUT_DIR: model_data/records
       with:
-        tox-test: |
-          echo NUM_IMAGES = 10 && 
-          NUM_VAL_IMAGES = 5 && 
-          IMAGE_DIR = ./scripts_generate/data && 
-          OUTPUT_DIR = ./model_data/records &&
-          python3 scripts_generate/build.py
+        tox-test: python3 scripts_generate/build.py
 
