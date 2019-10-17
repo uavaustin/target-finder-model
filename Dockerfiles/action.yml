@@ -1,5 +1,10 @@
 # action.yml
 name: 'Run Docker Container'
+env:
+  num_images: 10
+  num_val_images: 5
+  image_dir: scripts_generate/data
+  output_dir: model_data/records
 description: 'Run Docker Container'
 inputs:
   tox-test:  # id of input
