@@ -1,3 +1,2 @@
-#!/bin/sh -l
-
-cd /host/mounted && tox
+#!/bin/sh 
+cd /host/mounted && $1

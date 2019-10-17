@@ -8,6 +8,6 @@ inputs:
     default: 'tox'
 runs:
   using: 'docker'
-  image: 'docker://uavaustin/target-finder-model-env:latest'
+  image: 'docker://uavaustin/target-finder-model-env:test'
   args:
     - ${{ inputs.tox-test }}

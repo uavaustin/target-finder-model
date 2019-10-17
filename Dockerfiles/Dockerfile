@@ -32,5 +32,3 @@ ENV PYTHONPATH=$PYTHONPATH:/sources/models/research:/sources/models/research/sli
 RUN python setup.py install --user
 
 WORKDIR /host/mounted
-
-ENTRYPOINT ["/entrypoint.sh"]
