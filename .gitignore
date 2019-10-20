@@ -125,3 +125,6 @@ models/*/model.*
 models/inception_v3/*
 model_data/records/*
 target_finder_model/data/**/*
+
+# Editor
+.vscode
