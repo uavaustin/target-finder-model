@@ -24,12 +24,6 @@ jobs:
       uses: actions/checkout@v1
 
     - uses: ./Dockerfiles
-    - name: run tox in docker image
-      id: tox
-      uses: uavaustin/target-finder-model/Dockerfiles@tfrt-update
-      with:
-        tox-test: tox
-
     - name: Build Sample Data
       id: build_data
       uses: uavaustin/target-finder-model/Dockerfiles@tfrt-update

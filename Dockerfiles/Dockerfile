@@ -1,4 +1,4 @@
-FROM tensorflow/tensorflow:1.13.2-gpu-py3
+FROM nvcr.io/nvidia/tensorflow:19.09-py3
 
 WORKDIR /sources
 
