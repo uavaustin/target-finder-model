@@ -7,12 +7,12 @@ env:
   output_dir: model_data/records
 description: 'Run Docker Container'
 inputs:
-  tox-test:  # id of input
-    description: 'tox testing'
+  test:  # id of input
+    description: 'testing'
     required: true
-    default: 'tox'
+    default: 'python3 scripts_generate/build.py'
 runs:
   using: 'docker'
   image: 'docker://uavaustin/target-finder-model-env:test'
   args:
-    - ${{ inputs.tox-test }}
+    - ${{ inputs.test }}

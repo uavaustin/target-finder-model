@@ -28,5 +28,5 @@ jobs:
       id: build_data
       uses: uavaustin/target-finder-model/Dockerfiles@tfrt-update
       with:
-        tox-test: python3 scripts_generate/build.py
+        test: python3 scripts_generate/build.py
 
