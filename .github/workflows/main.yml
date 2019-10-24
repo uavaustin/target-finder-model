@@ -4,7 +4,7 @@ on: [push]
 
 jobs:
 
-  build:
+  build-env:
 
     runs-on: ubuntu-latest
 
@@ -14,10 +14,20 @@ jobs:
       working-directory: ./Dockerfiles
       run: make image
 
-  test:
+  build-test-env:
 
     runs-on: ubuntu-latest
-    name: Run Tox Test through Entrypoint
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Build target-finder-model-env Docker image
+      working-directory: ./Dockerfiles
+      run: make test-build
+
+  gen-data:
+
+    runs-on: ubuntu-latest
+    name: Run Test Through Entrypoint
 
     steps:
     - name: Checkout
@@ -29,4 +39,21 @@ jobs:
       uses: uavaustin/target-finder-model/Dockerfiles@tfrt-update
       with:
         test: python3 scripts_generate/build.py
+
+  gen-tf-records:
+
+    needs: gen-data
+    runs-on: ubuntu-latest
+    name: Run Test Through Entrypoint
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v1
+
+    - uses: ./Dockerfiles
+    - name: Build Sample Data
+      id: build_data
+      uses: uavaustin/target-finder-model/Dockerfiles@tfrt-update
+      with:
+        test: python3 scripts_tf/create_tf_records.py --image_dir ./scripts_generate/data --output_dir ./model_data/records
 
