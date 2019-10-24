@@ -15,7 +15,3 @@ runs:
   image: 'docker://uavaustin/target-finder-model-env:test'
   args:
     - ${{ inputs.test }}
-  using: actions/upload-artifact@master
-  with:
-    name: data-gen
-    path: .scripts_generate/data

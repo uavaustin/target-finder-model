@@ -27,7 +27,7 @@ jobs:
   gen-data:
 
     runs-on: ubuntu-latest
-    name: Run Test Through Entrypoint
+    name: Generate Data 
 
     steps:
     - name: Checkout
@@ -40,11 +40,16 @@ jobs:
       with:
         test: python3 scripts_generate/build.py
 
+    - uses: actions/upload-artifact@master
+      with:
+        name: data-gen
+        path: .scripts_generate/data
+
   gen-tf-records:
 
     needs: gen-data
     runs-on: ubuntu-latest
-    name: Run Test Through Entrypoint
+    name: Create TF-Records from Data
 
     steps:
     - name: Checkout
