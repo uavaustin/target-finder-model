@@ -1,11 +1,7 @@
 #!/usr/bin/env python
 
 import os
-
-try:
-    from setuptools import setup, find_packages
-except:
-    raise Exception('setuptools is required for installation')
+from setuptools import setup, find_packages
 
 
 def join(*paths):
@@ -15,7 +11,6 @@ def join(*paths):
     Returns:
         str: The normalized path.
     """
-
     return os.path.normpath(os.path.join(*paths))
 
 
@@ -44,7 +39,7 @@ setup(
     packages=find_packages(),
     package_data={
         'target_finder_model': [
-            'data/config.yaml'
+            'data/*'
         ]
     },
     license='MIT'
