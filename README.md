@@ -32,9 +32,9 @@ This create a `frozen_inference_graph.pb` that will be optimized with tensorrt.
 ```
 python path/to/models/research/object_detection/export_inference_graph.py \
     --input_type=image_tensor \
-    --pipeline_config_path=/path/to/MODEL_NAME/pipeline.config \
-    --trained_checkpoint_prefix=/path/to/MODEL_NAME//model.ckpt-XXXXX \
-    --output_directory=/path/to/MODEL_NAME/frozen
+    --pipeline_config_path=models/MODEL_NAME/pipeline.config \
+    --trained_checkpoint_prefix=models/MODEL_NAME/model.ckpt \
+    --output_directory=models/MODEL_NAME/frozen
 ```
 ## Repository Contents
 

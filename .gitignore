@@ -123,3 +123,4 @@ models/*/model.*
 models/faster_rcnn_resnet50_coco_2018_01_28/*
 model_data/records/*
 model_data/*
+target_finder_model/data/model/*

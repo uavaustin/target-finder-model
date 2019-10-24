@@ -1,4 +1,3 @@
-# action.yml
 name: 'Run Docker Container'
 env:
   num_images: 10
