@@ -14,8 +14,13 @@ jobs:
       working-directory: ./Dockerfiles
       run: make image
 
+    - name: docker login
+      run: docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD $DOCKER_REGISTRY_URL
+      env:
+        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+
     - name: Push target-finder-model-env
-      working-directory: ./Dockerfiles
       run: docker push uavaustin/target-finder-model-env:latest
 
   build-test-env:
@@ -29,6 +34,15 @@ jobs:
       working-directory: ./Dockerfiles
       run: make test-build
 
+    - name: docker login
+      run: docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD $DOCKER_REGISTRY_URL
+      env:
+        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+
+    - name: Push target-finder-model-env:test
+      run: docker push uavaustin/target-finder-model-env:test
+
   gen-data:
 
     needs: build-test-env
@@ -39,16 +53,16 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v1
 
-    - uses: ./Dockerfiles
     - name: Build Sample Data
       id: build_data
       uses: uavaustin/target-finder-model/Dockerfiles@tfrt-update
       with:
         test: python3 scripts_generate/build.py && ls /github/workspace
-
+    
+    - name: Upload generated data as artifact
     - uses: actions/upload-artifact@master
       with:
-        name: data-gen
+        name: data
         path: scripts_generate/data
 
   gen-tf-records:
