@@ -61,7 +61,7 @@ jobs:
         test: python3 scripts_generate/build.py && ls /github/workspace
     
     - name: Upload generated data as artifact
-    - uses: actions/upload-artifact@master
+      uses: actions/upload-artifact@master
       with:
         name: data
         path: scripts_generate/data
