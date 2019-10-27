@@ -16,6 +16,7 @@ jobs:
         DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
         DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
 
+    - name: Checkout code 
     - uses: actions/checkout@v1
 
     - name: Build target-finder-model-env Docker image
@@ -28,6 +29,7 @@ jobs:
   build-test-env:
 
     needs: build-env
+
     runs-on: ubuntu-latest
 
     steps:
@@ -48,6 +50,7 @@ jobs:
     name: Generate Data 
 
     steps:
+
     - name: Checkout
       uses: actions/checkout@v1
 
@@ -70,6 +73,7 @@ jobs:
     name: Create TF-Records from Data
 
     steps:
+
     - name: Checkout
       uses: actions/checkout@v1
 
