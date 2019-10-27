@@ -35,7 +35,6 @@ jobs:
 
   gen-data:
 
-    needs: build-test-env
     runs-on: ubuntu-latest
     name: Generate Data and TF-Records
 
