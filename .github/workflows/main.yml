@@ -38,7 +38,7 @@ jobs:
       id: build_data
       uses: uavaustin/target-finder-model/Dockerfiles@tfrt-update
       with:
-        test: python3 scripts_generate/build.py
+        test: python3 scripts_generate/build.py && mv scripts_generate/data /github/workspace
 
     - uses: actions/upload-artifact@master
       with:
