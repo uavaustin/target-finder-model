@@ -2,7 +2,7 @@ FROM uavaustin/target-finder-model-env:latest
 
 WORKDIR /host/mounted/
 
-COPY . /host/mounted/
+COPY . .
 
 RUN mv /host/mounted/Dockerfiles/entrypoint.sh /host/mounted/entrypoint.sh
 

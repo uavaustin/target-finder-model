@@ -9,56 +9,55 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v1
+
+    - name: docker login
+      run: docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD $DOCKER_REGISTRY_URL
+      env:
+        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+
+    - name: Checkout code 
+      uses: actions/checkout@v1
+
     - name: Build target-finder-model-env Docker image
       working-directory: ./Dockerfiles
       run: make image
 
-  build-test-env:
+    - name: Push target-finder-model-env
+      run: docker push uavaustin/target-finder-model-env:latest
 
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v1
     - name: Build target-finder-model-env Docker image
       working-directory: ./Dockerfiles
       run: make test-build
 
+    - name: Push target-finder-model-env:test
+      run: docker push uavaustin/target-finder-model-env:test
+
   gen-data:
 
     runs-on: ubuntu-latest
-    name: Generate Data 
+    name: Generate Data and TF-Records
 
     steps:
+
     - name: Checkout
       uses: actions/checkout@v1
 
-    - uses: ./Dockerfiles
     - name: Build Sample Data
-      id: build_data
+      id: create_data
       uses: uavaustin/target-finder-model/Dockerfiles@tfrt-update
       with:
-        test: python3 scripts_generate/build.py && mv scripts_generate/data /github/workspace
+        test: python3 scripts_generate/build.py
 
-    - uses: actions/upload-artifact@master
-      with:
-        name: data-gen
-        path: scripts_generate/data
-
-  gen-tf-records:
-
-    needs: gen-data
-    runs-on: ubuntu-latest
-    name: Create TF-Records from Data
-
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v1
-
-    - uses: ./Dockerfiles
-    - name: Build Sample Data
-      id: build_data
+    - name: Create tf-records
+      id: create_tf_records
       uses: uavaustin/target-finder-model/Dockerfiles@tfrt-update
       with:
         test: python3 scripts_tf/create_tf_records.py --image_dir ./scripts_generate/data --output_dir ./model_data/records
+
+    - name: Upload generated tf-records
+      uses: actions/upload-artifact@master
+      with:
+        name: tf-records
+        path: model_data/records
 

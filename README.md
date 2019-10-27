@@ -8,6 +8,16 @@
 1. Download `git clone https://github.com/uavaustin/target-finder-model && cd target-finder-model`
 2. Install `pip install -r requirements-dev.txt` (requires CUDA installation)
 
+### Usage
+
+```python
+import target_finder_model as tfm
+
+model = tfm.inference.DetectionModel()
+model.load()
+objects = model.predict(['temp.jpg'])
+```
+
 ### Training
 
 #### Generate Data

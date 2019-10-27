@@ -9,7 +9,7 @@ inputs:
   test:  # id of input
     description: 'testing'
     required: true
-    default: 'python3 scripts_generate/build.py && mv scripts_generate/data /github/workspace'
+    default: 'echo No command supplied'
 runs:
   using: 'docker'
   image: 'docker://uavaustin/target-finder-model-env:test'

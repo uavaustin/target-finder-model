@@ -1,2 +1,2 @@
 #!/bin/sh 
-cd /host/mounted && $1
+$1
