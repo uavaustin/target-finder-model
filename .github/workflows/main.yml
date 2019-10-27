@@ -45,13 +45,13 @@ jobs:
       uses: actions/checkout@v1
 
     - name: Build Sample Data
-      id: build_data
+      id: create_data
       uses: uavaustin/target-finder-model/Dockerfiles@tfrt-update
       with:
         test: python3 scripts_generate/build.py
 
     - name: Create tf-records
-      id: build_data
+      id: create_tf_records
       uses: uavaustin/target-finder-model/Dockerfiles@tfrt-update
       with:
         test: python3 scripts_tf/create_tf_records.py --image_dir ./scripts_generate/data --output_dir ./model_data/records
