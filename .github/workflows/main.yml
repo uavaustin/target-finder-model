@@ -34,7 +34,14 @@ jobs:
 
     steps:
 
-    - uses: actions/checkout@v1
+    - name: docker login
+      run: docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD $DOCKER_REGISTRY_URL
+      env:
+        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+
+    - name: Checkout code 
+      uses: actions/checkout@v1
 
     - name: Build target-finder-model-env Docker image
       working-directory: ./Dockerfiles
