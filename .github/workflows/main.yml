@@ -14,8 +14,13 @@ jobs:
       working-directory: ./Dockerfiles
       run: make image
 
+    - name: Push target-finder-model-env
+      working-directory: ./Dockerfiles
+      run: docker push uavaustin/target-finder-model-env:latest
+
   build-test-env:
 
+    needs: build-env
     runs-on: ubuntu-latest
 
     steps:
@@ -26,6 +31,7 @@ jobs:
 
   gen-data:
 
+    needs: build-test-env
     runs-on: ubuntu-latest
     name: Generate Data 
 
