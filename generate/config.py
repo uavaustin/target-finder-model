@@ -3,6 +3,7 @@
 import os
 import random
 
+
 # [Asset Settings and Files]
 BACKGROUNDS_VERSION = 'v2'
 BASE_SHAPES_VERSION = 'v1'
@@ -34,12 +35,12 @@ DATA_DIR = os.environ.get('DATA_DIR',
 # [Number of Images]
 # Generate num - offset images
 NUM_OFFSET = int(os.environ.get('NUM_OFFSET', '0'))
-NUM_IMAGES = int(os.environ.get('NUM_IMAGES', '30'))
+NUM_IMAGES = int(os.environ.get('NUM_IMAGES', '100'))
 NUM_VAL_OFFSET = int(os.environ.get('NUM_VAL_OFFSET', '0'))
 NUM_VAL_IMAGES = int(os.environ.get('NUM_VAL_IMAGES', '10'))
 
 # Max images to generate per image
-MAX_PER_SHAPE = int(os.environ.get('MAX_PER_SHAPE', '16'))
+MAX_PER_SHAPE = int(os.environ.get('MAX_PER_SHAPE', '2'))
 
 # Specify number of threads to use for shape generation. Default lets
 # the multiprocessing library determine.
@@ -108,9 +109,9 @@ def yellow():
     return (r,g,b)
 
 def white():
-    r = random.randint(245,255)
-    g = r + random.randint(245,255)
-    b = r + random.randint(245,255)
+    r = random.randint(245,248)
+    g = r + random.randint(245,248)
+    b = r + random.randint(245,248)
     return (r,g,b)
 
 def black():

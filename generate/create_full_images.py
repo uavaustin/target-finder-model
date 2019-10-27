@@ -31,6 +31,7 @@ FULL_SIZE = config.FULL_SIZE
 TARGET_COLORS = config.TARGET_COLORS
 ALPHA_COLORS = config.ALPHA_COLORS
 COLORS = config.COLORS
+CROP_SIZE = config.CROP_SIZE
 
 
 def generate_all_shapes(gen_type, num_gen, offset=0):
@@ -83,8 +84,8 @@ def generate_all_shapes(gen_type, num_gen, offset=0):
 
         angles = _random_list(range(0, 360), n)
 
-        xs = _random_list(range(200, FULL_SIZE[0] - 200, 50), n)
-        ys = _random_list(range(200, FULL_SIZE[1] - 200, 50), n)
+        xs = _random_list(range(50, CROP_SIZE[0] - 50, 20), n)
+        ys = _random_list(range(50, CROP_SIZE[1] - 50, 20), n)
 
         shape_params.append(list(zip(shape_names, bases, alphas,
                                      font_files, sizes, angles,
@@ -161,7 +162,10 @@ def _get_backgrounds():
     filenames = glob.glob(os.path.join(config.BACKGROUNDS_DIR, '*.png'))
     filenames += glob.glob(os.path.join(config.BACKGROUNDS_DIR, '*.jpg'))
 
-    return [Image.open(filename).resize(FULL_SIZE)
+    x = random.randint(0,FULL_SIZE[0]-CROP_SIZE[0])
+    y = random.randint(0,FULL_SIZE[1]-CROP_SIZE[1])
+
+    return [(Image.open(filename).resize(FULL_SIZE)).crop((x, y, x+CROP_SIZE[0], y+CROP_SIZE[1]))
             for filename in sorted(filenames)]
 
 
