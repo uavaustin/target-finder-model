@@ -11,9 +11,15 @@ import os
 from .version import __version__
 
 # Config
-config_fn = resource_filename(__name__, os.path.join('data', 'config.yaml'))
-with open(config_fn, 'r') as stream:
-    config = yaml.safe_load(stream)
+CONFIG_FN = resource_filename(__name__, os.path.join('data', 'config.yaml'))
+with open(CONFIG_FN, 'r') as stream:
+    CONFIG = yaml.safe_load(stream)
+
+# Builtin Saved Model
+MODEL_PATH = resource_filename(__name__, os.path.join('data', 'model', 'saved_model'))
 
 # Model Classes
-CLASSES = config['classes']['shapes'] + config['classes']['alphas']
+CLASSES = CONFIG['classes']['shapes'] + CONFIG['classes']['alphas']
+
+# Submodules
+from . import inference
