@@ -33,8 +33,9 @@ jobs:
     - name: Push target-finder-model-env:test
       run: docker push uavaustin/target-finder-model-env:test
 
-  gen-data:
+  gen-data: 
 
+    needs: build-env
     runs-on: ubuntu-latest
     name: Generate Data and TF-Records
 
