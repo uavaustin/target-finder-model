@@ -26,7 +26,7 @@ jobs:
     - name: Push target-finder-model-env
       run: docker push uavaustin/target-finder-model-env:latest
 
-    - name: Build target-finder-model-env Docker image
+    - name: Build target-finder-model-env:test Docker image
       working-directory: ./Dockerfiles
       run: make test-build
 
@@ -54,7 +54,7 @@ jobs:
       id: create_tf_records
       uses: uavaustin/target-finder-model/Dockerfiles@tfrt-update
       with:
-        test: python3 scripts_tf/create_tf_records.py --image_dir ./scripts_generate/data --output_dir ./model_data/records
+        test: python3 scripts_tf/create_tf_records.py --image_dir scripts_generate/data --output_dir ./model_data/records
 
     - name: Upload generated tf-records
       uses: actions/upload-artifact@master
