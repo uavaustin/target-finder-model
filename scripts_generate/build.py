@@ -12,6 +12,7 @@ from create_clf_data import convert_data as clf_convert_data
 
 if __name__ == '__main__':
     pull_all()
-    generate_all_shapes('testing', 5)
-    det_convert_data('testing', 5)
-    clf_convert_data('testing', 5)
+    generate_all_shapes('train', 5)
+    generate_all_shapes('val', 5)
+    det_convert_data('train', 5)
+    clf_convert_data('val', 5)
