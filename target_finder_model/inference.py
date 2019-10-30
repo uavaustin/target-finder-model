@@ -50,12 +50,13 @@ class DetectionModel:
             for k in range(int(nums[i])):
                 obj = DetectedObject()
                 obj.class_idx = int(obj_types[i][k])
+                obj.class_name = CLASSES[obj.class_idx - 1]
                 obj.confidence = scores[i][k]
                 bbox = boxes[i][k]
-                obj.x = bbox[0] * im_width
-                obj.y = bbox[1] * im_height
-                obj.width = (bbox[3] - bbox[1]) * im_width
-                obj.height = (bbox[2] - bbox[0]) * im_height
+                obj.x = int(bbox[0] * im_width)
+                obj.y = int(bbox[1] * im_height)
+                obj.width = int((bbox[3] - bbox[1]) * im_width)
+                obj.height = int((bbox[2] - bbox[0]) * im_height)
                 image_detects.append(obj)
             results.append(image_detects)
 
@@ -67,7 +68,7 @@ class DetectedObject:
     class_idx: int = 0
     class_name: str = 'unk'
     confidence: float = 0
-    x: float = 0
-    y: float = 0
-    width: float = 0
-    height: float = 0
+    x: int = 0
+    y: int = 0
+    width: int = 0
+    height: int = 0
