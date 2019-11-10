@@ -17,6 +17,7 @@ with open(CONFIG_FN, 'r') as stream:
 
 # Builtin Saved Model
 MODEL_PATH = resource_filename(__name__, os.path.join('data', 'model', 'saved_model'))
+CLF_MODEL_PATH = resource_filename(__name__, os.path.join('data', 'clf_model', 'model.ckpt'))
 
 # Model Classes
 CLASSES = CONFIG['classes']['shapes'] + CONFIG['classes']['alphas']

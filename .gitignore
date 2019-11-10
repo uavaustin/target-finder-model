@@ -126,5 +126,5 @@ models/inception_v3_2016_08_28/*
 model_data/records/*
 model_data/*
 target_finder_model/data/model/*
-
+target_finder_model/data/clf_model/*
 scripts_tf/test.py
