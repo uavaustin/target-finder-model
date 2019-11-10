@@ -24,19 +24,8 @@ objects = model.predict(['temp.jpg'])
 * `python scripts_tf/create_tf_records.py --image_dir ./scripts_generate/data --output_dir ./model_data` Reformat training files
 
 ### Training Pre-Classifier
-python3 scripts_tf/retrain.py \
-    --image_dir=scripts_generate/data/clf/ \
-    --summaries_dir=model_data/clf_training/ \
-    --saved_model_dir=model_data/clf_frozen \
-    --how_many_training_steps=1000 \
-    --checkpoint_path=model_data/clf/checkpoints/
 
-python3 /tensorrt/tftrt/examples/image-classification/image_classification.py \
-    --model=inception_v3 \
-    --model_dir=model_data/clf \
-    --mode=benchmark \
-    --use_trt \
-    --data_dir=scripts_generate/data/val_50k
+TODO
 
 ### Training Object Detector Model
 
