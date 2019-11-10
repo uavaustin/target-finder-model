@@ -38,6 +38,9 @@ classes:
     - Y
     - Z
     - '4'
+  types:
+    - 'background'
+    - 'target'
 inputs:
   full_image:
     width: 4240
