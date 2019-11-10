@@ -54,7 +54,7 @@ NUM_THREADS = config['generate']['threads']
 # [Shape Specs]
 SHAPE_TYPES = config['classes']['shapes']
 
-CLF_TYPES = ['background', 'shape_target']
+CLF_TYPES = ['background', 'target']
 
 TARGET_COLORS = ['black', 'red', 'blue',
                  'green', 'yellow', 'purple', 'orange']
@@ -136,3 +136,5 @@ PRECLF_SIZE = (
 
 # Whether to delete full image data when they are converted
 DELETE_ON_CONVERT = config['generate']['delete_on_convert']
+
+IMAGE_EXT = config['generate']['img_ext']

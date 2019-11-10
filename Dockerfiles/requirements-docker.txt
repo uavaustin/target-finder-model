@@ -8,3 +8,5 @@ matplotlib
 absl-py
 tqdm
 pyyaml
+dataclasses
+tensorflow_hub

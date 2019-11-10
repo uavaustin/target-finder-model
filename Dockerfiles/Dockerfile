@@ -27,8 +27,28 @@ WORKDIR /sources/models/research
 
 RUN protoc object_detection/protos/*.proto --python_out=.
 
-ENV PYTHONPATH=$PYTHONPATH:/sources/models/research:/sources/models/research/slim
 
 RUN python setup.py install --user
+
+WORKDIR /sources/models/research/slim
+
+RUN python3 setup.py install \
+  && pip3 install requests
+
+WORKDIR /
+# Setup TF-TRT 
+RUN git clone https://github.com/tensorflow/tensorrt.git \
+  && cd tensorrt/tftrt/examples/object_detection \
+  && git submodule update --init \
+  && ./install_dependencies.sh \
+  && cd /tensorrt \
+  && python3 setup.py install --user 
+
+RUN cd /tensorrt/tftrt/examples/image-classification \
+  && ./install_dependencies.sh \
+  && cd ../third_party/models
+
+
+ENV PYTHONPATH=$PYTHONPATH:/sources/models/research:/sources/models/research/slim:/tensorrt/tftrt/examples/third_party/models
 
 WORKDIR /host/mounted
