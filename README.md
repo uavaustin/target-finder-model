@@ -14,6 +14,7 @@
 import target_finder_model as tfm
 
 model = tfm.inference.DetectionModel()
+# or tfm.inference.ClfModel()
 model.load()
 objects = model.predict(['temp.jpg'])
 ```
@@ -40,7 +41,7 @@ python path/to/models/research/object_detection/model_main.py \
     --alsologtostderr
 ```
 #### Freeze Model 
-This create a `frozen_inference_graph.pb` that will be optimized with tensorrt.
+This will create a `frozen_inference_graph.pb` that will be optimized with tensorrt.
 ```
 python path/to/models/research/object_detection/export_inference_graph.py \
     --input_type=image_tensor \
