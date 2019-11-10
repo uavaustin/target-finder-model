@@ -18,10 +18,6 @@ AFTER running create_full_images.py and create_detection_data.py:
 
 $ python scripts_tf/create_tf_records.py --image_dir ./scripts_generate/data
 """
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 import hashlib
 import io
 import json
@@ -42,6 +38,8 @@ with open(os.path.join(os.path.dirname(__file__),
     config = yaml.safe_load(stream)
 
 CLASSES = config['classes']['shapes'] + config['classes']['alphas']
+CLF_CLASSES = config['classes']['types']
+FORMAT = config['generate']['img_ext']
 
 flags = tf.app.flags
 tf.flags.DEFINE_string('image_dir', '',
@@ -50,7 +48,7 @@ tf.flags.DEFINE_string('output_dir', 'model_data', 'Output data directory.')
 
 FLAGS = flags.FLAGS
 
-tf.logging.set_verbosity(tf.logging.INFO)
+tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.INFO)
 
 
 def parse_annotation_data(data):
@@ -65,17 +63,25 @@ def create_tf_example(image_path_prefix, image_dir):
   """Converts image and txt annotations to a tf.Example proto.
   """
   image_id = os.path.basename(image_path_prefix)
-  filename = image_path_prefix + '.jpeg'
-  with tf.gfile.GFile(filename, 'rb') as fid:
+  filename = image_path_prefix + '.' + FORMAT
+  with tf.io.gfile.GFile(filename, 'rb') as fid:
       encoded_jpg = fid.read()
   encoded_jpg_io = io.BytesIO(encoded_jpg)
+
   image = Image.open(encoded_jpg_io)
   image_width, image_height = image.size
 
-  image_format = b'jpeg'
+  annotations = []
+  has_target = 1
 
-  with open(image_path_prefix + '.txt', 'r') as annotations_fp:
-    annotations = parse_annotation_data(annotations_fp.read())
+  if os.path.exists(image_path_prefix + '.txt'):
+    # For object detection
+    with open(image_path_prefix + '.txt', 'r') as annotations_fp:
+      # TODO update for w/new file format
+      annotations = parse_annotation_data(annotations_fp.read())
+  else:
+    # For clf
+    has_target = (0 if 'target' not in image_path_prefix else 1)
 
   xmin = []
   xmax = []
@@ -111,8 +117,10 @@ def create_tf_example(image_path_prefix, image_dir):
           dataset_util.bytes_feature(image_id.encode('utf8')),
       'image/encoded':
           dataset_util.bytes_feature(encoded_jpg),
+      'image/colorspace': 
+          dataset_util.bytes_feature('RGB'.encode('utf8')),
       'image/format':
-          dataset_util.bytes_feature(image_format),
+          dataset_util.bytes_feature(FORMAT.encode('utf8')),
       'image/object/bbox/xmin':
           dataset_util.float_list_feature(xmin),
       'image/object/bbox/xmax':
@@ -124,7 +132,11 @@ def create_tf_example(image_path_prefix, image_dir):
       'image/object/class/text':
           dataset_util.bytes_list_feature(category_names),
       'image/object/class/label': 
-          dataset_util.int64_list_feature(category_ids)
+          dataset_util.int64_list_feature(category_ids),
+      'image/class/label':
+          dataset_util.int64_feature(has_target),
+      'image/class/text':
+          dataset_util.bytes_feature(CLF_CLASSES[has_target].encode('utf8'))
   }
   example = tf.train.Example(features=tf.train.Features(feature=feature_dict))
   return example
@@ -139,38 +151,45 @@ def _create_tf_record_from_images(data_dir, output_path, num_shards):
     output_tfrecords = tf_record_creation_util.open_sharded_output_tfrecords(
         tf_record_close_stack, output_path, num_shards)
 
-    image_fns = glob.glob(os.path.join(data_dir, 'ex*.jpeg'))
+    image_fns = glob.glob(os.path.join(data_dir, '*.' + FORMAT))
 
     for idx, image_fn in enumerate(image_fns):
       if idx % 100 == 0:
-        tf.logging.info('On image %d of %d', idx, len(image_fns))
-      image_path_prefix = image_fn.replace('.jpeg', '')
+        tf.compat.v1.logging.info('On image %d of %d', idx, len(image_fns))
+      image_path_prefix = image_fn.replace('.' + FORMAT, '')
       tf_example = create_tf_example(image_path_prefix, data_dir)
       shard_idx = idx % num_shards
       output_tfrecords[shard_idx].write(tf_example.SerializeToString())
-    tf.logging.info('Finished writing.')
+    tf.compat.v1.logging.info('Finished writing.')
 
 
 def main(_):
   assert FLAGS.image_dir, '`image_dir` missing.'
   assert FLAGS.output_dir, '`output_dir` missing.'
 
-  if not tf.gfile.IsDirectory(FLAGS.output_dir):
+  if not tf.io.gfile.isdir(FLAGS.output_dir):
     tf.gfile.MakeDirs(FLAGS.output_dir)
 
-  train_output_path = os.path.join(FLAGS.output_dir, 'tfm_train.record')
-  val_output_path = os.path.join(FLAGS.output_dir, 'tfm_val.record')
+  _create_tf_record_from_images(
+    os.path.join(FLAGS.image_dir, 'detector_train', 'images'),
+    os.path.join(FLAGS.output_dir, 'tfm_train.record'),
+    num_shards=10)
 
   _create_tf_record_from_images(
-      os.path.join(FLAGS.image_dir, 'detector_train', 'images'),
-      train_output_path,
-      num_shards=10)
+    os.path.join(FLAGS.image_dir, 'detector_val', 'images'),
+    os.path.join(FLAGS.output_dir, 'tfm_val.record'),
+    num_shards=2)
 
   _create_tf_record_from_images(
-      os.path.join(FLAGS.image_dir, 'detector_val', 'images'),
-      val_output_path,
-      num_shards=2)
+    os.path.join(FLAGS.image_dir, 'clf_train', 'images'),
+    os.path.join(FLAGS.output_dir, 'tfm_clf_train.record'),
+    num_shards=10)
+
+  _create_tf_record_from_images(
+    os.path.join(FLAGS.image_dir, 'clf_val', 'images'),
+    os.path.join(FLAGS.output_dir, 'tfm_clf_val.record'),
+    num_shards=2)
 
 
 if __name__ == '__main__':
-  tf.app.run()
+  tf.compat.v1.app.run()
