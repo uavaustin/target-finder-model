@@ -1,166 +1,319 @@
 #!/usr/bin/env python3
+"""
+This script should generate fullsized training images
+which contain several artificial shapes.
 
-from tqdm import tqdm
-from PIL import Image
-import multiprocessing
-import generate_config as config
+Save Format:
+    data/{train, val}/images/exX.png <- image X
+    data/{train, val}/images/exX.txt <- bboxes for image X
+
+BBox Format:
+    shape_ALPHA x y width height
+    shape2_ALPHA2 x y width height
+    ...
+"""
 import glob
+import multiprocessing
 import os
+import random
+import sys
+
+from PIL import Image, ImageDraw, ImageFilter, ImageFont, ImageOps
+from tqdm import tqdm
+
+import generate_config as config
 
 
 # Get constants from config
-DET_WIDTH, DET_HEIGHT = config.DETECTOR_SIZE
-CROP_WIDTH, CROP_HEIGHT = config.CROP_SIZE
-OVERLAP = config.CROP_OVERLAP
-RATIO = DET_WIDTH / CROP_WIDTH
-FILE_PATH = os.path.abspath(os.path.dirname(__file__))
-CLASSES = config.YOLO_CLASSES
+NUM_GEN = int(config.NUM_IMAGES)
+MAX_SHAPES = int(config.MAX_PER_SHAPE)
+FULL_SIZE = config.FULL_SIZE
+TARGET_COLORS = config.TARGET_COLORS
+ALPHA_COLORS = config.ALPHA_COLORS
+COLORS = config.COLORS
 
 
-def get_converted_bboxes(x1, y1, x2, y2, data):
-    """Find bboxes in coords and convert them to yolo format"""
-    bboxes = []
+def generate_all_shapes(gen_type, num_gen, offset=0):
+    """Generate the full sized images"""
+    images_dir = os.path.join(config.DATA_DIR, gen_type, 'images')
+    os.makedirs(config.DATA_DIR, exist_ok=True)
+    os.makedirs(images_dir, exist_ok=True)
 
-    for shape_desc, bx, by, bw, bh in data:
+    r_state = random.getstate()
+    random.seed(gen_type + str(offset))
 
-        shape_name, alpha = shape_desc.split("_")
+    # All the random selection is generated ahead of time, that way
+    # the process can be resumed without the shapes changing on each
+    # run.
 
-        if x1 < bx < bx + bw < x2 and y1 < by < by + bh < y2:
+    base_shapes = {}
+    for shape in config.SHAPE_TYPES:
+        base_shapes[shape] = _get_base_shapes(shape)
 
-            # Yolo3 Format
-            # class_idx center_x/im_w center_y/im_h w/im_w h/im_h
-            shape_class_idx = CLASSES.index(shape_name)
-            alpha_class_idx = CLASSES.index(alpha)
-            center_x = (bx - x1 + bw / 2) * RATIO / DET_WIDTH
-            center_y = (by - y1 + bh / 2) * RATIO / DET_HEIGHT
-            width = bw * RATIO / DET_WIDTH
-            height = bh * RATIO / DET_HEIGHT
+    numbers = list(range(offset, offset + num_gen))
 
-            bboxes.append((shape_class_idx,
-                          center_x, center_y,
-                          width, height))
+    backgrounds = _random_list(_get_backgrounds(), num_gen)
+    flip_bg = _random_list([False, True], num_gen)
+    mirror_bg = _random_list([False, True], num_gen)
+    blurs = _random_list(range(1, 2), num_gen)
+    num_targets = _random_list(range(1, MAX_SHAPES), num_gen)
 
-            bboxes.append((alpha_class_idx,
-                          center_x, center_y,
-                          width, height))
+    shape_params = []
 
-    return bboxes
+    for i in range(num_gen):
 
+        n = num_targets[i]
 
-def create_detector_data(data_zip):
-    """Generate data for the detector model"""
-    dataset_name, dataset_path, image_name, image_fn, data = data_zip
-    image = Image.open(image_fn)
-    full_width, full_height = image.size
+        shape_names = _random_list(config.SHAPE_TYPES, n)
+        bases = [random.choice(base_shapes[shape]) for shape in shape_names]
+        alphas = _random_list(config.ALPHAS, n)
+        font_files = _random_list(config.ALPHA_FONTS, n)
 
-    k = 0
+        target_colors = _random_list(TARGET_COLORS, n)
+        alpha_colors = _random_list(ALPHA_COLORS, n)
 
-    image_fns = []
-    list_paths = []
-    k = 0
+        for i, target_color in enumerate(target_colors):
+            if alpha_colors[i] == target_color:
+                alpha_colors[i] = 'white'
 
-    for y1 in range(0, full_height - CROP_HEIGHT, CROP_HEIGHT - OVERLAP):
+        target_rgbs = [random.choice(COLORS[color]) for color in target_colors]
+        alpha_rgbs = [random.choice(COLORS[color]) for color in alpha_colors]
 
-        for x1 in range(0, full_width - CROP_WIDTH, CROP_WIDTH - OVERLAP):
+        sizes = _random_list(range(35, 55), n)
 
-            y2 = y1 + CROP_HEIGHT
-            x2 = x1 + CROP_WIDTH
+        angles = _random_list(range(0, 360), n)
 
-            cropped_bboxes = get_converted_bboxes(x1, y1, x2, y2, data)
+        xs = _random_list(range(50, config.CROP_SIZE[0] - 50, 20), n)
+        ys = _random_list(range(50, config.CROP_SIZE[1] - 50, 20), n)
 
-            if len(cropped_bboxes) == 0:
-                # discard crop b/c no shape
-                continue
+        shape_params.append(list(zip(shape_names, bases, alphas,
+                                     font_files, sizes, angles,
+                                     target_colors, target_rgbs,
+                                     alpha_colors, alpha_rgbs,
+                                     xs, ys)))
 
-            k += 1
+    # Put everything into one large iterable so that we can split up
+    # data across thread pools.
+    data = zip(numbers, backgrounds, flip_bg, mirror_bg,
+               blurs, shape_params, [gen_type] * num_gen)
 
-            cropped_img = image.crop((x1, y1, x2, y2))
-            cropped_img = cropped_img.resize((DET_WIDTH, DET_HEIGHT))
+    random.setstate(r_state)
 
-            name = '{}_crop{}'.format(image_name, k)
-            bbox_fn = os.path.join(dataset_path, name + '.txt')
-            image_fn = os.path.join(FILE_PATH, dataset_path, name + '.jpeg')
-            list_fn = '{}_list.txt'.format(dataset_name)
-            list_path = os.path.join(dataset_path, list_fn)
-
-            cropped_img.save(image_fn)
-
-            with open(bbox_fn, 'w') as label_file:
-                for bbox in cropped_bboxes:
-                    label_file.write('{} {} {} {} {}\n'.format(*bbox))
-
-            list_paths.append(list_path)
-            image_fns.append(image_fn)
-
-    return (list_paths, image_fns, k)
-
-def write_data(list_paths, image_fns, k):
-
-    for i in range(k):
-        list_path = list_paths[i]
-        image_fn = image_fns[i]
-        with open(list_path, 'a') as list_file:
-            list_file.write(image_fn + "\n")
-
-def convert_data(dataset_type, num, offset=0):
-
-    if (num == 0):
-        return
-
-    new_dataset = ('detector_' + dataset_type, ) * num
-    images_path = os.path.join(config.DATA_DIR, dataset_type, 'images')
-    new_images_path = (os.path.join(config.DATA_DIR, new_dataset[0], 'images'), ) * num
-    os.makedirs(new_images_path[0], exist_ok=True)
-
-    # Clear/create data index
-    if offset == 0:
-        new_list_fn = '{}_list.txt'.format(new_dataset[0])
-        with open(os.path.join(new_images_path[0], new_list_fn), 'w') as im_list:
-            im_list.write("")
-
-    dataset_images = [os.path.join(images_path, f'ex{i}.jpeg')
-                      for i in range(offset, num + offset)]
-
-    image_names = []
-    image_data_zip = []
-
-    for img_fn in dataset_images:
-        label_fn = img_fn.replace('.jpeg', '.txt')
-
-        image_names.append(os.path.basename(img_fn).replace('jpeg', ''))
-        label_fn = img_fn.replace('.jpeg', '.txt')
-        image_data = []
-
-        with open(label_fn, 'r') as label_file:
-
-            for line in label_file.readlines():
-                shape_desc, x, y, w, h = line.strip().split(' ')
-                x, y, w, h = int(x), int(y), int(w), int(h)
-                image_data.append((shape_desc, x, y, w, h))
-
-        image_data_zip.append(image_data)
-        image_name = os.path.basename(img_fn).replace('.jpeg', '')
-
-        if config.DELETE_ON_CONVERT:
-            os.remove(img_fn)
-            os.remove(label_fn)
-
-    data = zip(new_dataset, new_images_path, image_names, dataset_images, image_data_zip)
-
-    outputs = []
-
-    # Generate in a pool
+    # Generate in a pool. If specificed, use a given number of
+    # threads.
     with multiprocessing.Pool(None) as pool:
-        processes = pool.imap_unordered(create_detector_data, data)
-        for i in tqdm(processes, total=num):
-            # create_detector_data returns information on writing to the _list txt file
-            outputs.append(i)
-
-    # Write to the _list txt file outside of the multithreaded operation
-    for i in range(num):
-        write_data(outputs[i][0], outputs[i][1], outputs[i][2])
+        processes = pool.imap_unordered(_generate_single_example, data)
+        for i in tqdm(processes, total=num_gen):
+            pass
 
 
-if __name__ == "__main__":
-    convert_data('train', config.NUM_IMAGES, config.NUM_OFFSET)
-    convert_data('val', config.NUM_VAL_IMAGES, config.NUM_VAL_OFFSET)
+def _generate_single_example(data):
+    """Creates a single full image"""
+    number, background, flip_bg, mirror_bg, blur, shape_params, gen_type = data
+
+    background = background.copy()
+    if flip_bg:
+        background = ImageOps.flip(background)
+    if mirror_bg:
+        background = ImageOps.mirror(background)
+
+    shape_imgs = [_create_shape(*shape_param) for shape_param in shape_params]
+
+    shape_bboxes, full_img = _add_shapes(background, shape_imgs,
+                                         shape_params, blur)
+
+    data_path = os.path.join(config.DATA_DIR, gen_type, 'images')
+    img_fn = os.path.join(data_path, 'ex{}.{}'.format(number, config.IMAGE_EXT))
+    labels_fn = os.path.join(data_path, 'ex{}.txt'.format(number))
+
+    full_img.save(img_fn)
+
+    with open(labels_fn, 'w') as label_file:
+        for shape_bbox in shape_bboxes:
+            label_file.write('{} {} {} {} {}\n'.format(*shape_bbox))
+
+
+def _add_shapes(background, shape_imgs, shape_params, blur_radius):
+    """Paste shapes onto background and return bboxes"""
+    shape_bboxes = []
+
+    for i, shape_param in enumerate(shape_params):
+
+        x = shape_param[-2]
+        y = shape_param[-1]
+        shape_img = shape_imgs[i]
+
+        x1, y1, x2, y2 = shape_img.getbbox()
+        bg_at_shape = background.crop((x1 + x, y1 + y, x2 + x, y2 + y))
+        bg_at_shape.paste(shape_img, (0, 0), shape_img)
+        bg_at_shape = bg_at_shape.filter(ImageFilter.GaussianBlur(blur_radius))
+        background.paste(bg_at_shape, (x, y))
+
+        target_name = "_".join([shape_param[0], shape_param[2]])
+        shape_bboxes.append((target_name, x, y, x2 - x1, y2 - y1))
+
+    return shape_bboxes, background.convert('RGB')
+
+
+def _get_backgrounds():
+    """Get the background assets"""
+    # Can be a mix of .png and .jpg
+    filenames = glob.glob(os.path.join(config.BACKGROUNDS_DIR, '*.png'))
+    filenames += glob.glob(os.path.join(config.BACKGROUNDS_DIR, '*.jpg'))
+
+    x = random.randint(0,config.FULL_SIZE[0]-config.CROP_SIZE[0])
+    y = random.randint(0,config.FULL_SIZE[1]-config.CROP_SIZE[1])
+
+    return [(Image.open(filename).resize(config.FULL_SIZE)).crop((x, y, x+config.CROP_SIZE[0], y+config.CROP_SIZE[1]))
+            for filename in sorted(filenames)]
+
+
+def _get_base_shapes(shape):
+    """Get the base shape images for a given shapes"""
+    # For now just using the first one to prevent bad alpha placement
+    # TODO: Use more base shapes
+    base_path = os.path.join(config.BASE_SHAPES_DIR,
+                             shape,
+                             '{}-01.png'.format(shape))
+    return [Image.open(base_path)]
+
+
+def _random_list(items, count):
+    """Get a list of items with length count"""
+    return [random.choice(items) for i in range(0, count)]
+
+
+def _create_shape(shape, base, alpha,
+                  font_file, size, angle,
+                  target_color, target_rgb,
+                  alpha_color, alpha_rgb, x, y):
+    """Create a shape given all the input parameters"""
+    target_rgb = _augment_color(target_rgb)
+    alpha_rgb = _augment_color(alpha_rgb)
+
+    image = _get_base(base, target_rgb, size)
+    image = _strip_image(image)
+    image = _add_alphanumeric(image, shape, alpha, alpha_rgb, font_file)
+
+    w, h = image.size
+    ratio = min(size / w, size / h)
+    image = image.resize((int(w * ratio), int(h * ratio)), 1)
+
+    image = _rotate_shape(image, shape, angle)
+    image = _strip_image(image)
+
+    return image
+
+
+def _augment_color(color_rgb):
+    """Shift the color a bit"""
+    r, g, b = color_rgb
+    r = max(min(r + random.randint(-10, 11), 255), 1)
+    g = max(min(g + random.randint(-10, 11), 255), 1)
+    b = max(min(b + random.randint(-10, 11), 255), 1)
+    return (r, g, b)
+
+
+def _get_base(base, target_rgb, size):
+    """Copy and recolor the base shape"""
+    image = base.copy()
+    image = image.resize((256, 256), 1)
+    image = image.convert('RGBA')
+
+    r, g, b = target_rgb
+
+    for x in range(image.width):
+        for y in range(image.height):
+
+            pr, pg, pb, _ = image.getpixel((x, y))
+
+            if pr != 255 or pg != 255 or pb != 255:
+                image.putpixel((x, y), (r, g, b, 255))
+
+    return image
+
+
+def _strip_image(image):
+    """Remove white and black edges"""
+    for x in range(image.width):
+        for y in range(image.height):
+
+            r, g, b, a = image.getpixel((x, y))
+
+            if r == 255 and g == 255 and b == 255:
+                image.putpixel((x, y), (0, 0, 0, 0))
+
+    image = image.crop(image.getbbox())
+
+    return image
+
+
+def _add_alphanumeric(image, shape, alpha, alpha_rgb, font_file):
+    # Adjust alphanumeric size based on the shape it will be on
+    if shape == 'star':
+        font_multiplier = 0.14
+    if shape == 'triangle':
+        font_multiplier = 0.5
+    elif shape == 'rectangle':
+        font_multiplier = 0.72
+    elif shape == 'quarter-circle':
+        font_multiplier = 0.60
+    elif shape == 'semicircle':
+        font_multiplier = 0.55
+    elif shape == 'circle':
+        font_multiplier = 0.55
+    elif shape == 'square':
+        font_multiplier = 0.60
+    elif shape == 'trapezoid':
+        font_multiplier = 0.60
+    else:
+        font_multiplier = 0.55
+
+    # Set font size, select font style from fonts file, set font color
+    font_size = int(round(font_multiplier * image.height))
+    font = ImageFont.truetype(font_file, font_size)
+    draw = ImageDraw.Draw(image)
+
+    w, h = draw.textsize(alpha, font=font)
+
+    x = (image.width - w) / 2
+    y = (image.height - h) / 2
+
+    # Adjust centering of alphanumerics on shapes
+    if shape == 'pentagon':
+        pass
+    elif shape == 'semicircle':
+        pass
+    elif shape == 'rectangle':
+        pass
+    elif shape == 'trapezoid':
+        y -= 20
+    elif shape == 'star':
+        pass
+    elif shape == 'triangle':
+        x -= 24
+        y += 12
+    elif shape == 'quarter-circle':
+        y -= 40
+        x += 14
+    elif shape == 'cross':
+        y -= 25
+    elif shape == 'square':
+        y -= 10
+    elif shape == 'circle':
+        pass
+    else:
+        pass
+
+    draw.text((x, y), alpha, alpha_rgb, font=font)
+
+    return image
+
+
+def _rotate_shape(image, shape, angle):
+    return image.rotate(angle, expand=1)
+
+
+if __name__ == '__main__':
+    generate_all_shapes('detector_train', config.NUM_IMAGES, config.NUM_OFFSET)
+    generate_all_shapes('detector_val', config.NUM_VAL_IMAGES, config.NUM_VAL_OFFSET)

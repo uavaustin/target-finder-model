@@ -2,11 +2,9 @@
 """
 This script should generate fullsized training images
 which contain several artificial shapes.
-
 Save Format:
     data/{train, val}/images/exX.png <- image X
     data/{train, val}/images/exX.txt <- bboxes for image X
-
 BBox Format:
     shape_ALPHA x y width height
     shape2_ALPHA2 x y width height

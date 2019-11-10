@@ -17,16 +17,29 @@ model = tfm.inference.DetectionModel()
 model.load()
 objects = model.predict(['temp.jpg'])
 ```
-
-### Training
-
 #### Generate Data
 * `python scripts_generate/pull_assets.py` Download base shapes and background images
 * `python scripts_generate/create_full_images.py` Create full-sized artificial images
 * `python scripts_generate/create_detection_data.py` Convert full-sized images to training data for detection model
 * `python scripts_tf/create_tf_records.py --image_dir ./scripts_generate/data --output_dir ./model_data` Reformat training files
 
-#### Train Model
+### Training Pre-Classifier
+python3 scripts_tf/retrain.py \
+    --image_dir=scripts_generate/data/clf/ \
+    --summaries_dir=model_data/clf_training/ \
+    --saved_model_dir=model_data/clf_frozen \
+    --how_many_training_steps=1000 \
+    --checkpoint_path=model_data/clf/checkpoints/
+
+python3 /tensorrt/tftrt/examples/image-classification/image_classification.py \
+    --model=inception_v3 \
+    --model_dir=model_data/clf \
+    --mode=benchmark \
+    --use_trt \
+    --data_dir=scripts_generate/data/val_50k
+
+### Training Object Detector Model
+
 1. In a seperate folder `git clone https://github.com/tensorflow/models.git`
 2. Run with `MODEL_NAME` set to one of the models in `models/`
 ```

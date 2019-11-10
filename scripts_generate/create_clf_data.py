@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 
 from tqdm import tqdm
-from PIL import Image
+from PIL import Image, ImageFilter, ImageOps
 import multiprocessing
 import random
 import generate_config as config
 import glob
 import os
+
+from create_detection_data import _random_list, _get_backgrounds
 
 
 # Get constants from config
@@ -18,134 +20,60 @@ FILE_PATH = os.path.abspath(os.path.dirname(__file__))
 CLASSES = config.CLF_TYPES
 
 
-def contains_shape(x1, y1, x2, y2, data):
-    """Check if their is a bbox within these coords"""
-    for shape_desc, bx, by, bw, bh in data:
-
-        if x1 < bx < bx + bw < x2 and y1 < by < by + bh < y2:
-            return True
-
-    return False
-
-
-def create_clf_data(data_zip):
+def create_clf_images(gen_type, num_gen, offset=0):
     """Generate data for the classifier model"""
-    dataset_name, dataset_path, image_name, image_fn, data = data_zip
-    image = Image.open(image_fn)
-    full_width, full_height = image.size
 
-    backgrounds = []
-    shapes = []
+    # Make necessary directories to save data
+    save_dir = os.path.join(config.DATA_DIR, gen_type, 'images')
 
-    for y1 in range(0, full_height - CROP_HEIGHT, CROP_HEIGHT - OVERLAP):
+    os.makedirs(save_dir, exist_ok=True)
 
-        for x1 in range(0, full_width - CROP_WIDTH, CROP_WIDTH - OVERLAP):
+    numbers = list(range(offset, offset + num_gen))
 
-            y2 = y1 + CROP_HEIGHT
-            x2 = x1 + CROP_WIDTH
+    # Get random crops and augmentations for background
+    backgrounds = _random_list(_get_backgrounds(), num_gen)
+    flip_bg = _random_list([False, True], num_gen)
+    mirror_bg = _random_list([False, True], num_gen)
+    blurs = _random_list(range(1, 2), num_gen)
 
-            cropped_img = image.crop((x1, y1, x2, y2))
-            cropped_img = cropped_img.resize((CLF_WIDTH, CLF_HEIGHT))
+    data_folder = 'detector_' + gen_type.split('_')[1]
+    images_dir = os.path.join(config.DATA_DIR, data_folder,'images/*' + str(config.IMAGE_EXT)) 
+    image_names = _random_list(glob.glob(images_dir), num_gen)
+    gen_types  = [gen_type] * num_gen
 
-            if contains_shape(x1, y1, x2, y2, data):
-                shapes.append(cropped_img)
-            else:
-                backgrounds.append(cropped_img)
+    data = zip(numbers, backgrounds, flip_bg , mirror_bg, blurs, image_names, gen_types)
 
-    # Keep classes balanced and randomize data
-    num_data = min(len(backgrounds), len(shapes))
-    random.shuffle(backgrounds)
-    random.shuffle(shapes)
-
-    list_fn = os.path.join(dataset_path,
-                           '{}_list.txt'.format(dataset_name))
-
-    shape_paths = []
-    bg_paths = []
-
-    for i in range(num_data):
-
-        shape_fn = '{}_{}_{}.jpeg'.format(CLASSES[1], image_name, i)
-        shape_path = os.path.join(FILE_PATH, dataset_path, shape_fn)
-        shape_paths.append(shape_path)
-
-        bg_fn = '{}_{}_{}.jpeg'.format(CLASSES[0], image_name, i)
-        bg_path = os.path.join(FILE_PATH, dataset_path, bg_fn)
-        bg_paths.append(bg_path)
-
-        shapes[i].save(shape_path)
-        backgrounds[i].save(bg_path)
-
-    return (shape_paths, bg_paths, list_fn, num_data)
-
-def write_data(shape_paths, bg_paths, list_fn, num_data):
-
-    for i in range(num_data):
-
-        shape_path = shape_paths[i]
-        bg_path = bg_paths[i]
-
-        with open(list_fn, 'a') as list_file:
-            list_file.write(shape_path + "\n")
-            list_file.write(bg_path + "\n")
-
-def convert_data(dataset_type, num, offset=0):
-
-    if (num == 0):
-        return
-    # Broadcast our data to an num-len tuple for multithreading
-    new_dataset = ('clf_' + dataset_type, ) * num 
-    images_path = os.path.join(config.DATA_DIR, dataset_type, 'images')
-    new_images_path = (os.path.join(config.DATA_DIR, new_dataset[0], 'images'), ) * num
-
-    os.makedirs(new_images_path[0], exist_ok=True)
-
-    if offset == 0:
-        new_list_fn = '{}_list.txt'.format(new_dataset[0])
-        with open(os.path.join(new_images_path[0], new_list_fn), 'w') as im_list:
-            im_list.write("")
-
-    dataset_images = [os.path.join(images_path, f'ex{i}.jpeg')
-                      for i in range(offset, num + offset)]
-
-    image_names = []
-    image_data_zip = []
-
-    for img_fn in dataset_images:
-
-        image_names.append(os.path.basename(img_fn).replace('.jpeg', ''))
-        label_fn = img_fn.replace('.jpeg', '.txt')
-        image_data = []
-
-        with open(label_fn, 'r') as label_file:
-
-            for line in label_file.readlines():
-                shape_desc, x, y, w, h = line.strip().split(' ')
-                x, y, w, h = int(x), int(y), int(w), int(h)
-                image_data.append((shape_desc, x, y, w, h))
-
-        image_data_zip.append(image_data)
-
-        if config.DELETE_ON_CONVERT:
-            os.remove(img_fn)
-            os.remove(label_fn)
-
-    data = zip(new_dataset, new_images_path, image_names, dataset_images, image_data_zip)
-
-    # Generate in a pool. If specificed, use a given number of
-    # threads.
-    outputs = []
     with multiprocessing.Pool(None) as pool:
-        processes = pool.imap_unordered(create_clf_data, data)
-        for i in tqdm(processes, total=num):
-            # create_clf_data returns information on writing to the _list txt file
-            outputs.append(i)
+        processes = pool.imap_unordered(_single_clf_image, data)
+        for i in tqdm(processes, total=num_gen):
+            pass
+    
+    return 
 
-    # Write to the _list txt file outside of the multithreaded operation
-    for i in range(num):
-        write_data(outputs[i][0], outputs[i][1], outputs[i][2], outputs[i][3])
+def _single_clf_image(data):
+    """Crop detection image and augment clf image and save"""
+    number, background, flip_bg , mirror_bg, blur, shape_img, gen_type = data
+
+    if flip_bg:
+        background = ImageOps.flip(background)
+    if mirror_bg:
+        background = ImageOps.mirror(background)
+    
+    background.filter(ImageFilter.GaussianBlur(blur))
+
+    data_path = os.path.join(config.DATA_DIR, gen_type, 'images')
+    bkg_fn = os.path.join(data_path, 'background_{}.{}'.format(number, config.IMAGE_EXT))
+    background.save(bkg_fn)
+
+    # Now resize shape 
+    shape = Image.open(shape_img).resize(config.PRECLF_SIZE)
+    shape_fn = os.path.join(data_path, 'target_{}.{}'.format(number, config.IMAGE_EXT))
+    shape.save(shape_fn)
+    
+    return 
 
 
 if __name__ == "__main__":
-    convert_data('train', config.NUM_IMAGES, config.NUM_OFFSET)
-    convert_data('val', config.NUM_VAL_IMAGES, config.NUM_VAL_OFFSET)
+
+    create_clf_images('clf_train', config.NUM_IMAGES, config.NUM_OFFSET)
+    create_clf_images('clf_val', config.NUM_VAL_IMAGES, config.NUM_VAL_OFFSET)

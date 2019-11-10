@@ -119,8 +119,12 @@ models/*/checkpoint
 models/*/*.pb
 models/*/*.index
 models/*/*.meta
+models/*/frozen
 models/*/model.*
 models/faster_rcnn_resnet50_coco_2018_01_28/*
+models/inception_v3_2016_08_28/*
 model_data/records/*
 model_data/*
 target_finder_model/data/model/*
+
+scripts_tf/test.py

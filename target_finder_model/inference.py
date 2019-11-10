@@ -4,6 +4,7 @@ Object detection inference API
 from pkg_resources import resource_filename
 from dataclasses import dataclass
 import tensorflow as tf
+import tensorflow.contrib.tensorrt as trt
 from PIL import Image
 import numpy as np
 import os
@@ -21,9 +22,18 @@ class DetectionModel:
             self.model_path = model_path
 
     def load(self):
-        self.sess = tf.compat.v1.Session()
-        tf.compat.v1.saved_model.load(self.sess, ['serve'], self.model_path)
+
+        tf_config = tf.ConfigProto()
+        tf_config.gpu_options.allow_growth = True
+
+        frozen_graph = tf.compat.v1.GraphDef()
+        with open(self.model_path, 'rb') as f:
+            frozen_graph.ParseFromString(f.read())
+
+        tf.import_graph_def(frozen_graph, name='')
+
         self.graph = tf.compat.v1.get_default_graph()
+        self.sess = tf.compat.v1.Session(config=tf_config)
 
     def predict(self, input_data):
         if isinstance(input_data, list):
@@ -32,7 +42,6 @@ class DetectionModel:
         assert len(input_data.shape) == 4  # (batch_size, height, width, channel)
         batch_size, im_width, im_height, _ = input_data.shape
 
-        image_tensor = self.graph.get_tensor_by_name('image_tensor:0')
         output_tensors = [
             self.graph.get_tensor_by_name('num_detections:0'),
             self.graph.get_tensor_by_name('detection_classes:0'),
