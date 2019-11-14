@@ -128,3 +128,7 @@ model_data/*
 target_finder_model/data/model/*
 target_finder_model/data/clf_model/*
 scripts_tf/test.py
+
+#Temp
+scripts_generate/create_detection_data_classes.py
+scripts_generate/test

@@ -1,6 +1,3 @@
-model_data/dataset/
-model_data/records/
-models/faster_rcnn_resnet50_coco_2018_01_28/
-scripts_generate/assets/
-scripts_generate/data/
-scripts_generate/__pycache__
+** 
+Dockerfiles
+

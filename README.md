@@ -25,9 +25,15 @@ objects = model.predict(['temp.jpg'])
 * `python scripts_tf/create_tf_records.py --image_dir ./scripts_generate/data --output_dir ./model_data` Reformat training files
 
 ### Training Pre-Classifier
-
-TODO
-
+```
+python train_image_classifier.py \
+    --train_dir=models/inception_v3_2016_08_28/checkpoints \
+    --dataset_dir=model_data/clf_records \
+    --dataset_name=flowers \
+    --dataset_split_name=train \
+    --model_name=inception_v3 \
+    --checkpoint_path=models/inception_v3_2016_08_28/model.ckpt-157585
+```
 ### Training Object Detector Model
 
 1. In a seperate folder `git clone https://github.com/tensorflow/models.git`
