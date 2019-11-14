@@ -7,7 +7,6 @@ import nets.nets_factory
 import tensorflow as tf
 from PIL import Image
 import numpy as np
-import cv2
 import os
 
 from . import CLASSES, MODEL_PATH, CLF_MODEL_PATH

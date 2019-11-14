@@ -14,10 +14,7 @@ from create_detection_data import _random_list, _get_backgrounds
 # Get constants from config
 CLF_WIDTH, CLF_HEIGHT = config.PRECLF_SIZE
 CROP_WIDTH, CROP_HEIGHT = config.CROP_SIZE
-OVERLAP = config.CROP_OVERLAP
-RATIO = CLF_WIDTH / CROP_WIDTH
 FILE_PATH = os.path.abspath(os.path.dirname(__file__))
-CLASSES = config.CLF_TYPES
 
 
 def create_clf_images(gen_type, num_gen, offset=0):
@@ -34,7 +31,7 @@ def create_clf_images(gen_type, num_gen, offset=0):
     backgrounds = _random_list(_get_backgrounds(), num_gen)
     flip_bg = _random_list([False, True], num_gen)
     mirror_bg = _random_list([False, True], num_gen)
-    blurs = _random_list(range(1, 2), num_gen)
+    blurs = _random_list(range(1, 3), num_gen)
 
     data_folder = 'detector_' + gen_type.split('_')[1]
     images_dir = os.path.join(config.DATA_DIR, data_folder,'images/*' + str(config.IMAGE_EXT)) 
@@ -60,12 +57,13 @@ def _single_clf_image(data):
         background = ImageOps.mirror(background)
     
     background.filter(ImageFilter.GaussianBlur(blur))
+    background = background.resize(config.PRECLF_SIZE)
 
     data_path = os.path.join(config.DATA_DIR, gen_type, 'images')
     bkg_fn = os.path.join(data_path, 'background_{}.{}'.format(number, config.IMAGE_EXT))
     background.save(bkg_fn)
 
-    # Now resize shape 
+    # Now resize image with shape 
     shape = Image.open(shape_img).resize(config.PRECLF_SIZE)
     shape_fn = os.path.join(data_path, 'target_{}.{}'.format(number, config.IMAGE_EXT))
     shape.save(shape_fn)
@@ -75,5 +73,8 @@ def _single_clf_image(data):
 
 if __name__ == "__main__":
 
-    create_clf_images('clf_train', config.NUM_IMAGES, config.NUM_OFFSET)
-    create_clf_images('clf_val', config.NUM_VAL_IMAGES, config.NUM_VAL_OFFSET)
+    if config.NUM_IMAGES != 0:
+        create_clf_images('clf_train', config.NUM_IMAGES, config.NUM_OFFSET)
+
+    if config.NUM_VAL_IMAGES != 0:
+        create_clf_images('clf_val', config.NUM_VAL_IMAGES, config.NUM_VAL_OFFSET)

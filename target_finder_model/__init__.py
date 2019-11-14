@@ -20,7 +20,10 @@ MODEL_PATH = resource_filename(__name__, os.path.join('data', 'model', 'saved_mo
 CLF_MODEL_PATH = resource_filename(__name__, os.path.join('data', 'clf_model', 'model.ckpt'))
 
 # Model Classes
-CLASSES = CONFIG['classes']['shapes'] + CONFIG['classes']['alphas']
+CLASSES = []
+for shape in CONFIG['classes']['shapes']:
+    for alpha in CONFIG['classes']['alphas']:
+        CLASSES.append('-'.join([shape,alpha]))
 
 # Submodules
 from . import inference

@@ -33,7 +33,7 @@ ALPHA_COLORS = config.ALPHA_COLORS
 COLORS = config.COLORS
 
 
-def generate_all_shapes(gen_type, num_gen, offset=0):
+def generate_all_images(gen_type, num_gen, offset=0):
     """Generate the full sized images"""
     images_dir = os.path.join(config.DATA_DIR, gen_type, 'images')
     os.makedirs(config.DATA_DIR, exist_ok=True)
@@ -315,5 +315,5 @@ def _rotate_shape(image, shape, angle):
 
 
 if __name__ == '__main__':
-    generate_all_shapes('detector_train', config.NUM_IMAGES, config.NUM_OFFSET)
-    generate_all_shapes('detector_val', config.NUM_VAL_IMAGES, config.NUM_VAL_OFFSET)
+    generate_all_images('detector_train', config.NUM_IMAGES, config.NUM_OFFSET)
+    generate_all_images('detector_val', config.NUM_VAL_IMAGES, config.NUM_VAL_OFFSET)
