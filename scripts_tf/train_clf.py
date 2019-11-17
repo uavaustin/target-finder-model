@@ -35,7 +35,10 @@ with open(os.path.join(os.path.dirname(__file__),
     config = yaml.safe_load(stream)
 
 
-CLASSES = config['classes']['types']
+CLASSES = []
+for shape in config['classes']['shapes']:
+    for alpha in config['classes']['alphas']:
+        CLASSES.append('-'.join([shape, alpha]))
 
 
 slim = contrib_slim
@@ -44,7 +47,7 @@ tf.app.flags.DEFINE_string(
     'master', '', 'The address of the TensorFlow master to use.')
 
 tf.app.flags.DEFINE_string(
-    'train_dir', 'models/inception_v3_2016_08_28/checkpoints',
+    'train_dir', '/tmp/tfmodel/',
     'Directory where checkpoints and event logs are written to.')
 
 tf.app.flags.DEFINE_integer('num_clones', 1,
@@ -76,7 +79,7 @@ tf.app.flags.DEFINE_integer(
     'The frequency with which logs are print.')
 
 tf.app.flags.DEFINE_integer(
-    'save_summaries_secs', 120,
+    'save_summaries_secs', 600,
     'The frequency with which summaries are saved, in seconds.')
 
 tf.app.flags.DEFINE_integer(
@@ -215,9 +218,6 @@ tf.app.flags.DEFINE_integer('max_number_of_steps', None,
 
 tf.app.flags.DEFINE_bool('use_grayscale', False,
                          'Whether to convert input images to grayscale.')
-
-tf.app.flags.DEFINE_string('records_name', 'model_data/clf_records/',
-                         'Prefix of classification records')
 
 #####################
 # Fine-Tuning Flags #
@@ -449,13 +449,12 @@ def main(_):
     decoder = slim.tfexample_decoder.TFExampleDecoder(
       keys_to_features, items_to_handlers
     )
-    file_pattern = 'tfm_clf_%s.*'
-    file_pattern = os.path.join(FLAGS.records_name, file_pattern % FLAGS.dataset_split_name)
+
     dataset = slim.dataset.Dataset(
-      data_sources=file_pattern, # TODO UPDATE
+      data_sources='flowers_%s_*.tfrecord', # TODO UPDATE
       reader=tf.TFRecordReader,
       decoder=decoder,
-      num_samples=80000, # TODO UPDATE
+      num_samples=100, # TODO UPDATE
       items_to_descriptions=items_to_descs,
       num_classes=len(CLASSES),
       labels_to_names=label_idx_to_name
