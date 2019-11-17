@@ -7,10 +7,12 @@ with open(os.path.join(os.path.dirname(__file__),
         os.pardir, 'config.yaml'), 'r') as stream:
     import yaml
     config = yaml.safe_load(stream)
+
+
 CLASSES = []
 for shape in config['classes']['shapes']:
     for alpha in config['classes']['alphas']:
-        CLASSES.append('-'.join([shape,alpha]))
+        CLASSES.append('-'.join([shape, alpha]))
 
 
 with open(os.path.join(os.path.dirname(__file__), 
