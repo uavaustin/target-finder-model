@@ -10,3 +10,4 @@ tqdm
 pyyaml
 dataclasses
 tensorflow_hub
+grpcio>=1.24.3

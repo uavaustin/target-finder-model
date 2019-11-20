@@ -20,24 +20,31 @@ objects = model.predict(['temp.jpg'])
 ```
 #### Generate Data
 * `python scripts_generate/pull_assets.py` Download base shapes and background images
-* `python scripts_generate/create_full_images.py` Create full-sized artificial images
-* `python scripts_generate/create_detection_data.py` Convert full-sized images to training data for detection model
+* `python scripts_generate/create_detection_data.py` Create images for object detection training 
+* `python scripts_generate/create_clf_data.py` Create images for classification training 
 * `python scripts_tf/create_tf_records.py --image_dir ./scripts_generate/data --output_dir ./model_data` Reformat training files
 
 ### Training Pre-Classifier
 ```
-python train_image_classifier.py \
-    --train_dir=models/inception_v3_2016_08_28/checkpoints \
-    --dataset_dir=model_data/clf_records \
-    --dataset_name=flowers \
-    --dataset_split_name=train \
-    --model_name=inception_v3 \
-    --checkpoint_path=models/inception_v3_2016_08_28/model.ckpt-157585
+python scrips_tf/train_clf.py
 ```
+### Freeze Pre-Classifier
+```
+python scripts_tf/optimize_clf.py \
+    --model inception_v3 \
+    --data_dir model_data/clf_records \
+    --calib_data_dir model_data/clf_records \
+    --model_dir models/inception_v3_2016_08_28/checkpoints \
+    --mode validation \
+    --cache models/models/inception_v3_2016_08_28/optimized_clf_int8.pb\
+    --use_trt \
+    --precision INT8
+```
+
 ### Training Object Detector Model
 
 1. In a seperate folder `git clone https://github.com/tensorflow/models.git`
-2. Run with `MODEL_NAME` set to one of the models in `models/`
+2. Run with `MODEL_NAME` set to one of the models in `models/2`
 ```
 python path/to/models/research/object_detection/model_main.py \
     --pipeline_config_path=models/MODEL_NAME/pipeline.config \

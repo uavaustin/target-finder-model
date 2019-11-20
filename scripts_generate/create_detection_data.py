@@ -32,6 +32,12 @@ TARGET_COLORS = config.TARGET_COLORS
 ALPHA_COLORS = config.ALPHA_COLORS
 COLORS = config.COLORS
 
+CLASSES = {}
+i = 0
+for target in config.SHAPE_TYPES:
+  for alpha in  config.ALPHAS:
+    CLASSES['-'.join([target, alpha])] = i
+    i += 1
 
 def generate_all_images(gen_type, num_gen, offset=0):
     """Generate the full sized images"""
@@ -149,8 +155,8 @@ def _add_shapes(background, shape_imgs, shape_params, blur_radius):
         bg_at_shape = bg_at_shape.filter(ImageFilter.GaussianBlur(blur_radius))
         background.paste(bg_at_shape, (x, y))
 
-        target_name = "_".join([shape_param[0], shape_param[2]])
-        shape_bboxes.append((target_name, x, y, x2 - x1, y2 - y1))
+        target_name = '-'.join([shape_param[0], shape_param[2]])
+        shape_bboxes.append((CLASSES[target_name], x, y, x2 - x1, y2 - y1))
 
     return shape_bboxes, background.convert('RGB')
 

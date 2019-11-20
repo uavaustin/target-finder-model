@@ -74,7 +74,7 @@ def _single_clf_image(data):
 if __name__ == "__main__":
 
     if config.NUM_IMAGES != 0:
-        create_clf_images('clf_train', config.NUM_IMAGES, config.NUM_OFFSET)
+        create_clf_images('clf_train', config.NUM_IMAGES * 20, config.NUM_OFFSET)
 
     if config.NUM_VAL_IMAGES != 0:
-        create_clf_images('clf_val', config.NUM_VAL_IMAGES, config.NUM_VAL_OFFSET)
+        create_clf_images('clf_val', config.NUM_VAL_IMAGES * 20, config.NUM_VAL_OFFSET)
