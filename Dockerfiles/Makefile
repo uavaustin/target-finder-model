@@ -12,9 +12,13 @@ CUR_DIR := $(shell pwd)
 .PHONY: all clean
 all: image
 
-.PHONY: image
-image:
-	docker build -t $(IMAGE_NAME):$(IMAGE_TAG) -f Dockerfile $(DOCKERFLAGS) .
+.PHONY: tf1
+tf1:
+	docker build -t $(IMAGE_NAME):tf1 -f Dockerfile.tf1 $(DOCKERFLAGS) .
+
+.PHONY: tf2
+tf2:
+	docker build -t $(IMAGE_NAME):tf2 -f Dockerfile.tf2 $(DOCKERFLAGS) .
 
 .PHONY: test-build
 test-build:

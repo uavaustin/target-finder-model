@@ -37,10 +37,12 @@ with open(os.path.join(os.path.dirname(__file__),
     import yaml
     config = yaml.safe_load(stream)
 
-CLASSES = []
+CLASSES = {}
+i = 0
 for target in config['classes']['shapes']:
   for alpha in  config['classes']['alphas']:
-    CLASSES.append('-'.join([target, alpha]))
+    CLASSES[i] = '-'.join([target, alpha])
+    i += 1
 
 CLF_CLASSES = config['classes']['types']
 FORMAT = config['generate']['img_ext']
@@ -148,8 +150,9 @@ def _create_tf_record_from_images(data_dir, output_path):
   them into tf records.
   """
   # Determine number of shards. Recommended ~2000 images per shard
+
   image_fns = glob.glob(os.path.join(data_dir, '*.' + FORMAT))
-  num_shards = len(image_fns) // 2000 + 1
+  num_shards = 1 #len(image_fns) // 2000 + 1
 
   with contextlib2.ExitStack() as tf_record_close_stack:
 
@@ -164,9 +167,6 @@ def _create_tf_record_from_images(data_dir, output_path):
       tf_example = create_tf_example(image_path_prefix, data_dir)
       shard_idx = idx % num_shards
       output_tfrecords[shard_idx].write(tf_example.SerializeToString())
-
-    tf.compat.v1.logging.info('Finished writing.')
-
 
 def main(_):
 

@@ -1,5 +1,5 @@
-FROM nvcr.io/nvidia/tensorflow:19.09-py3
-
+FROM nvcr.io/nvidia/tensorflow:19.10-py3
+ 
 WORKDIR /sources
 
 RUN apt-get update \
@@ -11,10 +11,10 @@ RUN apt-get update \
 COPY requirements-docker.txt .
 
 RUN apt install python3-pip \
-  && pip3 install --upgrade pip \
-  && pip3 install tox
+  && pip3 install --upgrade pip 
 
-RUN pip3 install -r requirements-docker.txt
+RUN pip3 install -r requirements-docker.txt \
+  && pip3 install --upgrade tf-nightly
 
 RUN git clone https://github.com/tensorflow/models.git
 
@@ -27,7 +27,6 @@ WORKDIR /sources/models/research
 
 RUN protoc object_detection/protos/*.proto --python_out=.
 
-
 RUN python setup.py install --user
 
 WORKDIR /sources/models/research/slim
@@ -35,19 +34,13 @@ WORKDIR /sources/models/research/slim
 RUN python3 setup.py install \
   && pip3 install requests
 
-WORKDIR /
-# Setup TF-TRT 
+WORKDIR /tion
 RUN git clone https://github.com/tensorflow/tensorrt.git \
   && cd tensorrt/tftrt/examples/object_detection \
   && git submodule update --init \
   && ./install_dependencies.sh \
   && cd /tensorrt \
   && python3 setup.py install --user 
-
-RUN cd /tensorrt/tftrt/examples/image-classification \
-  && ./install_dependencies.sh \
-  && cd ../third_party/models
-
 
 ENV PYTHONPATH=$PYTHONPATH:/sources/models/research:/sources/models/research/slim:/tensorrt/tftrt/examples/third_party/models
 

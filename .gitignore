@@ -115,7 +115,7 @@ venv.bak/
 *.weights
 bad.list
 models/*/saved_model
-models/*/checkpoint
+models/*/checkpoints
 models/*/*.pb
 models/*/*.index
 models/*/*.meta
@@ -123,6 +123,8 @@ models/*/frozen
 models/*/model.*
 models/faster_rcnn_resnet50_coco_2018_01_28/*
 models/inception_v3_2016_08_28/*
+models/faster_rcnn_inception_resnet_v2_atrous_coco_2018_01_28/*
+models/faster_rcnn_resnet101_coco_2018_01_28/*
 model_data/records/*
 model_data/*
 target_finder_model/data/model/*
