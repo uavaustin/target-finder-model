@@ -21,10 +21,10 @@ jobs:
 
     - name: Build target-finder-model-env Docker image
       working-directory: ./Dockerfiles
-      run: make image
+      run: make tf1
 
     - name: Push target-finder-model-env
-      run: docker push uavaustin/target-finder-model-env:latest
+      run: docker push uavaustin/target-finder-model-env:tf1
 
     - name: Build target-finder-model-env:test Docker image
       working-directory: ./Dockerfiles
@@ -61,4 +61,3 @@ jobs:
       with:
         name: tf-records
         path: model_data/records
-
