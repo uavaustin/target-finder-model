@@ -17,9 +17,6 @@ from PIL import Image
 import numpy as np
 
 from . import CLASSES, OD_MODEL_PATH, CLF_MODEL_PATH
-from . import optimize_od
-
-from .optimize_od import optimize as optimize_od
 
 class DetectionModel:
     
@@ -30,7 +27,7 @@ class DetectionModel:
         else:
             self.model_path = model_path
 
-    def load(self, use_trt=False):
+    def load(self):
 
         tf_config = tf.compat.v1.ConfigProto()
         tf_config.gpu_options.allow_growth = True
@@ -39,11 +36,8 @@ class DetectionModel:
         with open(self.model_path, 'rb') as f:
             frozen_graph.ParseFromString(f.read())
 
-        if use_trt:
-            optimized_frozen_graph = optimize_od(frozen_graph)
-            tf.import_graph_def(optimized_frozen_graph, name='')
-        else:
-            tf.import_graph_def(frozen_graph, name='')
+        tf.import_graph_def(optimized_frozen_graph, name='')
+        tf.import_graph_def(frozen_graph, name='')
 
         self.graph = tf.compat.v1.get_default_graph()
         self.sess = tf.compat.v1.Session(config=tf_config)
@@ -97,7 +91,7 @@ class ClfModel:
         else:
             self.model_path = model_path
 
-    def load(self, use_trt=False):
+    def load(self):
 
         with tf.io.gfile.GFile(self.model_path, 'rb') as f:
             graph_def = tf.compat.v1.GraphDef()
