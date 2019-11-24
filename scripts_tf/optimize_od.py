@@ -35,7 +35,7 @@ def load_graph(args):
 
     optimize(frozen_graph, args.output_path)
 
-def optimize(frozen_graph, output_path):
+def optimize(frozen_graph, output_path=None):
     """
     output_names = [BOXES_NAME, CLASSES_NAME, SCORES_NAME, NUM_DETECTIONS_NAME]
 
@@ -71,7 +71,7 @@ def optimize(frozen_graph, output_path):
         with open(output_path, 'wb') as f:
             f.write(frozen_graph_out.SerializeToString())
     """
-    frozen_graph = optimize_model(
+    optimized_frozen_graph = optimize_model(
     frozen_graph,
     use_trt=True,
     precision_mode="FP32",
@@ -81,7 +81,8 @@ def optimize(frozen_graph, output_path):
     calib_image_shape=[640, 640],
     max_workspace_size_bytes=17179869184,
     output_path=output_path
-)
+    )
+    return optimized_frozen_graph
 
 
 if __name__ == '__main__':

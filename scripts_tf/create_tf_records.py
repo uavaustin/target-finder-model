@@ -51,8 +51,9 @@ flags = tf.app.flags
 tf.flags.DEFINE_string('image_dir', 'scripts_generate/data',
                        'Training image directory.')
 tf.flags.DEFINE_string('output_dir', 'model_data/records', 'Output data directory.')
-tf.flags.DEFINE_bool('clf','False',"Create clf records")
-tf.flags.DEFINE_bool('det','False',"Create det records")
+tf.flags.DEFINE_bool('clf','False',"Create classification records")
+tf.flags.DEFINE_bool('det','False',"Create detection records")
+tf.flags.DEFINE_bool('ori','False',"Create orientation records")
 
 FLAGS = flags.FLAGS
 
@@ -189,12 +190,12 @@ def main(_):
 
   if FLAGS.clf:
     _create_tf_record_from_images(
-    os.path.join(FLAGS.image_dir, 'clf_train', 'images'),
-    os.path.join(FLAGS.output_dir, 'tfm_clf_train.record'))
+      os.path.join(FLAGS.image_dir, 'clf_train', 'images'),
+      os.path.join(FLAGS.output_dir, 'tfm_clf_train.record'))
 
-  _create_tf_record_from_images(
-    os.path.join(FLAGS.image_dir, 'clf_val', 'images'),
-    os.path.join(FLAGS.output_dir, 'tfm_clf_val.record'))
+    _create_tf_record_from_images(
+      os.path.join(FLAGS.image_dir, 'clf_val', 'images'),
+      os.path.join(FLAGS.output_dir, 'tfm_clf_val.record'))
 
 
 if __name__ == '__main__':

@@ -1,46 +1,55 @@
 """
 Object detection inference API
 """
+import os
+import time
+# Limit TF logs
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
+import tensorflow as tf
+
 from pkg_resources import resource_filename
 from dataclasses import dataclass
 import nets.nets_factory
-import tensorflow as tf
+# see https://stackoverflow.com/questions/35911252/disable-tensorflow-debugging-information
+
+
 from PIL import Image
 import numpy as np
-import os
 
-from . import CLASSES, MODEL_PATH, CLF_MODEL_PATH
-
+from . import CLASSES, OD_MODEL_PATH, CLF_MODEL_PATH
 
 class DetectionModel:
     
     def __init__(self, model_path=None):
         # Choose between default and custom model
         if model_path is None:
-            self.model_path = MODEL_PATH
+            self.model_path = OD_MODEL_PATH
         else:
             self.model_path = model_path
 
     def load(self):
 
-        tf_config = tf.ConfigProto()
+        tf_config = tf.compat.v1.ConfigProto()
         tf_config.gpu_options.allow_growth = True
 
         frozen_graph = tf.compat.v1.GraphDef()
         with open(self.model_path, 'rb') as f:
             frozen_graph.ParseFromString(f.read())
 
+        tf.import_graph_def(optimized_frozen_graph, name='')
         tf.import_graph_def(frozen_graph, name='')
 
         self.graph = tf.compat.v1.get_default_graph()
         self.sess = tf.compat.v1.Session(config=tf_config)
 
-    def predict(self, input_data):
+    def predict(self, input_data, batch_size=4):
+
         if isinstance(input_data, list):
             # allow list of paths as input
-            input_data = np.array([np.asarray(Image.open(fn)) for fn in input_data])
-        assert len(input_data.shape) == 4  # (batch_size, height, width, channel)
-        batch_size, im_width, im_height, _ = input_data.shape
+            input_data = np.array([np.asarray(fn) for fn in input_data])
+
+        #assert len(input_data.shape) == 4  # (num_imgs, height, width, channel)
+        num_imgs, im_width, im_height, _ = input_data.shape
 
         output_tensors = [
             self.graph.get_tensor_by_name('num_detections:0'),
@@ -49,25 +58,27 @@ class DetectionModel:
             self.graph.get_tensor_by_name('detection_scores:0')
         ]
 
-        [nums, obj_types, boxes, scores] = self.sess.run(output_tensors, feed_dict={
-            'image_tensor:0': input_data
-        })
-
         results = []
-        for i in range(batch_size):
-            image_detects = []
-            for k in range(int(nums[i])):
-                obj = DetectedObject()
-                obj.class_idx = int(obj_types[i][k])
-                obj.class_name = CLASSES[obj.class_idx - 1]
-                obj.confidence = scores[i][k]
-                bbox = boxes[i][k]
-                obj.x = int(bbox[0] * im_width)
-                obj.y = int(bbox[1] * im_height)
-                obj.width = int((bbox[3] - bbox[1]) * im_width)
-                obj.height = int((bbox[2] - bbox[0]) * im_height)
-                image_detects.append(obj)
-            results.append(image_detects)
+        for idx in range(batch_size, num_imgs, batch_size):
+
+            [nums, obj_types, boxes, scores] = self.sess.run(output_tensors, feed_dict={
+                'image_tensor:0': input_data[(idx - batch_size):idx]
+            })
+
+            for i in range(batch_size):
+                image_detects = []
+                for k in range(int(nums[i])):
+                    obj = DetectedObject()
+                    obj.class_idx = int(obj_types[i][k])
+                    obj.class_name = CLASSES[obj.class_idx - 1]
+                    obj.confidence = scores[i][k]
+                    bbox = boxes[i][k]
+                    obj.x = int(bbox[0] * im_width)
+                    obj.y = int(bbox[1] * im_height)
+                    obj.width = int((bbox[3] - bbox[1]) * im_width)
+                    obj.height = int((bbox[2] - bbox[0]) * im_height)
+                    image_detects.append(obj)
+                results.append(image_detects)
 
         return results
 
@@ -82,39 +93,44 @@ class ClfModel:
 
     def load(self):
 
-        tf_config = tf.ConfigProto()
+        with tf.io.gfile.GFile(self.model_path, 'rb') as f:
+            graph_def = tf.compat.v1.GraphDef()
+            graph_def.ParseFromString(f.read())
+
+        # Then, we import the graph_def into a new Graph and returns it 
+        with tf.Graph().as_default() as graph:
+            # The name var will prefix every op/nodes in your graph
+            # Since we load everything in a new graph, this is not needed
+            tf.import_graph_def(graph_def, name="prefix")
+
+        tf_config = tf.compat.v1.ConfigProto()
         tf_config.gpu_options.allow_growth = True
 
         self.graph = tf.compat.v1.get_default_graph()
-        self.sess = tf.compat.v1.Session(config=tf_config)
+        self.sess = tf.compat.v1.Session(graph = graph, config=tf_config)
+        
+        self.tf_output = 'prefix/classes:0'
 
-        # TODO unhardcode these constants
-        tf_input = tf.placeholder(tf.float32, [None, 299, 299, 3], name='image_tensor')
-        network_fn = nets.nets_factory.get_network_fn('inception_v3', 1001, is_training=False)
-        tf_net, tf_end_points = network_fn(tf_input)
-        self.tf_output = tf_end_points
+    def predict(self, input_data, batch_size=40):
 
-        tf_saver = tf.train.Saver()
-        tf_saver.restore(save_path=self.model_path, sess=self.sess)
-
-    def predict(self, input_data):
         if isinstance(input_data, list):
             # allow list of paths as input
-            input_data = np.array([np.asarray(Image.open(fn).resize((299, 299))) for fn in input_data])
+            input_data = np.array([np.asarray(fn) for fn in input_data])
+
         assert len(input_data.shape) == 4  # (batch_size, height, width, channel)
-        batch_size = input_data.shape[0]
+        num_imgs, im_width, im_height, _ = input_data.shape
 
-        [net_out] = self.sess.run([self.tf_output], feed_dict={
-            'image_tensor:0': input_data
-        })
+        for idx in range(batch_size, num_imgs, batch_size):
 
-        pred = net_out['Predictions']
-
-        results = []
-        for i in range(batch_size):
-            obj = DetectedObject()
-            obj.class_idx = np.argmax(pred[i])
-            results.append(obj)
+            [preds] = self.sess.run([self.tf_output], feed_dict={
+                'prefix/input:0': input_data[(idx - batch_size):idx]
+            })
+            
+            results = []
+            for i in range(batch_size):
+                obj = DetectedObject()
+                obj.class_idx = preds[i]
+                results.append(obj)
 
         return results
 
