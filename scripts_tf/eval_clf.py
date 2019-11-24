@@ -133,7 +133,7 @@ def main(_):
     file_pattern = 'tfm_clf_%s.*'
     file_pattern = os.path.join(FLAGS.dataset_dir, file_pattern % FLAGS.dataset_split_name)
     dataset = slim.dataset.Dataset(
-      data_sources=file_pattern, # TODO UPDATE
+      data_sources=file_pattern,
       reader=tf.TFRecordReader,
       decoder=decoder,
       num_samples=20000, # TODO UPDATE
