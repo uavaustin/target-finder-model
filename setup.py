@@ -22,12 +22,9 @@ def get_version():
     Returns:
         str: The current uavaustin-target-finder version.
     """
-
     with open(VERSION_PATH, 'r') as version:
         out = {}
-
         exec(version.read(), out)
-
         return out['__version__']
 
 

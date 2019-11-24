@@ -23,7 +23,7 @@ OD_MODEL_PATH = resource_filename(__name__, os.path.join('data', 'det.pb'))
 CLASSES = []
 for shape in CONFIG['classes']['shapes']:
     for alpha in CONFIG['classes']['alphas']:
-        CLASSES.append('-'.join([shape,alpha]))
+        CLASSES.append('-'.join([shape, alpha]))
 
 # Submodules
 from . import inference

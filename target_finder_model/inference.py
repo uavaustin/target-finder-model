@@ -3,14 +3,14 @@ Object detection inference API
 """
 import os
 import time
-# Limit TF logs
+# Limit TF logs: 
+# see https://stackoverflow.com/questions/35911252/disable-tensorflow-debugging-information
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
 import tensorflow as tf
 
 from pkg_resources import resource_filename
 from dataclasses import dataclass
 import nets.nets_factory
-# see https://stackoverflow.com/questions/35911252/disable-tensorflow-debugging-information
 
 
 from PIL import Image
@@ -36,7 +36,6 @@ class DetectionModel:
         with open(self.model_path, 'rb') as f:
             frozen_graph.ParseFromString(f.read())
 
-        tf.import_graph_def(optimized_frozen_graph, name='')
         tf.import_graph_def(frozen_graph, name='')
 
         self.graph = tf.compat.v1.get_default_graph()

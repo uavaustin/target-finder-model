@@ -31,6 +31,7 @@ import tensorflow.contrib.slim as slim
 import official.resnet.ctl.ctl_imagenet_main
 from preprocessing import inception_preprocessing, vgg_preprocessing
 
+
 class LoggerHook(tf.train.SessionRunHook):
     """Logs runtime of each iteration"""
     def __init__(self, batch_size, num_records, display_every):
@@ -51,6 +52,7 @@ class LoggerHook(tf.train.SessionRunHook):
             print("    step %d/%d, iter_time(ms)=%.4f, images/sec=%d" % (
                 current_step, self.num_steps, duration * 1000,
                 self.batch_size / self.iter_times[-1]))
+
 
 class BenchmarkHook(tf.train.SessionRunHook):
     """Limits run duration and number of iterations"""
@@ -79,6 +81,7 @@ class BenchmarkHook(tf.train.SessionRunHook):
             self.current_iteration += 1
             if self.current_iteration >= self.iteration_limit:
                 run_context.request_stop()
+
 
 # Define the dataset input function for tf.estimator.Estimator
 def input_fn(model, data_files, batch_size, use_synthetic, mode='validation', return_numpy=False):
@@ -127,6 +130,7 @@ def input_fn(model, data_files, batch_size, use_synthetic, mode='validation', re
         else:
             raise ValueError("Mode must be either 'validation' or 'benchmark'")
     return features, labels
+
 
 def run(frozen_graph, model, data_files, batch_size,
     num_iterations, num_warmup_iterations, use_synthetic, display_every=100,
@@ -207,6 +211,7 @@ def run(frozen_graph, model, data_files, batch_size,
     results['latency_median'] = np.median(iter_times) * 1000
     results['latency_min'] = np.min(iter_times) * 1000
     return results
+
 
 class NetDef(object):
     """Contains definition of a model
@@ -320,6 +325,7 @@ def get_netdef(model):
     }
     return NETS[model]
 
+
 def deserialize_image_record(record):
     feature_map = {
         'image/encoded':          tf.FixedLenFeature([ ], tf.string, ''),
@@ -372,6 +378,7 @@ def get_preprocess_fn(model, mode='validation'):
     else:
         raise ValueError("Mode must be either 'validation' or 'benchmark'")
 
+
 def build_classification_graph(model, model_dir=None, default_models_dir='./data'):
     """Builds an image classification model by name
     This function builds an image classification model given a model
@@ -423,6 +430,7 @@ def build_classification_graph(model, model_dir=None, default_models_dir='./data
 
     return frozen_graph
 
+
 def get_checkpoint(model, model_dir=None, default_models_dir='.'):
     """Get the checkpoint. User may provide their own checkpoint via model_dir.
     If model_dir is None, attempts to download the checkpoint using url property
@@ -458,6 +466,7 @@ def get_checkpoint(model, model_dir=None, default_models_dir='.'):
     print('No model_dir was provided and the model does not define a download' \
           ' URL.')
     exit(1)
+
 
 def find_checkpoint_in_dir(model_dir):
     # tf.train.latest_checkpoint will find checkpoints if a 'checkpoint' file is
@@ -511,6 +520,7 @@ def download_checkpoint(model, destination_path):
                                         '*')
             for f in glob.glob(source_files):
                 copy_files(f, destination_path)
+
 
 def get_frozen_graph(
     model,
@@ -626,6 +636,7 @@ def get_frozen_graph(
         times['saving_frozen_graph'] = time.time() - start_time
 
     return frozen_graph, num_nodes, times, graph_sizes
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Evaluate model')
