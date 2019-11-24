@@ -35,8 +35,7 @@ def load_graph(args):
 
     optimize(frozen_graph, args.output_path)
 
-def optimize(frozen_graph):
-    print('optimizing OD model')
+def optimize(frozen_graph, output_path=None):
     """
     output_names = [BOXES_NAME, CLASSES_NAME, SCORES_NAME, NUM_DETECTIONS_NAME]
 
@@ -80,9 +79,9 @@ def optimize(frozen_graph):
     num_calib_images=8,
     calib_batch_size=8,
     calib_image_shape=[640, 640],
-    max_workspace_size_bytes=17179869184
+    max_workspace_size_bytes=17179869184,
+    output_path=output_path
     )
-
     return optimized_frozen_graph
 
 

@@ -134,3 +134,6 @@ scripts_tf/test.py
 #Temp
 scripts_generate/create_detection_data_classes.py
 scripts_generate/test
+test/
+target_finder_model/data
+models/frozen

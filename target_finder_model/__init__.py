@@ -16,8 +16,8 @@ with open(CONFIG_FN, 'r') as stream:
     CONFIG = yaml.safe_load(stream)
 
 # Builtin Saved Model
-MODEL_PATH = resource_filename(__name__, os.path.join('data', 'model', 'saved_model'))
-CLF_MODEL_PATH = resource_filename(__name__, os.path.join('data', 'clf_model', 'model.ckpt'))
+CLF_MODEL_PATH = resource_filename(__name__, os.path.join('data', 'clf.pb'))
+OD_MODEL_PATH = resource_filename(__name__, os.path.join('data', 'det.pb'))
 
 # Model Classes
 CLASSES = []

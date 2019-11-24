@@ -28,7 +28,7 @@ objects = model.predict(['temp.jpg'])
 ```
 python scrips_tf/train_clf.py
 ```
-### Freeze Pre-Classifier
+### Optimize Pre-Classifier from ckpt
 ```
 python scripts_tf/optimize_clf.py \
     --model inception_v3 \
@@ -39,6 +39,10 @@ python scripts_tf/optimize_clf.py \
     --cache models/models/inception_v3_2016_08_28/optimized_clf_int8.pb\
     --use_trt \
     --precision INT8
+```
+### [Optional] Freeze Pre-Classifier 
+```
+python scripts_tf/freeze_clf.py --ckpt_dir=/folder/with/ckpts
 ```
 
 ### Training Object Detector Model
@@ -53,7 +57,7 @@ python path/to/models/research/object_detection/model_main.py \
     --sample_1_of_n_eval_examples=1 \
     --alsologtostderr
 ```
-#### Freeze Model 
+#### Freeze Model Object Detector Model
 This will create a `frozen_inference_graph.pb` that will be optimized with tensorrt.
 ```
 python path/to/models/research/object_detection/export_inference_graph.py \
@@ -61,6 +65,10 @@ python path/to/models/research/object_detection/export_inference_graph.py \
     --pipeline_config_path=models/MODEL_NAME/pipeline.config \
     --trained_checkpoint_prefix=models/MODEL_NAME/model.ckpt \
     --output_directory=models/MODEL_NAME/frozen
+```
+### Optimize Object Detector Model
+```
+python scripts_tf/optimize.py --frozen_model=/path/to/frozen_inference_graph.pb --output_dir=/out/optimized_od.pb
 ```
 ## Repository Contents
 
