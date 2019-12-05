@@ -3,6 +3,7 @@ Script for freezing inception v3 model
 TODO Adapt script for other classifiers
 """
 import os
+import glob
 import tensorflow as tf 
 import nets.nets_factory  #models/research/slim
 import tensorflow.contrib.slim as slim
@@ -110,7 +111,7 @@ def freeze_model(model, ckpt_dir, output_path):
 
     netdef = NetDef(name='inception_v3',input_size=299, num_classes=2)
     tf_config = tf.ConfigProto()
-    tf_config.gpu_options.allow_growth = True
+    tf_config.gpu_options.per_process_gpu_memory_fraction=0.5
 
     with tf.Graph().as_default() as tf_graph:
         with tf.Session(config=tf_config) as tf_sess:
@@ -145,6 +146,8 @@ def freeze_model(model, ckpt_dir, output_path):
         f.write(frozen_graph.SerializeToString())
 
     return 
+
+
 if __name__ == '__main__':
 
     assert FLAGS.ckpt_dir

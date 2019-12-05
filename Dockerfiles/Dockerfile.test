@@ -1,9 +1,12 @@
-FROM uavaustin/target-finder-model-env:latest
+FROM uavaustin/target-finder-model-env:tf1
 
-WORKDIR /host/mounted/
+WORKDIR /test
+
+RUN pip3 install tox pycodestyle pytest pytest-cov coveralls
 
 COPY . .
 
-RUN mv /host/mounted/Dockerfiles/entrypoint.sh /host/mounted/entrypoint.sh
+RUN chmod +x Dockerfiles/entrypoint.sh
+RUN mv Dockerfiles/entrypoint.sh /usr/local/bin/entrypoint.sh
 
-ENTRYPOINT ["/host/mounted/entrypoint.sh"]
+ENTRYPOINT ["entrypoint.sh"]

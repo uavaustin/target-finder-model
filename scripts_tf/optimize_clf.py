@@ -32,27 +32,6 @@ import official.resnet.ctl.ctl_imagenet_main
 from preprocessing import inception_preprocessing, vgg_preprocessing
 
 
-class LoggerHook(tf.train.SessionRunHook):
-    """Logs runtime of each iteration"""
-    def __init__(self, batch_size, num_records, display_every):
-        self.iter_times = []
-        self.display_every = display_every
-        self.num_steps = (num_records + batch_size - 1) / batch_size
-        self.batch_size = batch_size
-
-    def before_run(self, run_context):
-        self.start_time = time.time()
-
-    def after_run(self, run_context, run_values):
-        current_time = time.time()
-        duration = current_time - self.start_time
-        self.iter_times.append(duration)
-        current_step = len(self.iter_times)
-        if current_step % self.display_every == 0:
-            print("    step %d/%d, iter_time(ms)=%.4f, images/sec=%d" % (
-                current_step, self.num_steps, duration * 1000,
-                self.batch_size / self.iter_times[-1]))
-
 
 class BenchmarkHook(tf.train.SessionRunHook):
     """Limits run duration and number of iterations"""
@@ -228,11 +207,10 @@ class NetDef(object):
     num_classes: Number of output classes in model. Background class will be
         automatically adjusted for if num_classes is 1001.
     """
-    def __init__(self, name, url=None, model_dir_in_archive=None,
+    def __init__(self, name, model_dir_in_archive=None,
                 checkpoint_name=None, preprocess='inception',
             input_size=224, slim=True, postprocess=tf.nn.softmax, model_fn=None, num_classes=2):
         self.name = name
-        self.url = url
         self.model_dir_in_archive = model_dir_in_archive
         self.checkpoint_name = checkpoint_name
         if preprocess == 'inception':
@@ -252,9 +230,6 @@ class NetDef(object):
     def get_num_classes(self):
         return self.num_classes
 
-    def get_url(self):
-        return self.url
-
 
 def get_netdef(model):
     """Creates the dictionary NETS with model names as keys and NetDef as values.
@@ -263,25 +238,20 @@ def get_netdef(model):
     """
     NETS = {
         'mobilenet_v1': NetDef(
-            name='mobilenet_v1',
-            url='http://download.tensorflow.org/models/mobilenet_v1_2018_02_22/mobilenet_v1_1.0_224.tgz'),
+            name='mobilenet_v1'
 
         'mobilenet_v2': NetDef(
-            name='mobilenet_v2_140',
-            url='https://storage.googleapis.com/mobilenet_v2/checkpoints/mobilenet_v2_1.4_224.tgz'),
+            name='mobilenet_v2_140's
 
         'nasnet_mobile': NetDef(
-            name='nasnet_mobile',
-            url='https://storage.googleapis.com/download.tensorflow.org/models/nasnet-a_mobile_04_10_2017.tar.gz'),
+            name='nasnet_mobile'
 
         'nasnet_large': NetDef(
             name='nasnet_large',
-            url='https://storage.googleapis.com/download.tensorflow.org/models/nasnet-a_large_04_10_2017.tar.gz',
             input_size=331),
 
         'resnet_v1_50': NetDef(
             name='resnet_v1_50',
-            url='http://download.tensorflow.org/models/official/20181001_resnet/checkpoints/resnet_imagenet_v1_fp32_20181001.tar.gz',
             model_dir_in_archive='resnet_imagenet_v1_fp32_20181001',
             slim=False,
             preprocess='vgg',
@@ -289,7 +259,6 @@ def get_netdef(model):
 
         'resnet_v2_50': NetDef(
             name='resnet_v2_50',
-            url='http://download.tensorflow.org/models/official/20181001_resnet/checkpoints/resnet_imagenet_v2_fp32_20181001.tar.gz',
             model_dir_in_archive='resnet_imagenet_v2_fp32_20181001',
             slim=False,
             preprocess='vgg',
@@ -303,24 +272,20 @@ def get_netdef(model):
 
         'vgg_16': NetDef(
             name='vgg_16',
-            url='http://download.tensorflow.org/models/vgg_16_2016_08_28.tar.gz',
             preprocess='vgg',
             num_classes=1000),
 
         'vgg_19': NetDef(
             name='vgg_19',
-            url='http://download.tensorflow.org/models/vgg_19_2016_08_28.tar.gz',
             preprocess='vgg',
             num_classes=1000),
 
         'inception_v3': NetDef(
             name='inception_v3',
-            url='http://download.tensorflow.org/models/inception_v3_2016_08_28.tar.gz',
             input_size=299),
 
         'inception_v4': NetDef(
             name='inception_v4',
-            url='http://download.tensorflow.org/models/inception_v4_2016_09_09.tar.gz',
             input_size=299),
     }
     return NETS[model]
@@ -379,152 +344,9 @@ def get_preprocess_fn(model, mode='validation'):
         raise ValueError("Mode must be either 'validation' or 'benchmark'")
 
 
-def build_classification_graph(model, model_dir=None, default_models_dir='./data'):
-    """Builds an image classification model by name
-    This function builds an image classification model given a model
-    name, parameter checkpoint file path, and number of classes.  This
-    function performs some graph processing to produce a graph that is
-    well optimized by the TensorRT package in TensorFlow 1.7+.
-    model: string, the model name (see NETS table)
-    model_dir: string, optional user provided checkpoint location
-    default_models_dir: string, directory to store downloaded model checkpoints
-    returns: tensorflow.GraphDef, the TensorRT compatible frozen graph
-    """
-    netdef = get_netdef(model)
-    tf_config = tf.ConfigProto()
-    tf_config.gpu_options.allow_growth = True
-
-    with tf.Graph().as_default() as tf_graph:
-        with tf.Session(config=tf_config) as tf_sess:
-            tf_input = tf.placeholder(tf.float32, [None, netdef.input_height, netdef.input_width, 3], name='input')
-            if netdef.slim:
-                # TF Slim Model: get model function from nets_factory
-                network_fn = nets.nets_factory.get_network_fn(netdef.name, netdef.num_classes,
-                        is_training=False)
-                tf_net, tf_end_points = network_fn(tf_input)
-            else:
-                # TF Official Model: get model function from NETS
-                tf_net = netdef.model_fn(tf_input, training=False)
-
-            tf_output = tf.identity(tf_net, name='logits')
-            num_classes = tf_output.get_shape().as_list()[1]
-            if num_classes == 1001:
-                # Shift class down by 1 if background class was included
-                tf_output_classes = tf.add(tf.argmax(tf_output, axis=1), -1, name='classes')
-            else:
-                tf_output_classes = tf.argmax(tf_output, axis=1, name='classes')
-
-            # Get checkpoint.
-            checkpoint_path = get_checkpoint(model, model_dir, default_models_dir)
-            print('Using checkpoint:', checkpoint_path)
-            # load checkpoint
-            tf_saver = tf.train.Saver()
-            tf_saver.restore(save_path=checkpoint_path, sess=tf_sess)
-
-            # freeze graph
-            frozen_graph = tf.graph_util.convert_variables_to_constants(
-                tf_sess,
-                tf_sess.graph_def,
-                output_node_names=['logits', 'classes']
-            )
-
-    return frozen_graph
-
-
-def get_checkpoint(model, model_dir=None, default_models_dir='.'):
-    """Get the checkpoint. User may provide their own checkpoint via model_dir.
-    If model_dir is None, attempts to download the checkpoint using url property
-    from model definition (see get_netdef()). default_models_dir/model is first
-    checked to see if the checkpoint was already downloaded. If not, the
-    checkpoint will be downloaded from the url.
-    model: string, the model name (see NETS table)
-    model_dir: string, optional user provided checkpoint location
-    default_models_dir: string, the directory where files are downloaded to
-    returns: string, path to the checkpoint file containing trained model params
-    """
-    # User has provided a checkpoint
-    if model_dir:
-        checkpoint_path = find_checkpoint_in_dir(model_dir)
-        if not checkpoint_path:
-            print('No checkpoint was found in', model_dir)
-            exit(1)
-        return checkpoint_path
-
-    # User has not provided a checkpoint. We need to download one. First check
-    # if checkpoint was already downloaded and stored in default_models_dir.
-    model_dir = os.path.join(default_models_dir, model)
-    checkpoint_path = find_checkpoint_in_dir(model_dir)
-    if checkpoint_path:
-        return checkpoint_path
-
-    # Checkpoint has not yet been downloaded. Download checkpoint if model has
-    # defined a URL.
-    if get_netdef(model).url:
-        download_checkpoint(model, model_dir)
-        return find_checkpoint_in_dir(model_dir)
-
-    print('No model_dir was provided and the model does not define a download' \
-          ' URL.')
-    exit(1)
-
-
-def find_checkpoint_in_dir(model_dir):
-    # tf.train.latest_checkpoint will find checkpoints if a 'checkpoint' file is
-    # present in the directory.
-    checkpoint_path = tf.train.latest_checkpoint(model_dir)
-    if checkpoint_path:
-        return checkpoint_path
-
-    # tf.train.latest_checkpoint did not find anything. Find .ckpt file
-    # manually.
-    files = glob.glob(os.path.join(model_dir, '*.ckpt*'))
-    if len(files) == 0:
-        return None
-    # Use last file for consistency if more than one (may not actually be
-    # "latest").
-    checkpoint_path = sorted(files)[-1]
-    # Trim after .ckpt-* segment. For example:
-    # model.ckpt-257706.data-00000-of-00002 -> model.ckpt-257706
-    parts = checkpoint_path.split('.')
-    ckpt_index = [i for i in range(len(parts)) if 'ckpt' in parts[i]][0]
-    checkpoint_path = '.'.join(parts[:ckpt_index+1])
-    return checkpoint_path
-
-
-def download_checkpoint(model, destination_path):
-    #copy files from source to destination (without any directories)
-    def copy_files(source, destination):
-        try:
-            shutil.copy2(source, destination)
-        except (OSError, IOError) as e:
-            pass
-        except shutil.Error as e:
-            pass
-
-    # Download and extract checkpoints if they don't exist.
-    if not os.path.exists(destination_path):
-        # Make directories.
-        os.makedirs(destination_path)
-        # Download archive.
-        archive_path = os.path.join(destination_path,
-                                    os.path.basename(get_netdef(model).url))
-        subprocess.check_call(['wget', '--no-check-certificate', '-q',
-                               get_netdef(model).url, '-O', archive_path])
-        # Extract.
-        subprocess.check_call(['tar', '-xzf', archive_path, '-C',
-                               destination_path])
-        # Move checkpoints out of archive sub directories into destination_path
-        if get_netdef(model).model_dir_in_archive:
-            source_files = os.path.join(destination_path,
-                                        get_netdef(model).model_dir_in_archive,
-                                        '*')
-            for f in glob.glob(source_files):
-                copy_files(f, destination_path)
-
-
 def get_frozen_graph(
     model,
-    model_dir=None,
+    model_path=None,
     use_trt=False,
     engine_dir=None,
     use_dynamic_op=False,
@@ -551,7 +373,7 @@ def get_frozen_graph(
     # Load from pb file if frozen graph was already created and cached
     if cache:
         # Graph must match the model, TRT mode, precision, and batch size
-        prebuilt_graph_path = FLAGS.cache #"graphs/frozen_graph_%s_%d_%s_%d.pb" % (model, int(use_trt), precision, batch_size)
+        prebuilt_graph_path = "graphs/frozen_graph_%s_%d_%s_%d.pb" % (model, int(use_trt), precision, batch_size)
         if os.path.isfile(prebuilt_graph_path):
             print('Loading cached frozen graph from \'%s\'' % prebuilt_graph_path)
             start_time = time.time()
@@ -564,8 +386,17 @@ def get_frozen_graph(
             graph_sizes['loaded_frozen_graph'] = len(frozen_graph.SerializeToString())
             return frozen_graph, num_nodes, times, graph_sizes
 
-    # Build graph and load weights
-    frozen_graph = build_classification_graph(model, model_dir, default_models_dir)
+    # Load model from frozen graph
+    with tf.io.gfile.GFile(model_path, 'rb') as f:
+            frozen_graph = tf.compat.v1.GraphDef()
+            frozen_graph.ParseFromString(f.read())
+
+    # Then, we import the graph_def into a new Graph and returns it 
+    with tf.Graph().as_default() as graph:
+        # The name var will prefix every op/nodes in your graph
+        # Since we load everything in a new graph, this is not needed
+        tf.import_graph_def(frozen_graph, name="prefix")
+    
     num_nodes['native_tf'] = len(frozen_graph.node)
     graph_sizes['native_tf'] = len(frozen_graph.SerializeToString())
 
@@ -640,7 +471,7 @@ def get_frozen_graph(
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Evaluate model')
-    parser.add_argument('--model', type=str.lower, default='inception_v4',
+    parser.add_argument('--model', type=str.lower, default='inception_v3',
         choices=['mobilenet_v1', 'mobilenet_v2', 'nasnet_mobile', 'nasnet_large',
                  'resnet_v1_50', 'resnet_v2_50', 'resnet_v2_152', 'vgg_16', 'vgg_19',
                  'inception_v3', 'inception_v4'],
@@ -653,9 +484,6 @@ if __name__ == '__main__':
         help='Directory containing model checkpoint. If not provided, a ' \
              'checkpoint may be downloaded automatically and stored in ' \
              '"{--default_models_dir}/{--model}" for future use.')
-    parser.add_argument('--default_models_dir', type=str, default='./data',
-        help='Directory where downloaded model checkpoints will be stored and ' \
-             'loaded from if --model_dir is not provided.')
     parser.add_argument('--use_trt', action='store_true',
         help='If set, the graph will be converted to a TensorRT graph.')
     parser.add_argument('--engine_dir', type=str, default=None,
@@ -708,7 +536,7 @@ if __name__ == '__main__':
         raise ValueError("--num_iterations is required for --use_synthetic")
 
     def get_files(data_dir, filename_pattern):
-        if data_dir == None:
+        if data_dir is None:
             return []
         files = tf.gfile.Glob(os.path.join(data_dir, filename_pattern))
         if files == []:
@@ -720,12 +548,12 @@ if __name__ == '__main__':
     data_files = []
     if not args.use_synthetic:
         if args.mode == "validation":
-            data_files = get_files(args.data_dir, 'validation*')
+            data_files = get_files(args.data_dir, 'tfm_clf_val.record*')
         elif args.mode == "benchmark":
             data_files = [os.path.join(path, name) for path, _, files in os.walk(args.data_dir) for name in files]
         else:
             raise ValueError("Mode must be either 'validation' or 'benchamark'")
-        calib_files = get_files(args.calib_data_dir, 'train*')
+        calib_files = get_files(args.calib_data_dir, 'tfm_clf_train.record*')
 
     frozen_graph, num_nodes, times, graph_sizes = get_frozen_graph(
         model=args.model,
@@ -747,12 +575,12 @@ if __name__ == '__main__':
         for k, v in sorted(input_dict.items()):
             headline = '{}({}): '.format(str, k) if str else '{}: '.format(k)
             v = v * scale if scale else v
-            print('{}{}'.format(headline, '%.1f'%v if type(v)==float else v))
+            print('{}{}'.format(headline, '%.1f'%v if type(v) == float else v))
 
     print_dict(vars(args))
     print("url: " + get_netdef(args.model).get_url())
     print_dict(num_nodes, str='num_nodes')
-    print_dict(graph_sizes, str='graph_size(MB)', scale=1./(1<<20))
+    print_dict(graph_sizes, str='graph_size(MB)', scale=1./(1 << 20))
     print_dict(times, str='time(s)')
 
     # Evaluate model

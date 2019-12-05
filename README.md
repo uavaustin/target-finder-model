@@ -2,6 +2,10 @@
 
 > Related scripts and models for [target-finder](https://github.com/uavaustin/target-finder).
 
+[![Actions Status | Build](https://github.com/uavaustin/target-finder-model/workflows/main/badge.svg)](https://github.com/uavaustin/target-finder-model/actions)
+
+[![Coverage Status](https://coveralls.io/repos/github/uavaustin/target-finder-model/badge.svg?branch=master)](https://coveralls.io/github/uavaustin/target-finder-model?branch=master)
+
 ## Developer Instructions
 
 ### Install
@@ -34,9 +38,9 @@ python scripts_tf/optimize_clf.py \
     --model inception_v3 \
     --data_dir model_data/clf_records \
     --calib_data_dir model_data/clf_records \
-    --model_dir models/inception_v3_2016_08_28/checkpoints \
+    --model_path path/to/frozen_model.pb \
     --mode validation \
-    --cache models/models/inception_v3_2016_08_28/optimized_clf_int8.pb\
+    --save_path path/to/optimized_clf_int8.pb \
     --use_trt \
     --precision INT8
 ```
@@ -85,7 +89,4 @@ python scripts_tf/optimize.py --frozen_model=/path/to/frozen_inference_graph.pb 
 * `Dockerfiles/` Docker resources for creating a prebuilt ML environment
 * `target_finder_model/` The package that will be exported to [target-finder](https://github.com/uavaustin/target-finder) when a release is created.
 
-
 ## Testing
-
-`TODO: Write tests`

@@ -1,25 +1,20 @@
-"""
-Object detection inference API
-"""
 import os
 import time
-# Limit TF logs: 
+# Limit TF logs:
 # see https://stackoverflow.com/questions/35911252/disable-tensorflow-debugging-information
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 import tensorflow as tf
-
 from pkg_resources import resource_filename
 from dataclasses import dataclass
 import nets.nets_factory
-
-
 from PIL import Image
 import numpy as np
 
-from . import CLASSES, OD_MODEL_PATH, CLF_MODEL_PATH
+from . import OD_CLASSES, OD_MODEL_PATH, CLF_MODEL_PATH
+
 
 class DetectionModel:
-    
+
     def __init__(self, model_path=None):
         # Choose between default and custom model
         if model_path is None:
@@ -43,11 +38,14 @@ class DetectionModel:
 
     def predict(self, input_data, batch_size=4):
 
-        if isinstance(input_data, list):
+        if len(input_data) == 0:
+            return []
+        elif isinstance(input_data, list):
             # allow list of paths as input
             input_data = np.array([np.asarray(fn) for fn in input_data])
+        else:
+            pass
 
-        #assert len(input_data.shape) == 4  # (num_imgs, height, width, channel)
         num_imgs, im_width, im_height, _ = input_data.shape
 
         output_tensors = [
@@ -58,18 +56,20 @@ class DetectionModel:
         ]
 
         results = []
-        for idx in range(batch_size, num_imgs, batch_size):
+        if num_imgs < batch_size:
+            batch_size = num_imgs
 
-            [nums, obj_types, boxes, scores] = self.sess.run(output_tensors, feed_dict={
-                'image_tensor:0': input_data[(idx - batch_size):idx]
-            })
+        for idx in range(batch_size, num_imgs + batch_size, batch_size):
+
+            [nums, obj_types, boxes, scores] = self.sess.run(output_tensors,
+                feed_dict={'image_tensor:0': input_data[(idx - batch_size):idx]})
 
             for i in range(batch_size):
                 image_detects = []
                 for k in range(int(nums[i])):
                     obj = DetectedObject()
                     obj.class_idx = int(obj_types[i][k])
-                    obj.class_name = CLASSES[obj.class_idx - 1]
+                    obj.class_name = OD_CLASSES[obj.class_idx - 1]
                     obj.confidence = scores[i][k]
                     bbox = boxes[i][k]
                     obj.x = int(bbox[0] * im_width)
@@ -83,7 +83,7 @@ class DetectionModel:
 
 
 class ClfModel:
-    
+
     def __init__(self, model_path=None):
         if model_path is None:
             self.model_path = CLF_MODEL_PATH
@@ -96,7 +96,7 @@ class ClfModel:
             graph_def = tf.compat.v1.GraphDef()
             graph_def.ParseFromString(f.read())
 
-        # Then, we import the graph_def into a new Graph and returns it 
+        # Then, we import the graph_def into a new Graph and returns it
         with tf.Graph().as_default() as graph:
             # The name var will prefix every op/nodes in your graph
             # Since we load everything in a new graph, this is not needed
@@ -106,26 +106,33 @@ class ClfModel:
         tf_config.gpu_options.allow_growth = True
 
         self.graph = tf.compat.v1.get_default_graph()
-        self.sess = tf.compat.v1.Session(graph = graph, config=tf_config)
-        
+        self.sess = tf.compat.v1.Session(graph=graph, config=tf_config)
+
         self.tf_output = 'prefix/classes:0'
 
     def predict(self, input_data, batch_size=40):
 
-        if isinstance(input_data, list):
+        if len(input_data) == 0:
+            return []
+        elif isinstance(input_data, list):
             # allow list of paths as input
-            input_data = np.array([np.asarray(fn) for fn in input_data])
+            input_data = np.array([np.asarray(fn)/255 for fn in input_data])
+        else:
+            pass
 
+        results = []
         assert len(input_data.shape) == 4  # (batch_size, height, width, channel)
         num_imgs, im_width, im_height, _ = input_data.shape
 
-        for idx in range(batch_size, num_imgs, batch_size):
+        if num_imgs < batch_size:
+            batch_size = num_imgs
 
+        for idx in range(batch_size, num_imgs + batch_size, batch_size):
+            
             [preds] = self.sess.run([self.tf_output], feed_dict={
                 'prefix/input:0': input_data[(idx - batch_size):idx]
             })
-            
-            results = []
+
             for i in range(batch_size):
                 obj = DetectedObject()
                 obj.class_idx = preds[i]

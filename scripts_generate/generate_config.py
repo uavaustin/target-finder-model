@@ -1,14 +1,13 @@
 """
 Contains configuration settings for generation.
-
-#TODO Replace w/config.yaml
 """
 
 import os
+import yaml
 
-with open(os.path.join(os.path.dirname(__file__), 
-        os.pardir, 'config.yaml'), 'r') as stream:
-    import yaml
+with open(os.path.join(os.path.dirname(__file__),
+                       os.pardir, 'config.yaml'), 'r') as stream:
+
     config = yaml.safe_load(stream)
 
 
@@ -111,24 +110,24 @@ ALPHA_FONTS = [
     os.path.join(ALPHA_FONT_DIR, 'News_Cycle', 'NewsCycle-Bold.ttf')
 ]
 
-YOLO_CLASSES = SHAPE_TYPES + ALPHAS
+OD_CLASSES = SHAPE_TYPES + ALPHAS
 
 # [Model Dimensions]
 FULL_SIZE = (
-    config['inputs']['full_image']['width'], 
+    config['inputs']['full_image']['width'],
     config['inputs']['full_image']['height']
 )
 CROP_SIZE = (
-    config['inputs']['cropping']['width'], 
+    config['inputs']['cropping']['width'],
     config['inputs']['cropping']['height']
 )
 CROP_OVERLAP = config['inputs']['cropping']['overlap']
 DETECTOR_SIZE = (
-    config['inputs']['detector']['width'], 
+    config['inputs']['detector']['width'],
     config['inputs']['detector']['height']
 )
 PRECLF_SIZE = (
-    config['inputs']['preclf']['width'], 
+    config['inputs']['preclf']['width'],
     config['inputs']['preclf']['height']
 )
 
