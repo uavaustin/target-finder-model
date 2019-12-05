@@ -9,20 +9,21 @@ MOUNT_DIR := /
 
 CUR_DIR := $(shell pwd)
 
-.PHONY: all clean
-all: image
+.PHONY: all 
+all: tf1 test
 
 .PHONY: tf1
 tf1:
-	docker build -t $(IMAGE_NAME):tf1 -f Dockerfile.tf1 $(DOCKERFLAGS) .
-
+	docker build -t $(IMAGE_NAME):tf1 -f Dockerfile.tf1 $(DOCKERFLAGS) . 
+	
 .PHONY: tf2
 tf2:
 	docker build -t $(IMAGE_NAME):tf2 -f Dockerfile.tf2 $(DOCKERFLAGS) .
 
-.PHONY: test-build
-test-build:
-	cd .. && docker build -t $(IMAGE_NAME):test -f Dockerfiles/Dockerfile.test $(DOCKERFLAGS) .
+.PHONY: test
+test:
+	docker build -t $(IMAGE_NAME):test -f Dockerfile.test $(DOCKERFLAGS) ..
+	docker run -it --rm $(IMAGE_NAME):test
 
 .PHONY: run
 run:
@@ -31,7 +32,3 @@ run:
 .PHONY: test-run
 test-run:
 	docker run -ti $(IMAGE_NAME):test /bin/bash
-
-.PHONY: clean
-clean:
-	docker rmi --force $(IMAGE_NAME):$(IMAGE_TAG)

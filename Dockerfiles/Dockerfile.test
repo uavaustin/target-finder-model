@@ -1,9 +1,7 @@
-FROM uavaustin/target-finder-model-env:latest
+FROM uavaustin/target-finder-model-env:tf1
 
-WORKDIR /host/mounted/
+WORKDIR /test
 
 COPY . .
 
-RUN mv /host/mounted/Dockerfiles/entrypoint.sh /host/mounted/entrypoint.sh
-
-ENTRYPOINT ["/host/mounted/entrypoint.sh"]
+CMD python scripts_generate/build.py && python scripts_tf/create_tf_records.py
