@@ -46,12 +46,12 @@ jobs:
         name: tf-records
         path: model_data/records
 
-- name: Coveralls Parallel
-      uses: coverallsapp/github-action@master
-      with:
-        github-token: ${{ secrets.COVERALLS_TOKEN }}
-        parallel: true
-        path-to-lcov: .coverage # optional (default value)
+    - name: Coveralls Parallel
+          uses: coverallsapp/github-action@master
+          with:
+            github-token: ${{ secrets.COVERALLS_TOKEN }}
+            parallel: true
+            path-to-lcov: .coverage # optional (default value)
 
     - name: Coveralls Finished
       uses: coverallsapp/github-action@master
