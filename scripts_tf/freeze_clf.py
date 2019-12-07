@@ -4,14 +4,18 @@ TODO Adapt script for other classifiers
 """
 import os
 import glob
-import tensorflow as tf 
-import nets.nets_factory  #models/research/slim
+import tensorflow as tf
+import nets.nets_factory  # models/research/slim
 import tensorflow.contrib.slim as slim
 from preprocessing import inception_preprocessing
 
 flags = tf.app.flags
-tf.flags.DEFINE_string('ckpt_dir', '','Directory containing model ckpts')
-tf.flags.DEFINE_string('output_path', 'models/clf/frozen_clf.pb', 'Output model path')
+tf.flags.DEFINE_string('ckpt_dir',
+                       '',
+                       'Directory containing model ckpts')
+tf.flags.DEFINE_string('output_path',
+                       'models/clf/frozen_clf.pb',
+                       'Output model path')
 FLAGS = flags.FLAGS
 
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.INFO)
@@ -29,12 +33,13 @@ class NetDef(object):
         model_fn to build graph.
     postprocess: Postprocessing function on predictions.
     model_fn: Function to build graph if slim=False
-    num_classes: Number of output classes in model. Background class will be
-        automatically adjusted for if num_classes is 1001.
+    num_classes: Number of output classes in model.
     """
+
     def __init__(self, name, url=None, model_dir_in_archive=None,
-                checkpoint_name=None, preprocess='inception',
-            input_size=299, slim=True, postprocess=tf.nn.softmax, model_fn=None, num_classes=2):
+                 checkpoint_name=None, preprocess='inception',
+                 input_size=299, slim=True, postprocess=tf.nn.softmax,
+                 model_fn=None, num_classes=2):
         self.name = name
         self.url = url
         self.model_dir_in_archive = model_dir_in_archive
@@ -56,16 +61,13 @@ class NetDef(object):
     def get_num_classes(self):
         return self.num_classes
 
+
 def get_checkpoint(model, model_dir):
     """Get the checkpoint. User may provide their own checkpoint via model_dir.
-    If model_dir is None, attempts to download the checkpoint using url property
-    from model definition (see get_netdef()). default_models_dir/model is first
-    checked to see if the checkpoint was already downloaded. If not, the
-    checkpoint will be downloaded from the url.
     model: string, the model name (see NETS table)
     model_dir: string, optional user provided checkpoint location
     default_models_dir: string, the directory where files are downloaded to
-    returns: string, path to the checkpoint file containing trained model params
+    returns: string, path to the checkpoint file containing model params
     """
     # User has provided a checkpoint
     if model_dir:
@@ -75,9 +77,11 @@ def get_checkpoint(model, model_dir):
             exit(1)
         return checkpoint_path
 
+
 def find_checkpoint_in_dir(model_dir):
-    # tf.train.latest_checkpoint will find checkpoints if a 'checkpoint' file is
-    # present in the directory.
+    """tf.train.latest_checkpoint will find checkpoints if
+    'checkpoint' file is present in the directory.
+    """
     checkpoint_path = tf.train.latest_checkpoint(model_dir)
     if checkpoint_path:
         return checkpoint_path
@@ -97,6 +101,7 @@ def find_checkpoint_in_dir(model_dir):
     checkpoint_path = '.'.join(parts[:ckpt_index+1])
     return checkpoint_path
 
+
 def freeze_model(model, ckpt_dir, output_path):
     """Builds an image classification model by name
     This function builds an image classification model given a model
@@ -109,17 +114,21 @@ def freeze_model(model, ckpt_dir, output_path):
     returns: tensorflow.GraphDef, the TensorRT compatible frozen graph
     """
 
-    netdef = NetDef(name='inception_v3',input_size=299, num_classes=2)
+    netdef = NetDef(name='inception_v3', input_size=299, num_classes=2)
     tf_config = tf.ConfigProto()
-    tf_config.gpu_options.per_process_gpu_memory_fraction=0.5
+    tf_config.gpu_options.per_process_gpu_memory_fraction = 0.5
 
     with tf.Graph().as_default() as tf_graph:
         with tf.Session(config=tf_config) as tf_sess:
-            tf_input = tf.placeholder(tf.float32, [None, netdef.input_height, netdef.input_width, 3], name='input')
+            tf_input = tf.placeholder(
+                tf.float32,
+                [None, netdef.input_height, netdef.input_width, 3],
+                name='input')
             if netdef.slim:
                 # TF Slim Model: get model function from nets_factory
-                network_fn = nets.nets_factory.get_network_fn(netdef.name, netdef.num_classes,
-                        is_training=False)
+                network_fn = nets.nets_factory.get_network_fn(
+                    netdef.name, netdef.num_classes,
+                    is_training=False)
                 tf_net, tf_end_points = network_fn(tf_input)
             else:
                 # TF Official Model: get model function from NETS
@@ -145,7 +154,7 @@ def freeze_model(model, ckpt_dir, output_path):
     with tf.io.gfile.GFile(output_path, "wb") as f:
         f.write(frozen_graph.SerializeToString())
 
-    return 
+    return
 
 
 if __name__ == '__main__':

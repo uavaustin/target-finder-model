@@ -1,4 +1,5 @@
-# Adapted from https://github.com/tensorflow/models/blob/master/research/object_detection/dataset_tools/create_coco_tf_record.py
+# Adapted from:
+# https://github.com/tensorflow/models/blob/master/research/object_detection/dataset_tools/create_coco_tf_record.py
 # Copyright 2017 The TensorFlow Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -32,7 +33,7 @@ import tensorflow as tf
 from object_detection.dataset_tools import tf_record_creation_util
 from object_detection.utils import dataset_util
 
-with open(os.path.join(os.path.dirname(__file__), 
+with open(os.path.join(os.path.dirname(__file__),
         os.pardir, 'config.yaml'), 'r') as stream:
     import yaml
     config = yaml.safe_load(stream)
@@ -45,10 +46,10 @@ FORMAT = config['generate']['img_ext']
 flags = tf.app.flags
 tf.flags.DEFINE_string('image_dir', 'scripts_generate/data',
                        'Training image directory.')
-tf.flags.DEFINE_string('output_dir', 'model_data/records', 'Output data directory.')
-tf.flags.DEFINE_bool('clf','False',"Create classification records")
-tf.flags.DEFINE_bool('det','False',"Create detection records")
-tf.flags.DEFINE_bool('ori','False',"Create orientation records")
+tf.flags.DEFINE_string('output_dir', 'model_data/records',
+                       'Output data directory.')
+tf.flags.DEFINE_bool('clf', 'False', "Create classification records")
+tf.flags.DEFINE_bool('det', 'False', "Create detection records")
 
 FLAGS = flags.FLAGS
 
@@ -56,142 +57,146 @@ tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.INFO)
 
 
 def parse_annotation_data(data):
-  labels = []
-  data = data.replace('\r', '').strip()
-  for line in data.split('\n'):
-    labels.append([float(val) for val in line.split(' ')])
-  return labels
+    labels = []
+    data = data.replace('\r', '').strip()
+    for line in data.split('\n'):
+        labels.append([float(val) for val in line.split(' ')])
+    return labels
 
 
 def create_tf_example(image_path_prefix, image_dir):
-  """Converts image and txt annotations to a tf.Example proto.
-  """
-  image_id = os.path.basename(image_path_prefix)
-  filename = image_path_prefix + '.' + FORMAT
-  with tf.io.gfile.GFile(filename, 'rb') as fid:
-      encoded_img = fid.read()
-  encoded_img_io = io.BytesIO(encoded_img)
+    """Converts image and txt annotations to a tf.Example proto.
+    """
+    image_id = os.path.basename(image_path_prefix)
+    filename = image_path_prefix + '.' + FORMAT
+    with tf.io.gfile.GFile(filename, 'rb') as fid:
+        encoded_img = fid.read()
+    encoded_img_io = io.BytesIO(encoded_img)
 
-  image = Image.open(encoded_img_io)
-  image_width, image_height = image.size
+    image = Image.open(encoded_img_io)
+    image_width, image_height = image.size
 
-  annotations = []
-  has_target = 1
+    annotations = []
+    has_target = 1
 
-  if os.path.exists(image_path_prefix + '.txt'):
-    # For object detection
-    with open(image_path_prefix + '.txt', 'r') as annotations_fp:
-      # TODO update for w/new file format
-      annotations = parse_annotation_data(annotations_fp.read())
-  else:
-    # For clf
-    has_target = (0 if 'target' not in image_path_prefix else 1)
+    if os.path.exists(image_path_prefix + '.txt'):
+        # For object detection
+        with open(image_path_prefix + '.txt', 'r') as annotations_fp:
+            # TODO update for w/new file format
+            annotations = parse_annotation_data(annotations_fp.read())
+    else:
+        # For clf
+        has_target = (0 if 'target' not in image_path_prefix else 1)
 
-  xmin = []
-  xmax = []
-  ymin = []
-  ymax = []
-  category_names = []
-  category_ids = []
-  
-  for idx, (obj_id, x_n, y_n, w_n, h_n) in enumerate(annotations):
+    xmin = []
+    xmax = []
+    ymin = []
+    ymax = []
+    category_names = []
+    category_ids = []
 
-    xmin.append(x_n)
-    xmax.append(x_n + w_n)
-    ymin.append(y_n)
-    ymax.append(y_n + h_n)
+    for idx, (obj_id, x_n, y_n, w_n, h_n) in enumerate(annotations):
 
-    category_id = int(obj_id)
-    category_ids.append(category_id + 1)
-    category_names.append(CLASSES[category_id].encode('utf8'))
+        xmin.append(x_n)
+        xmax.append(x_n + w_n)
+        ymin.append(y_n)
+        ymax.append(y_n + h_n)
 
-  feature_dict = {
-      'image/height':
-          dataset_util.int64_feature(image_height),
-      'image/width':
-          dataset_util.int64_feature(image_width),
-      'image/filename':
-          dataset_util.bytes_feature(filename.encode('utf8')),
-      'image/source_id':
-          dataset_util.bytes_feature(image_id.encode('utf8')),
-      'image/encoded':
-          dataset_util.bytes_feature(encoded_img),
-      'image/colorspace': 
-          dataset_util.bytes_feature('RGB'.encode('utf8')),
-      'image/format':
-          dataset_util.bytes_feature(FORMAT.encode('utf8')),
-      'image/object/bbox/xmin':
-          dataset_util.float_list_feature(xmin),
-      'image/object/bbox/xmax':
-          dataset_util.float_list_feature(xmax),
-      'image/object/bbox/ymin':
-          dataset_util.float_list_feature(ymin),
-      'image/object/bbox/ymax':
-          dataset_util.float_list_feature(ymax),
-      'image/object/class/text':
-          dataset_util.bytes_list_feature(category_names),
-      'image/object/class/label': 
-          dataset_util.int64_list_feature(category_ids),
-      'image/class/label':
-          dataset_util.int64_feature(has_target),
-      'image/class/text':
-          dataset_util.bytes_feature(CLF_CLASSES[has_target].encode('utf8'))
-  }
-  example = tf.train.Example(features=tf.train.Features(feature=feature_dict))
-  return example
+        category_id = int(obj_id)
+        category_ids.append(category_id + 1)
+        category_names.append(CLASSES[category_id].encode('utf8'))
+
+    feature_dict = {
+        'image/height':
+            dataset_util.int64_feature(image_height),
+        'image/width':
+            dataset_util.int64_feature(image_width),
+        'image/filename':
+            dataset_util.bytes_feature(filename.encode('utf8')),
+        'image/source_id':
+            dataset_util.bytes_feature(image_id.encode('utf8')),
+        'image/encoded':
+            dataset_util.bytes_feature(encoded_img),
+        'image/colorspace':
+            dataset_util.bytes_feature('RGB'.encode('utf8')),
+        'image/format':
+            dataset_util.bytes_feature(FORMAT.encode('utf8')),
+        'image/object/bbox/xmin':
+            dataset_util.float_list_feature(xmin),
+        'image/object/bbox/xmax':
+            dataset_util.float_list_feature(xmax),
+        'image/object/bbox/ymin':
+            dataset_util.float_list_feature(ymin),
+        'image/object/bbox/ymax':
+            dataset_util.float_list_feature(ymax),
+        'image/object/class/text':
+            dataset_util.bytes_list_feature(category_names),
+        'image/object/class/label':
+            dataset_util.int64_list_feature(category_ids),
+        'image/class/label':
+            dataset_util.int64_feature(has_target),
+        'image/class/text':
+            dataset_util.bytes_feature(CLF_CLASSES[has_target].encode('utf8'))
+    }
+    example = tf.train.Example(
+        features=tf.train.Features(feature=feature_dict))
+
+    return example
 
 
 def _create_tf_record_from_images(data_dir, output_path):
-  """Loads images generated by generate/*.py scripts and converts
-  them into tf records.
-  """
-  # Determine number of shards. Recommended ~2000 images per shard
+    """Loads images generated by generate/*.py scripts and converts
+    them into tf records.
+    """
+    # Determine number of shards. Recommended ~2000 images per shard
 
-  image_fns = glob.glob(os.path.join(data_dir, '*.' + FORMAT))
-  num_shards = 1 #len(image_fns) // 2000 + 1
+    image_fns = glob.glob(os.path.join(data_dir, '*.' + FORMAT))
+    len(image_fns) // 2000 + 1
 
-  with contextlib2.ExitStack() as tf_record_close_stack:
+    with contextlib2.ExitStack() as tf_record_close_stack:
 
-    output_tfrecords = tf_record_creation_util.open_sharded_output_tfrecords(
-        tf_record_close_stack, output_path, num_shards)
+        output_tfrecords = tf_record_creation_util.open_sharded_output_tfrecords(
+            tf_record_close_stack, output_path, num_shards)
 
-    for idx, image_fn in enumerate(image_fns):
-      if idx % 100 == 0:
-        tf.compat.v1.logging.info('On image %d of %d', idx, len(image_fns))
+        for idx, image_fn in enumerate(image_fns):
+            if idx % 100 == 0:
+                tf.compat.v1.logging.info('On image %d of %d', 
+                                          idx, len(image_fns))
 
-      image_path_prefix = image_fn.replace('.' + FORMAT, '')
-      tf_example = create_tf_example(image_path_prefix, data_dir)
-      shard_idx = idx % num_shards
-      output_tfrecords[shard_idx].write(tf_example.SerializeToString())
+        image_path_prefix = image_fn.replace('.' + FORMAT, '')
+        tf_example = create_tf_example(image_path_prefix, data_dir)
+        shard_idx = idx % num_shards
+        output_tfrecords[shard_idx].write(tf_example.SerializeToString())
+
 
 def main(_):
 
-  if not tf.io.gfile.isdir(FLAGS.output_dir):
-    tf.gfile.MakeDirs(FLAGS.output_dir)
-  
-  # If neither input supplied, do both det and clf
-  if not FLAGS.clf and not FLAGS.det:
-    FLAGS.clf = True
-    FLAGS.det = True
+    if not tf.io.gfile.isdir(FLAGS.output_dir):
+        tf.gfile.MakeDirs(FLAGS.output_dir)
+    
+    # If neither input supplied, do both det and clf
+    if not FLAGS.clf and not FLAGS.det:
+        FLAGS.clf = True
+        FLAGS.det = True
 
-  if FLAGS.det:
-    _create_tf_record_from_images(
-      os.path.join(FLAGS.image_dir, 'detector_train', 'images'),
-      os.path.join(FLAGS.output_dir, 'tfm_train.record'))
+    if FLAGS.det:
+        _create_tf_record_from_images(
+          os.path.join(FLAGS.image_dir, 'detector_train', 'images'),
+          os.path.join(FLAGS.output_dir, 'tfm_train.record'))
 
-    _create_tf_record_from_images(
-      os.path.join(FLAGS.image_dir, 'detector_val', 'images'),
-      os.path.join(FLAGS.output_dir, 'tfm_val.record'))
+        _create_tf_record_from_images(
+            os.path.join(FLAGS.image_dir, 'detector_val', 'images'),
+            os.path.join(FLAGS.output_dir, 'tfm_val.record'))
 
-  if FLAGS.clf:
-    _create_tf_record_from_images(
-      os.path.join(FLAGS.image_dir, 'clf_train', 'images'),
-      os.path.join(FLAGS.output_dir, 'tfm_clf_train.record'))
+    if FLAGS.clf:
+        _create_tf_record_from_images(
+            os.path.join(FLAGS.image_dir, 'clf_train', 'images'),
+            os.path.join(FLAGS.output_dir, 'tfm_clf_train.record'))
 
-    _create_tf_record_from_images(
-      os.path.join(FLAGS.image_dir, 'clf_val', 'images'),
-      os.path.join(FLAGS.output_dir, 'tfm_clf_val.record'))
+        _create_tf_record_from_images(
+            os.path.join(FLAGS.image_dir, 'clf_val', 'images'),
+            os.path.join(FLAGS.output_dir, 'tfm_clf_val.record'))
 
 
 if __name__ == '__main__':
-  tf.compat.v1.app.run()
+    tf.compat.v1.app.run()

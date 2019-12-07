@@ -2,7 +2,7 @@
 
 > Related scripts and models for [target-finder](https://github.com/uavaustin/target-finder).
 
-[![Actions Status | Build](https://github.com/uavaustin/target-finder-model/workflows/main/badge.svg)](https://github.com/uavaustin/target-finder-model/actions)
+[![Actions Status | Build](https://github.com/uavaustin/target-finder-model/workflows/target-finder-model/badge.svg)](https://github.com/uavaustin/target-finder-model/actions)
 
 [![Coverage Status](https://coveralls.io/repos/github/uavaustin/target-finder-model/badge.svg?branch=master)](https://coveralls.io/github/uavaustin/target-finder-model?branch=master)
 

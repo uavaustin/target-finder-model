@@ -10,7 +10,8 @@ from create_clf_data import create_clf_images as create_clf_data
 
 
 if __name__ == '__main__':
-
+    
+    print("Pulling assets")
     pull_all()
 
     print("Creating detection data.")
