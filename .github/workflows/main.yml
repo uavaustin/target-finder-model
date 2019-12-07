@@ -46,7 +46,7 @@ jobs:
         name: tf-records
         path: model_data/records
 
-- name: Coveralls Parallel
+    - name: Coveralls Parallel
       uses: coverallsapp/github-action@master
       with:
         github-token: ${{ secrets.COVERALLS_TOKEN }}
