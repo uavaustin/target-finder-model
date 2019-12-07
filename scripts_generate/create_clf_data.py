@@ -34,28 +34,29 @@ def create_clf_images(gen_type, num_gen, offset=0):
     blurs = _random_list(range(1, 3), num_gen)
 
     data_folder = 'detector_' + gen_type.split('_')[1]
-    images_dir = os.path.join(config.DATA_DIR, data_folder,'images/*' + str(config.IMAGE_EXT)) 
+    images_dir = os.path.join(config.DATA_DIR, data_folder, 'images/*' + str(config.IMAGE_EXT))
     image_names = _random_list(glob.glob(images_dir), num_gen)
     gen_types  = [gen_type] * num_gen
 
-    data = zip(numbers, backgrounds, flip_bg , mirror_bg, blurs, image_names, gen_types)
+    data = zip(numbers, backgrounds, flip_bg, mirror_bg, blurs, image_names, gen_types)
 
     with multiprocessing.Pool(None) as pool:
         processes = pool.imap_unordered(_single_clf_image, data)
         for i in tqdm(processes, total=num_gen):
             pass
-    
-    return 
+
+    return
+
 
 def _single_clf_image(data):
     """Crop detection image and augment clf image and save"""
-    number, background, flip_bg , mirror_bg, blur, shape_img, gen_type = data
+    number, background, flip_bg, mirror_bg, blur, shape_img, gen_type = data
 
     if flip_bg:
         background = ImageOps.flip(background)
     if mirror_bg:
         background = ImageOps.mirror(background)
-    
+
     background.filter(ImageFilter.GaussianBlur(blur))
     background = background.resize(config.PRECLF_SIZE)
 
@@ -63,12 +64,12 @@ def _single_clf_image(data):
     bkg_fn = os.path.join(data_path, 'background_{}.{}'.format(number, config.IMAGE_EXT))
     background.save(bkg_fn)
 
-    # Now resize image with shape 
+    # Now resize image with shape
     shape = Image.open(shape_img).resize(config.PRECLF_SIZE)
     shape_fn = os.path.join(data_path, 'target_{}.{}'.format(number, config.IMAGE_EXT))
     shape.save(shape_fn)
-    
-    return 
+
+    return
 
 
 if __name__ == "__main__":

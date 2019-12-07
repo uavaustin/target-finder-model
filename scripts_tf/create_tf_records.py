@@ -37,12 +37,7 @@ with open(os.path.join(os.path.dirname(__file__),
     import yaml
     config = yaml.safe_load(stream)
 
-CLASSES = {}
-i = 0
-for target in config['classes']['shapes']:
-  for alpha in  config['classes']['alphas']:
-    CLASSES[i] = '-'.join([target, alpha])
-    i += 1
+CLASSES = config['classes']['shapes'] + config['classes']['alphas']
 
 CLF_CLASSES = config['classes']['types']
 FORMAT = config['generate']['img_ext']

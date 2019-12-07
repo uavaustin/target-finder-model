@@ -2,6 +2,11 @@ FROM uavaustin/target-finder-model-env:tf1
 
 WORKDIR /test
 
+RUN pip3 install tox pycodestyle pytest pytest-cov coveralls
+
 COPY . .
 
-CMD python scripts_generate/build.py && python scripts_tf/create_tf_records.py
+RUN chmod +x Dockerfiles/entrypoint.sh
+RUN mv Dockerfiles/entrypoint.sh /usr/local/bin/entrypoint.sh
+
+ENTRYPOINT ["entrypoint.sh"]

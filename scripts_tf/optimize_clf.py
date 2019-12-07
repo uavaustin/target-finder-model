@@ -536,7 +536,7 @@ if __name__ == '__main__':
         raise ValueError("--num_iterations is required for --use_synthetic")
 
     def get_files(data_dir, filename_pattern):
-        if data_dir == None:
+        if data_dir is None:
             return []
         files = tf.gfile.Glob(os.path.join(data_dir, filename_pattern))
         if files == []:
@@ -575,12 +575,12 @@ if __name__ == '__main__':
         for k, v in sorted(input_dict.items()):
             headline = '{}({}): '.format(str, k) if str else '{}: '.format(k)
             v = v * scale if scale else v
-            print('{}{}'.format(headline, '%.1f'%v if type(v)==float else v))
+            print('{}{}'.format(headline, '%.1f'%v if type(v) == float else v))
 
     print_dict(vars(args))
     print("url: " + get_netdef(args.model).get_url())
     print_dict(num_nodes, str='num_nodes')
-    print_dict(graph_sizes, str='graph_size(MB)', scale=1./(1<<20))
+    print_dict(graph_sizes, str='graph_size(MB)', scale=1./(1 << 20))
     print_dict(times, str='time(s)')
 
     # Evaluate model

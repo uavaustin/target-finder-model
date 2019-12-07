@@ -3,14 +3,10 @@ DOCKERFLAGS :=
 
 IMAGE_NAME := uavaustin/target-finder-model-env
 
-IMAGE_TAG := latest
-
-MOUNT_DIR := /
-
 CUR_DIR := $(shell pwd)
 
 .PHONY: all 
-all: tf1 test
+all: tf1 test 
 
 .PHONY: tf1
 tf1:
@@ -22,13 +18,10 @@ tf2:
 
 .PHONY: test
 test:
-	docker build -t $(IMAGE_NAME):test -f Dockerfile.test $(DOCKERFLAGS) ..
-	docker run -it --rm $(IMAGE_NAME):test
+	docker build -t $(IMAGE_NAME):test -f Dockerfile.test $(DOCKERFLAGS) .. 
+	docker run --rm -v $(CUR_DIR)/../:/test $(IMAGE_NAME):test /bin/bash 
 
-.PHONY: run
-run:
-	docker run --runtime=nvidia -ti -v $(MOUNT_DIR):/host/mounted/ $(IMAGE_NAME):$(IMAGE_TAG) /bin/bash
-
-.PHONY: test-run
-test-run:
-	docker run -ti $(IMAGE_NAME):test /bin/bash
+.PHONY: clean
+clean:
+	docker rmi $(IMAGE_NAME):tf1
+	docker rmi $(IMAGE_NAME):test
