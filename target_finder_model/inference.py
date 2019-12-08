@@ -1,7 +1,6 @@
 import os
 import time
 # Limit TF logs:
-# see https://stackoverflow.com/questions/35911252/disable-tensorflow-debugging-information
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 import tensorflow as tf
 from pkg_resources import resource_filename
@@ -121,14 +120,14 @@ class ClfModel:
             pass
 
         results = []
-        assert len(input_data.shape) == 4  # (batch_size, height, width, channel)
+        assert len(input_data.shape) == 4  #(batch_size, h, w, channel)
         num_imgs, im_width, im_height, _ = input_data.shape
 
         if num_imgs < batch_size:
             batch_size = num_imgs
 
         for idx in range(batch_size, num_imgs + batch_size, batch_size):
-            
+
             [preds] = self.sess.run([self.tf_output], feed_dict={
                 'prefix/input:0': input_data[(idx - batch_size):idx]
             })

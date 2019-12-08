@@ -89,14 +89,20 @@ def input_fn(model, data_files, batch_size, use_synthetic, mode='validation', re
 
         if mode == 'validation':
             dataset = tf.data.TFRecordDataset(data_files)
-            dataset = dataset.apply(tf.contrib.data.map_and_batch(map_func=preprocess_fn, batch_size=batch_size, num_parallel_calls=8))
+            dataset = dataset.apply(
+                tf.contrib.data.map_and_batch(map_func=preprocess_fn, 
+                                              batch_size=batch_size, 
+                                              num_parallel_calls=8))
             dataset = dataset.prefetch(buffer_size=tf.contrib.data.AUTOTUNE)
             dataset = dataset.repeat(count=1)
             iterator = dataset.make_one_shot_iterator()
             features, labels = iterator.get_next()
         elif mode == 'benchmark':
             dataset = tf.data.Dataset.from_tensor_slices(data_files)
-            dataset = dataset.apply(tf.contrib.data.map_and_batch(map_func=preprocess_fn, batch_size=batch_size, num_parallel_calls=8))
+            dataset = dataset.apply(
+                tf.contrib.data.map_and_batch(map_func=preprocess_fn, 
+                                              batch_size=batch_size, 
+                                              num_parallel_calls=8))
             dataset = dataset.repeat(count=1)
             iterator = dataset.make_one_shot_iterator()
             features = iterator.get_next()
@@ -498,7 +504,7 @@ if __name__ == '__main__':
     parser.add_argument('--minimum_segment_size', type=int, default=2,
         help='Minimum number of TF ops in a TRT engine.')
     parser.add_argument('--num_iterations', type=int, default=None,
-        help='How many iterations(batches) to evaluate. If not supplied, the whole set will be evaluated.')
+        help='How many iterations(batches) to evaluate. If not, the whole set will be evaluated.')
     parser.add_argument('--display_every', type=int, default=100,
         help='Number of iterations executed between two consecutive display of metrics')
     parser.add_argument('--use_synthetic', action='store_true',
@@ -511,7 +517,7 @@ if __name__ == '__main__':
     parser.add_argument('--max_workspace_size', type=int, default=(1<<32),
         help='workspace size in bytes')
     parser.add_argument('--cache', default='models/', action='store_true',
-        help='If set, graphs will be saved to disk after conversion. If a converted graph is present on disk, it will be loaded instead of building the graph again.')
+        help='If set, graphs will be saved after conversion.')
     parser.add_argument('--mode', type=str.lower, choices=['validation', 'benchmark'], default='validation',
         help='Which mode to use (validation or benchmark)')
     parser.add_argument('--target_duration', type=int, default=None,

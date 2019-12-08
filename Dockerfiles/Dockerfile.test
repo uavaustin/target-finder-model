@@ -6,7 +6,14 @@ RUN pip3 install tox pycodestyle pytest pytest-cov coveralls
 
 COPY . .
 
+RUN wget https://bintray.com/uavaustin/target-finder-assets/download_file?file_path=models-v1.tar.gz -O models-v1.tar.gz \
+  && tar xvzf models-v1.tar.gz \
+  && mv models-v1/models/*.pb target_finder_model/data \
+  && rm models-v1.tar.gz \
+  && rm -r models-v1 
+
 RUN chmod +x Dockerfiles/entrypoint.sh
+
 RUN mv Dockerfiles/entrypoint.sh /usr/local/bin/entrypoint.sh
 
 ENTRYPOINT ["entrypoint.sh"]

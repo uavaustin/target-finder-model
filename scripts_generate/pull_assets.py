@@ -36,7 +36,7 @@ def _pull_asset(url):
 def _download_file(url):
     # Make sure the assets folder exists.
     os.makedirs(config.ASSETS_DIR, exist_ok=True)
-
+    
     asset = url.split('=')[-1]
     filename = os.path.join(config.ASSETS_DIR, asset)
 
