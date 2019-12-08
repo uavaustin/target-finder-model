@@ -151,7 +151,7 @@ def _create_tf_record_from_images(data_dir, output_path):
     # Determine number of shards. Recommended ~2000 images per shard
 
     image_fns = glob.glob(os.path.join(data_dir, '*.' + FORMAT))
-    len(image_fns) // 2000 + 1
+    num_shards = len(image_fns) // 2000 + 1
 
     with contextlib2.ExitStack() as tf_record_close_stack:
 
