@@ -1,4 +1,4 @@
-name: Target-Finder-Model
+name: target-finder-model
 
 on: ["push", "pull_request"]
 
