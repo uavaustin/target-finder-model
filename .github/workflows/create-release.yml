@@ -18,7 +18,7 @@ jobs:
           fetch-depth: 3
 
       - name: Create release tar
-        run: sh scripts/create_release.sh
+        run: ./scripts/create-release.sh
         
       - name: Create Release
         id: create_release
