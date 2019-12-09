@@ -5,7 +5,7 @@ on:
   # push to master.
   push:
     branches:
-      - tfrt-update
+      - master
 
 jobs:
   build:
