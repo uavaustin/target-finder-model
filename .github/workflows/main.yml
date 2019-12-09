@@ -38,7 +38,7 @@ jobs:
 
     - name: Build target-finder-model-env:test and test code
       working-directory: ./Dockerfiles
-      run: make test
+      run: make test DOCKERARGS=coveralls
 
     - name: Upload generated tf-records
       uses: actions/upload-artifact@master
