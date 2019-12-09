@@ -1,5 +1,5 @@
-# Flags for docker when building images, meant to be overridden
-DOCKERFLAGS :=
+# Args for when running docker test container, meant to be overridden
+DOCKERARGS :=
 
 IMAGE_NAME := uavaustin/target-finder-model-env
 
@@ -19,7 +19,7 @@ tf2:
 .PHONY: test
 test:
 	docker build -t $(IMAGE_NAME):test -f Dockerfile.test $(DOCKERFLAGS) .. 
-	docker run --rm -v $(CUR_DIR)/../:/host $(IMAGE_NAME):test /bin/bash 
+	docker run --rm -v $(CUR_DIR)/../:/host $(IMAGE_NAME):test $(DOCKERARGS)  /bin/bash 
 
 .PHONY: clean
 clean:
