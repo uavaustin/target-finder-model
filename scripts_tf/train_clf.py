@@ -260,8 +260,8 @@ def _configure_learning_rate(num_samples_per_epoch, global_step):
     # Note: when num_clones is > 1, this will actually have each clone to go
     # over each epoch FLAGS.num_epochs_per_decay times. This is different
     # behavior from sync replicas and is expected to produce different results.
-    decay_steps = int(num_samples_per_epoch * FLAGS.num_epochs_per_decay /
-                      FLAGS.batch_size)
+    decay_steps = int(num_samples_per_epoch * FLAGS.num_epochs_per_decay
+                      / FLAGS.batch_size)
 
     if FLAGS.sync_replicas:
         decay_steps /= FLAGS.replicas_to_aggregate

@@ -52,4 +52,4 @@ RUN cd tensorrt/tftrt/examples/image-classification \
 
 ENV PYTHONPATH=$PYTHONPATH:/sources/models/research:/sources/models/research/slim:/tensorrt/tftrt/examples/third_party/models
 
-WORKDIR /host/mounted
+WORKDIR /host

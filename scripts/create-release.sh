@@ -6,6 +6,7 @@ cd $(dirname "$0")
 model_link="https://bintray.com/uavaustin/target-finder-assets/download_file?file_path=models-v1.tar.gz"
 od_model="models-v1/models/det.pb"
 clf_model="models-v1/models/clf.pb"
+config="../config.yaml"
 
 wget "$model_link" -O models-v1.tar.gz
 tar xzf models-v1.tar.gz
@@ -27,6 +28,7 @@ echo "Staging files"
 mkdir -p "$tf_stage_dir""/target_finder_model/data/"
 cp "$od_model" "$tf_stage_dir""/target_finder_model/data/"
 cp "$clf_model" "$tf_stage_dir""/target_finder_model/data/"
+cp "$config" "$tf_stage_dir""/target_finder_model/data/"
 
 # Remove the downloaded models.
 echo "Remove downloaded placeholder models."

@@ -20,6 +20,7 @@ AFTER running create_full_images.py and create_detection_data.py:
 $ python scripts_tf/create_tf_records.py --image_dir ./scripts_generate/data
 """
 import hashlib
+import random
 import io
 import json
 import os
@@ -28,13 +29,14 @@ import numpy as np
 from PIL import Image
 import glob
 
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 import tensorflow as tf
 
 from object_detection.dataset_tools import tf_record_creation_util
 from object_detection.utils import dataset_util
 
 with open(os.path.join(os.path.dirname(__file__),
-        os.pardir, 'config.yaml'), 'r') as stream:
+          os.pardir, 'config.yaml'), 'r') as stream:
     import yaml
     config = yaml.safe_load(stream)
 
@@ -69,6 +71,7 @@ def create_tf_example(image_path_prefix, image_dir):
     """
     image_id = os.path.basename(image_path_prefix)
     filename = image_path_prefix + '.' + FORMAT
+
     with tf.io.gfile.GFile(filename, 'rb') as fid:
         encoded_img = fid.read()
     encoded_img_io = io.BytesIO(encoded_img)
@@ -82,7 +85,6 @@ def create_tf_example(image_path_prefix, image_dir):
     if os.path.exists(image_path_prefix + '.txt'):
         # For object detection
         with open(image_path_prefix + '.txt', 'r') as annotations_fp:
-            # TODO update for w/new file format
             annotations = parse_annotation_data(annotations_fp.read())
     else:
         # For clf
@@ -96,7 +98,7 @@ def create_tf_example(image_path_prefix, image_dir):
     category_ids = []
 
     for idx, (obj_id, x_n, y_n, w_n, h_n) in enumerate(annotations):
-
+        
         xmin.append(x_n)
         xmax.append(x_n + w_n)
         ymin.append(y_n)
@@ -149,31 +151,33 @@ def _create_tf_record_from_images(data_dir, output_path):
     them into tf records.
     """
     # Determine number of shards. Recommended ~2000 images per shard
-
     image_fns = glob.glob(os.path.join(data_dir, '*.' + FORMAT))
+    random.shuffle(image_fns)
+
     num_shards = len(image_fns) // 2000 + 1
 
     with contextlib2.ExitStack() as tf_record_close_stack:
 
-        output_tfrecords = tf_record_creation_util.open_sharded_output_tfrecords(
-            tf_record_close_stack, output_path, num_shards)
+        output_tfrecords = \
+            tf_record_creation_util.open_sharded_output_tfrecords(
+                tf_record_close_stack, output_path, num_shards)
 
         for idx, image_fn in enumerate(image_fns):
             if idx % 100 == 0:
-                tf.compat.v1.logging.info('On image %d of %d', 
+                tf.compat.v1.logging.info('On image %d of %d',
                                           idx, len(image_fns))
 
-        image_path_prefix = image_fn.replace('.' + FORMAT, '')
-        tf_example = create_tf_example(image_path_prefix, data_dir)
-        shard_idx = idx % num_shards
-        output_tfrecords[shard_idx].write(tf_example.SerializeToString())
+            image_path_prefix = image_fn.replace('.' + FORMAT, '')
+            tf_example = create_tf_example(image_path_prefix, data_dir)
+            shard_idx = idx % num_shards
+            output_tfrecords[shard_idx].write(tf_example.SerializeToString())
 
 
 def main(_):
 
     if not tf.io.gfile.isdir(FLAGS.output_dir):
         tf.gfile.MakeDirs(FLAGS.output_dir)
-    
+
     # If neither input supplied, do both det and clf
     if not FLAGS.clf and not FLAGS.det:
         FLAGS.clf = True
@@ -181,8 +185,8 @@ def main(_):
 
     if FLAGS.det:
         _create_tf_record_from_images(
-          os.path.join(FLAGS.image_dir, 'detector_train', 'images'),
-          os.path.join(FLAGS.output_dir, 'tfm_train.record'))
+            os.path.join(FLAGS.image_dir, 'detector_train', 'images'),
+            os.path.join(FLAGS.output_dir, 'tfm_train.record'))
 
         _create_tf_record_from_images(
             os.path.join(FLAGS.image_dir, 'detector_val', 'images'),

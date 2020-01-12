@@ -19,7 +19,7 @@ tf2:
 .PHONY: test
 test:
 	docker build -t $(IMAGE_NAME):test -f Dockerfile.test $(DOCKERFLAGS) .. 
-	docker run --rm -v $(CUR_DIR)/../:/host $(IMAGE_NAME):test $(DOCKERARGS)  /bin/bash 
+	docker run --rm -v $(CUR_DIR)/../:/host $(IMAGE_NAME):test $(DOCKERARGS) 
 
 .PHONY: clean
 clean:

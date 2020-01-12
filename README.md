@@ -32,22 +32,26 @@ objects = model.predict(['temp.jpg'])
 ```
 python scrips_tf/train_clf.py
 ```
+
+### Freeze Pre-Classifier 
+```
+python scripts_tf/freeze_clf.py 
+    --model_name inception_v3 \
+    --ckpt_dir models/MODEL_NAME/ckpts \
+    --output_dir models/MODEL_NAME/frozen 
+```
+
 ### Optimize Pre-Classifier from ckpt
 ```
 python scripts_tf/optimize_clf.py \
-    --model inception_v3 \
-    --data_dir model_data/clf_records \
-    --calib_data_dir model_data/clf_records \
-    --model_path path/to/frozen_model.pb \
+    --input_saved_model_dir models/MODEL_NAME/frozen  \
+    --output_saved_model_dir models/MODEL_NAME/optimizes \
+    --data_dir model_data/records \
     --mode validation \
-    --save_path path/to/optimized_clf_int8.pb \
     --use_trt \
-    --precision INT8
+    --precision FP16 
 ```
-### [Optional] Freeze Pre-Classifier 
-```
-python scripts_tf/freeze_clf.py --ckpt_dir=/folder/with/ckpts
-```
+
 
 ### Training Object Detector Model
 
@@ -72,7 +76,12 @@ python path/to/models/research/object_detection/export_inference_graph.py \
 ```
 ### Optimize Object Detector Model
 ```
-python scripts_tf/optimize.py --frozen_model=/path/to/frozen_inference_graph.pb --output_dir=/out/optimized_od.pb
+python scripts_tf/optimize_clf.py \
+    --input_saved_model_dir=models/MODEL_NAME/saved_model \
+    --output_saved_model_dir=models/MODEL_NAME/optimized \
+    --data_dir model_data/records/ \
+    --use_trt \
+    --precision FP16
 ```
 ## Repository Contents
 

@@ -1,5 +1,4 @@
 scripts_generate/data/**/*
 scripts_generate/data
-models/
-model_data/
+model_data/**/*
 scripts_generate/assets
