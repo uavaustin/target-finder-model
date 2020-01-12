@@ -43,11 +43,11 @@ classes:
     - 'target'
 inputs:
   full_image:
-    width: 4240
-    height: 2400
+    width: 1920
+    height: 1072
   cropping:
-    width: 400
-    height: 400
+    width: 300
+    height: 300
     overlap: 100
   detector:
     width: 608
@@ -56,16 +56,16 @@ inputs:
     width: 299
     height: 299
 generate:
-  backgrounds_version: v2
+  backgrounds_version: v4
   base_shapes_version: v1
   download_base_url: https://bintray.com/uavaustin/target-finder-assets/download_file?file_path=
   max_shapes_per_image: 2
   threads: 0
   delete_on_convert: false
   train_batch:
-    offset: 0
-    images: 10
+    offset: 60000
+    images: 60000
   eval_batch:
-    offset: 0
-    images: 2
+    offset: 6000
+    images: 6000
   img_ext: png

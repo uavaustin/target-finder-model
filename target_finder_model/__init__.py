@@ -21,6 +21,7 @@ OD_MODEL_PATH = resource_filename(__name__, os.path.join('data', 'det.pb'))
 
 # Model Classes
 OD_CLASSES = CONFIG['classes']['shapes'] + CONFIG['classes']['alphas']
+
 CLF_CLASSES = CONFIG['classes']['types']
 
 # Submodules

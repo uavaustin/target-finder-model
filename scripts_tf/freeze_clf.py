@@ -1,7 +1,7 @@
 """
-Script for freezing inception v3 model
-TODO Adapt script for other classifiers
+Script to freeze clf model as a frozen graph and for serving
 """
+
 import os
 import glob
 import tensorflow as tf
@@ -9,17 +9,28 @@ import nets.nets_factory  # models/research/slim
 import tensorflow.contrib.slim as slim
 from preprocessing import inception_preprocessing
 
+with open(os.path.join(os.path.dirname(__file__),
+          os.pardir, 'config.yaml'), 'r') as stream:
+    import yaml
+    config = yaml.safe_load(stream)
+
+
 flags = tf.app.flags
+tf.flags.DEFINE_string('model_name',
+                       'inception_v3',
+                        'Model name.')
 tf.flags.DEFINE_string('ckpt_dir',
                        '',
-                       'Directory containing model ckpts')
+                       'Directory containing model ckpts.')
 tf.flags.DEFINE_string('output_path',
-                       'models/clf/frozen_clf.pb',
-                       'Output model path')
+                       'models/clf/',
+                       'Output model dir.')
 FLAGS = flags.FLAGS
 
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.INFO)
 
+CLF_SIZE = config['inputs']['preclf']['width']
+CLF_CLASSES = config['classes']['types']
 
 class NetDef(object):
     """Contains definition of a model
@@ -38,8 +49,8 @@ class NetDef(object):
 
     def __init__(self, name, url=None, model_dir_in_archive=None,
                  checkpoint_name=None, preprocess='inception',
-                 input_size=299, slim=True, postprocess=tf.nn.softmax,
-                 model_fn=None, num_classes=2):
+                 input_size=CLF_SIZE, slim=True, postprocess=tf.nn.softmax,
+                 model_fn=None, num_classes=len(CLF_CLASSES)):
         self.name = name
         self.url = url
         self.model_dir_in_archive = model_dir_in_archive
@@ -114,7 +125,10 @@ def freeze_model(model, ckpt_dir, output_path):
     returns: tensorflow.GraphDef, the TensorRT compatible frozen graph
     """
 
-    netdef = NetDef(name='inception_v3', input_size=299, num_classes=2)
+    netdef = NetDef(name=model, 
+                    input_size=CLF_SIZE, 
+                    num_classes=len(CLF_CLASSES))
+                    
     tf_config = tf.ConfigProto()
     tf_config.gpu_options.per_process_gpu_memory_fraction = 0.5
 
@@ -151,7 +165,36 @@ def freeze_model(model, ckpt_dir, output_path):
                 tf_sess.graph_def,
                 output_node_names=['logits', 'classes']
             )
-    with tf.io.gfile.GFile(output_path, "wb") as f:
+            
+            # Save out the model for serving.
+            builder = tf.saved_model.builder.SavedModelBuilder(output_path)
+            
+            in_image = tf_sess.graph.get_tensor_by_name('input:0')
+            inputs = {'image': tf.saved_model.utils.build_tensor_info(in_image)}
+
+            out_classes = tf_sess.graph.get_tensor_by_name('classes:0')
+            outputs = {'prediction': 
+                        tf.saved_model.utils.build_tensor_info(out_classes)}
+
+            signature = tf.saved_model.signature_def_utils.build_signature_def(
+                inputs=inputs,
+                outputs=outputs,
+                method_name=tf.saved_model.signature_constants.PREDICT_METHOD_NAME)
+
+            builder.add_meta_graph_and_variables(
+                tf_sess, 
+                [tf.saved_model.tag_constants.SERVING],
+                signature_def_map={
+                    tf.saved_model.signature_constants
+                    .DEFAULT_SERVING_SIGNATURE_DEF_KEY: 
+                    signature,
+                },
+                #legacy_init_op=legacy_init_op
+                )
+            builder.save()
+  
+    frozen_graph_path = os.path.join(output_path, 'frozen_clf.pb')
+    with tf.io.gfile.GFile(frozen_graph_path, "wb") as f:
         f.write(frozen_graph.SerializeToString())
 
     return
@@ -164,4 +207,4 @@ if __name__ == '__main__':
     if not tf.io.gfile.isdir(os.path.dirname(FLAGS.output_path)):
         tf.gfile.MakeDirs(os.path.dirname(FLAGS.output_path))
 
-    freeze_model('inception_v3', FLAGS.ckpt_dir, FLAGS.output_path)
+    freeze_model(FLAGS.model_name, FLAGS.ckpt_dir, FLAGS.output_path)

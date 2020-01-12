@@ -1,1350 +1,185 @@
 item {
  id: 1
- name: 'circle-A'
+ name: 'circle'
 }
 
 item {
  id: 2
- name: 'circle-B'
+ name: 'cross'
 }
 
 item {
  id: 3
- name: 'circle-C'
+ name: 'pentagon'
 }
 
 item {
  id: 4
- name: 'circle-D'
+ name: 'quarter-circle'
 }
 
 item {
  id: 5
- name: 'circle-E'
+ name: 'rectangle'
 }
 
 item {
  id: 6
- name: 'circle-F'
+ name: 'semicircle'
 }
 
 item {
  id: 7
- name: 'circle-G'
+ name: 'square'
 }
 
 item {
  id: 8
- name: 'circle-H'
+ name: 'star'
 }
 
 item {
  id: 9
- name: 'circle-I'
+ name: 'trapezoid'
 }
 
 item {
  id: 10
- name: 'circle-J'
+ name: 'triangle'
 }
 
 item {
  id: 11
- name: 'circle-K'
+ name: 'A'
 }
 
 item {
  id: 12
- name: 'circle-L'
+ name: 'B'
 }
 
 item {
  id: 13
- name: 'circle-M'
+ name: 'C'
 }
 
 item {
  id: 14
- name: 'circle-N'
+ name: 'D'
 }
 
 item {
  id: 15
- name: 'circle-O'
+ name: 'E'
 }
 
 item {
  id: 16
- name: 'circle-P'
+ name: 'F'
 }
 
 item {
  id: 17
- name: 'circle-Q'
+ name: 'G'
 }
 
 item {
  id: 18
- name: 'circle-R'
+ name: 'H'
 }
 
 item {
  id: 19
- name: 'circle-S'
+ name: 'I'
 }
 
 item {
  id: 20
- name: 'circle-T'
+ name: 'J'
 }
 
 item {
  id: 21
- name: 'circle-U'
+ name: 'K'
 }
 
 item {
  id: 22
- name: 'circle-V'
+ name: 'L'
 }
 
 item {
  id: 23
- name: 'circle-W'
+ name: 'M'
 }
 
 item {
  id: 24
- name: 'circle-X'
+ name: 'N'
 }
 
 item {
  id: 25
- name: 'circle-Y'
+ name: 'O'
 }
 
 item {
  id: 26
- name: 'circle-Z'
+ name: 'P'
 }
 
 item {
  id: 27
- name: 'circle-4'
+ name: 'Q'
 }
 
 item {
  id: 28
- name: 'cross-A'
+ name: 'R'
 }
 
 item {
  id: 29
- name: 'cross-B'
+ name: 'S'
 }
 
 item {
  id: 30
- name: 'cross-C'
+ name: 'T'
 }
 
 item {
  id: 31
- name: 'cross-D'
+ name: 'U'
 }
 
 item {
  id: 32
- name: 'cross-E'
+ name: 'V'
 }
 
 item {
  id: 33
- name: 'cross-F'
+ name: 'W'
 }
 
 item {
  id: 34
- name: 'cross-G'
+ name: 'X'
 }
 
 item {
  id: 35
- name: 'cross-H'
+ name: 'Y'
 }
 
 item {
  id: 36
- name: 'cross-I'
+ name: 'Z'
 }
 
 item {
  id: 37
- name: 'cross-J'
-}
-
-item {
- id: 38
- name: 'cross-K'
-}
-
-item {
- id: 39
- name: 'cross-L'
-}
-
-item {
- id: 40
- name: 'cross-M'
-}
-
-item {
- id: 41
- name: 'cross-N'
-}
-
-item {
- id: 42
- name: 'cross-O'
-}
-
-item {
- id: 43
- name: 'cross-P'
-}
-
-item {
- id: 44
- name: 'cross-Q'
-}
-
-item {
- id: 45
- name: 'cross-R'
-}
-
-item {
- id: 46
- name: 'cross-S'
-}
-
-item {
- id: 47
- name: 'cross-T'
-}
-
-item {
- id: 48
- name: 'cross-U'
-}
-
-item {
- id: 49
- name: 'cross-V'
-}
-
-item {
- id: 50
- name: 'cross-W'
-}
-
-item {
- id: 51
- name: 'cross-X'
-}
-
-item {
- id: 52
- name: 'cross-Y'
-}
-
-item {
- id: 53
- name: 'cross-Z'
-}
-
-item {
- id: 54
- name: 'cross-4'
-}
-
-item {
- id: 55
- name: 'pentagon-A'
-}
-
-item {
- id: 56
- name: 'pentagon-B'
-}
-
-item {
- id: 57
- name: 'pentagon-C'
-}
-
-item {
- id: 58
- name: 'pentagon-D'
-}
-
-item {
- id: 59
- name: 'pentagon-E'
-}
-
-item {
- id: 60
- name: 'pentagon-F'
-}
-
-item {
- id: 61
- name: 'pentagon-G'
-}
-
-item {
- id: 62
- name: 'pentagon-H'
-}
-
-item {
- id: 63
- name: 'pentagon-I'
-}
-
-item {
- id: 64
- name: 'pentagon-J'
-}
-
-item {
- id: 65
- name: 'pentagon-K'
-}
-
-item {
- id: 66
- name: 'pentagon-L'
-}
-
-item {
- id: 67
- name: 'pentagon-M'
-}
-
-item {
- id: 68
- name: 'pentagon-N'
-}
-
-item {
- id: 69
- name: 'pentagon-O'
-}
-
-item {
- id: 70
- name: 'pentagon-P'
-}
-
-item {
- id: 71
- name: 'pentagon-Q'
-}
-
-item {
- id: 72
- name: 'pentagon-R'
-}
-
-item {
- id: 73
- name: 'pentagon-S'
-}
-
-item {
- id: 74
- name: 'pentagon-T'
-}
-
-item {
- id: 75
- name: 'pentagon-U'
-}
-
-item {
- id: 76
- name: 'pentagon-V'
-}
-
-item {
- id: 77
- name: 'pentagon-W'
-}
-
-item {
- id: 78
- name: 'pentagon-X'
-}
-
-item {
- id: 79
- name: 'pentagon-Y'
-}
-
-item {
- id: 80
- name: 'pentagon-Z'
-}
-
-item {
- id: 81
- name: 'pentagon-4'
-}
-
-item {
- id: 82
- name: 'quarter-circle-A'
-}
-
-item {
- id: 83
- name: 'quarter-circle-B'
-}
-
-item {
- id: 84
- name: 'quarter-circle-C'
-}
-
-item {
- id: 85
- name: 'quarter-circle-D'
-}
-
-item {
- id: 86
- name: 'quarter-circle-E'
-}
-
-item {
- id: 87
- name: 'quarter-circle-F'
-}
-
-item {
- id: 88
- name: 'quarter-circle-G'
-}
-
-item {
- id: 89
- name: 'quarter-circle-H'
-}
-
-item {
- id: 90
- name: 'quarter-circle-I'
-}
-
-item {
- id: 91
- name: 'quarter-circle-J'
-}
-
-item {
- id: 92
- name: 'quarter-circle-K'
-}
-
-item {
- id: 93
- name: 'quarter-circle-L'
-}
-
-item {
- id: 94
- name: 'quarter-circle-M'
-}
-
-item {
- id: 95
- name: 'quarter-circle-N'
-}
-
-item {
- id: 96
- name: 'quarter-circle-O'
-}
-
-item {
- id: 97
- name: 'quarter-circle-P'
-}
-
-item {
- id: 98
- name: 'quarter-circle-Q'
-}
-
-item {
- id: 99
- name: 'quarter-circle-R'
-}
-
-item {
- id: 100
- name: 'quarter-circle-S'
-}
-
-item {
- id: 101
- name: 'quarter-circle-T'
-}
-
-item {
- id: 102
- name: 'quarter-circle-U'
-}
-
-item {
- id: 103
- name: 'quarter-circle-V'
-}
-
-item {
- id: 104
- name: 'quarter-circle-W'
-}
-
-item {
- id: 105
- name: 'quarter-circle-X'
-}
-
-item {
- id: 106
- name: 'quarter-circle-Y'
-}
-
-item {
- id: 107
- name: 'quarter-circle-Z'
-}
-
-item {
- id: 108
- name: 'quarter-circle-4'
-}
-
-item {
- id: 109
- name: 'rectangle-A'
-}
-
-item {
- id: 110
- name: 'rectangle-B'
-}
-
-item {
- id: 111
- name: 'rectangle-C'
-}
-
-item {
- id: 112
- name: 'rectangle-D'
-}
-
-item {
- id: 113
- name: 'rectangle-E'
-}
-
-item {
- id: 114
- name: 'rectangle-F'
-}
-
-item {
- id: 115
- name: 'rectangle-G'
-}
-
-item {
- id: 116
- name: 'rectangle-H'
-}
-
-item {
- id: 117
- name: 'rectangle-I'
-}
-
-item {
- id: 118
- name: 'rectangle-J'
-}
-
-item {
- id: 119
- name: 'rectangle-K'
-}
-
-item {
- id: 120
- name: 'rectangle-L'
-}
-
-item {
- id: 121
- name: 'rectangle-M'
-}
-
-item {
- id: 122
- name: 'rectangle-N'
-}
-
-item {
- id: 123
- name: 'rectangle-O'
-}
-
-item {
- id: 124
- name: 'rectangle-P'
-}
-
-item {
- id: 125
- name: 'rectangle-Q'
-}
-
-item {
- id: 126
- name: 'rectangle-R'
-}
-
-item {
- id: 127
- name: 'rectangle-S'
-}
-
-item {
- id: 128
- name: 'rectangle-T'
-}
-
-item {
- id: 129
- name: 'rectangle-U'
-}
-
-item {
- id: 130
- name: 'rectangle-V'
-}
-
-item {
- id: 131
- name: 'rectangle-W'
-}
-
-item {
- id: 132
- name: 'rectangle-X'
-}
-
-item {
- id: 133
- name: 'rectangle-Y'
-}
-
-item {
- id: 134
- name: 'rectangle-Z'
-}
-
-item {
- id: 135
- name: 'rectangle-4'
-}
-
-item {
- id: 136
- name: 'semicircle-A'
-}
-
-item {
- id: 137
- name: 'semicircle-B'
-}
-
-item {
- id: 138
- name: 'semicircle-C'
-}
-
-item {
- id: 139
- name: 'semicircle-D'
-}
-
-item {
- id: 140
- name: 'semicircle-E'
-}
-
-item {
- id: 141
- name: 'semicircle-F'
-}
-
-item {
- id: 142
- name: 'semicircle-G'
-}
-
-item {
- id: 143
- name: 'semicircle-H'
-}
-
-item {
- id: 144
- name: 'semicircle-I'
-}
-
-item {
- id: 145
- name: 'semicircle-J'
-}
-
-item {
- id: 146
- name: 'semicircle-K'
-}
-
-item {
- id: 147
- name: 'semicircle-L'
-}
-
-item {
- id: 148
- name: 'semicircle-M'
-}
-
-item {
- id: 149
- name: 'semicircle-N'
-}
-
-item {
- id: 150
- name: 'semicircle-O'
-}
-
-item {
- id: 151
- name: 'semicircle-P'
-}
-
-item {
- id: 152
- name: 'semicircle-Q'
-}
-
-item {
- id: 153
- name: 'semicircle-R'
-}
-
-item {
- id: 154
- name: 'semicircle-S'
-}
-
-item {
- id: 155
- name: 'semicircle-T'
-}
-
-item {
- id: 156
- name: 'semicircle-U'
-}
-
-item {
- id: 157
- name: 'semicircle-V'
-}
-
-item {
- id: 158
- name: 'semicircle-W'
-}
-
-item {
- id: 159
- name: 'semicircle-X'
-}
-
-item {
- id: 160
- name: 'semicircle-Y'
-}
-
-item {
- id: 161
- name: 'semicircle-Z'
-}
-
-item {
- id: 162
- name: 'semicircle-4'
-}
-
-item {
- id: 163
- name: 'square-A'
-}
-
-item {
- id: 164
- name: 'square-B'
-}
-
-item {
- id: 165
- name: 'square-C'
-}
-
-item {
- id: 166
- name: 'square-D'
-}
-
-item {
- id: 167
- name: 'square-E'
-}
-
-item {
- id: 168
- name: 'square-F'
-}
-
-item {
- id: 169
- name: 'square-G'
-}
-
-item {
- id: 170
- name: 'square-H'
-}
-
-item {
- id: 171
- name: 'square-I'
-}
-
-item {
- id: 172
- name: 'square-J'
-}
-
-item {
- id: 173
- name: 'square-K'
-}
-
-item {
- id: 174
- name: 'square-L'
-}
-
-item {
- id: 175
- name: 'square-M'
-}
-
-item {
- id: 176
- name: 'square-N'
-}
-
-item {
- id: 177
- name: 'square-O'
-}
-
-item {
- id: 178
- name: 'square-P'
-}
-
-item {
- id: 179
- name: 'square-Q'
-}
-
-item {
- id: 180
- name: 'square-R'
-}
-
-item {
- id: 181
- name: 'square-S'
-}
-
-item {
- id: 182
- name: 'square-T'
-}
-
-item {
- id: 183
- name: 'square-U'
-}
-
-item {
- id: 184
- name: 'square-V'
-}
-
-item {
- id: 185
- name: 'square-W'
-}
-
-item {
- id: 186
- name: 'square-X'
-}
-
-item {
- id: 187
- name: 'square-Y'
-}
-
-item {
- id: 188
- name: 'square-Z'
-}
-
-item {
- id: 189
- name: 'square-4'
-}
-
-item {
- id: 190
- name: 'star-A'
-}
-
-item {
- id: 191
- name: 'star-B'
-}
-
-item {
- id: 192
- name: 'star-C'
-}
-
-item {
- id: 193
- name: 'star-D'
-}
-
-item {
- id: 194
- name: 'star-E'
-}
-
-item {
- id: 195
- name: 'star-F'
-}
-
-item {
- id: 196
- name: 'star-G'
-}
-
-item {
- id: 197
- name: 'star-H'
-}
-
-item {
- id: 198
- name: 'star-I'
-}
-
-item {
- id: 199
- name: 'star-J'
-}
-
-item {
- id: 200
- name: 'star-K'
-}
-
-item {
- id: 201
- name: 'star-L'
-}
-
-item {
- id: 202
- name: 'star-M'
-}
-
-item {
- id: 203
- name: 'star-N'
-}
-
-item {
- id: 204
- name: 'star-O'
-}
-
-item {
- id: 205
- name: 'star-P'
-}
-
-item {
- id: 206
- name: 'star-Q'
-}
-
-item {
- id: 207
- name: 'star-R'
-}
-
-item {
- id: 208
- name: 'star-S'
-}
-
-item {
- id: 209
- name: 'star-T'
-}
-
-item {
- id: 210
- name: 'star-U'
-}
-
-item {
- id: 211
- name: 'star-V'
-}
-
-item {
- id: 212
- name: 'star-W'
-}
-
-item {
- id: 213
- name: 'star-X'
-}
-
-item {
- id: 214
- name: 'star-Y'
-}
-
-item {
- id: 215
- name: 'star-Z'
-}
-
-item {
- id: 216
- name: 'star-4'
-}
-
-item {
- id: 217
- name: 'trapezoid-A'
-}
-
-item {
- id: 218
- name: 'trapezoid-B'
-}
-
-item {
- id: 219
- name: 'trapezoid-C'
-}
-
-item {
- id: 220
- name: 'trapezoid-D'
-}
-
-item {
- id: 221
- name: 'trapezoid-E'
-}
-
-item {
- id: 222
- name: 'trapezoid-F'
-}
-
-item {
- id: 223
- name: 'trapezoid-G'
-}
-
-item {
- id: 224
- name: 'trapezoid-H'
-}
-
-item {
- id: 225
- name: 'trapezoid-I'
-}
-
-item {
- id: 226
- name: 'trapezoid-J'
-}
-
-item {
- id: 227
- name: 'trapezoid-K'
-}
-
-item {
- id: 228
- name: 'trapezoid-L'
-}
-
-item {
- id: 229
- name: 'trapezoid-M'
-}
-
-item {
- id: 230
- name: 'trapezoid-N'
-}
-
-item {
- id: 231
- name: 'trapezoid-O'
-}
-
-item {
- id: 232
- name: 'trapezoid-P'
-}
-
-item {
- id: 233
- name: 'trapezoid-Q'
-}
-
-item {
- id: 234
- name: 'trapezoid-R'
-}
-
-item {
- id: 235
- name: 'trapezoid-S'
-}
-
-item {
- id: 236
- name: 'trapezoid-T'
-}
-
-item {
- id: 237
- name: 'trapezoid-U'
-}
-
-item {
- id: 238
- name: 'trapezoid-V'
-}
-
-item {
- id: 239
- name: 'trapezoid-W'
-}
-
-item {
- id: 240
- name: 'trapezoid-X'
-}
-
-item {
- id: 241
- name: 'trapezoid-Y'
-}
-
-item {
- id: 242
- name: 'trapezoid-Z'
-}
-
-item {
- id: 243
- name: 'trapezoid-4'
-}
-
-item {
- id: 244
- name: 'triangle-A'
-}
-
-item {
- id: 245
- name: 'triangle-B'
-}
-
-item {
- id: 246
- name: 'triangle-C'
-}
-
-item {
- id: 247
- name: 'triangle-D'
-}
-
-item {
- id: 248
- name: 'triangle-E'
-}
-
-item {
- id: 249
- name: 'triangle-F'
-}
-
-item {
- id: 250
- name: 'triangle-G'
-}
-
-item {
- id: 251
- name: 'triangle-H'
-}
-
-item {
- id: 252
- name: 'triangle-I'
-}
-
-item {
- id: 253
- name: 'triangle-J'
-}
-
-item {
- id: 254
- name: 'triangle-K'
-}
-
-item {
- id: 255
- name: 'triangle-L'
-}
-
-item {
- id: 256
- name: 'triangle-M'
-}
-
-item {
- id: 257
- name: 'triangle-N'
-}
-
-item {
- id: 258
- name: 'triangle-O'
-}
-
-item {
- id: 259
- name: 'triangle-P'
-}
-
-item {
- id: 260
- name: 'triangle-Q'
-}
-
-item {
- id: 261
- name: 'triangle-R'
-}
-
-item {
- id: 262
- name: 'triangle-S'
-}
-
-item {
- id: 263
- name: 'triangle-T'
-}
-
-item {
- id: 264
- name: 'triangle-U'
-}
-
-item {
- id: 265
- name: 'triangle-V'
-}
-
-item {
- id: 266
- name: 'triangle-W'
-}
-
-item {
- id: 267
- name: 'triangle-X'
-}
-
-item {
- id: 268
- name: 'triangle-Y'
-}
-
-item {
- id: 269
- name: 'triangle-Z'
-}
-
-item {
- id: 270
- name: 'triangle-4'
+ name: '4'
 }
 

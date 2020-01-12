@@ -60,10 +60,13 @@ class DetectionModel:
 
         for idx in range(batch_size, num_imgs + batch_size, batch_size):
 
-            [nums, obj_types, boxes, scores] = self.sess.run(output_tensors,
-                feed_dict={'image_tensor:0': input_data[(idx - batch_size):idx]})
+            [nums, obj_types, boxes, scores] = self.sess.run(
+                output_tensors,
+                feed_dict={
+                    'image_tensor:0': input_data[(idx - batch_size):idx]
+                })
 
-            for i in range(batch_size):
+            for i in range(len(nums)):
                 image_detects = []
                 for k in range(int(nums[i])):
                     obj = DetectedObject()
@@ -107,7 +110,7 @@ class ClfModel:
         self.graph = tf.compat.v1.get_default_graph()
         self.sess = tf.compat.v1.Session(graph=graph, config=tf_config)
 
-        self.tf_output = 'prefix/classes:0'
+        self.tf_output = 'prefix/logits:0'
 
     def predict(self, input_data, batch_size=40):
 
@@ -115,25 +118,27 @@ class ClfModel:
             return []
         elif isinstance(input_data, list):
             # allow list of paths as input
-            input_data = np.array([np.asarray(fn)/255 for fn in input_data])
+            input_data = np.array(
+                [np.asarray(fn) / 255 for fn in input_data])
         else:
             pass
 
         results = []
-        assert len(input_data.shape) == 4  #(batch_size, h, w, channel)
+        assert len(input_data.shape) == 4  # (batch_size, h, w, channel)
         num_imgs, im_width, im_height, _ = input_data.shape
 
         if num_imgs < batch_size:
             batch_size = num_imgs
-
+        
         for idx in range(batch_size, num_imgs + batch_size, batch_size):
 
             [preds] = self.sess.run([self.tf_output], feed_dict={
                 'prefix/input:0': input_data[(idx - batch_size):idx]
             })
-
-            for i in range(batch_size):
+            print(preds)
+            for i in range(len(preds)):
                 obj = DetectedObject()
+                
                 obj.class_idx = preds[i]
                 results.append(obj)
 
