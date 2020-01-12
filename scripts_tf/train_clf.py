@@ -29,25 +29,21 @@ from preprocessing import preprocessing_factory
 
 import os
 
+slim = contrib_slim
+
 with open(os.path.join(os.path.dirname(__file__),
           os.pardir, 'config.yaml'), 'r') as stream:
     import yaml
     config = yaml.safe_load(stream)
 
-
-CLASSES = []
-for shape in config['classes']['shapes']:
-    for alpha in config['classes']['alphas']:
-        CLASSES.append('-'.join([shape, alpha]))
-
-
-slim = contrib_slim
+CLASSES = config['classes']['types']
+CLF_SIZE = config['inputs']['preclf']['width']
 
 tf.app.flags.DEFINE_string(
     'master', '', 'The address of the TensorFlow master to use.')
 
 tf.app.flags.DEFINE_string(
-    'train_dir', '/tmp/tfmodel/',
+    'train_dir', '',
     'Directory where checkpoints and event logs are written to.')
 
 tf.app.flags.DEFINE_integer('num_clones', 1,
@@ -211,7 +207,7 @@ tf.app.flags.DEFINE_integer(
     'batch_size', 32, 'The number of samples in each batch.')
 
 tf.app.flags.DEFINE_integer(
-    'train_image_size', None, 'Train image size')
+    'train_image_size', CLF_SIZE, 'Train image size')
 
 tf.app.flags.DEFINE_integer('max_number_of_steps', None,
                             'The maximum number of training steps.')
@@ -219,7 +215,7 @@ tf.app.flags.DEFINE_integer('max_number_of_steps', None,
 tf.app.flags.DEFINE_bool('use_grayscale', False,
                          'Whether to convert input images to grayscale.')
 
-tf.app.flags.DEFINE_string('records_name', 'model_data/clf_records/',
+tf.app.flags.DEFINE_string('records_name', 'model_data/records/',
                            'Prefix of classification records')
 
 #####################

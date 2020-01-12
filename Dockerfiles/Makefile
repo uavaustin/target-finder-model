@@ -6,7 +6,7 @@ IMAGE_NAME := uavaustin/target-finder-model-env
 CUR_DIR := $(shell pwd)
 
 .PHONY: all 
-all: tf1 test 
+all: tf1 tf2 test
 
 .PHONY: tf1
 tf1:
@@ -19,9 +19,14 @@ tf2:
 .PHONY: test
 test:
 	docker build -t $(IMAGE_NAME):test -f Dockerfile.test $(DOCKERFLAGS) .. 
-	docker run --rm -v $(CUR_DIR)/../:/host $(IMAGE_NAME):test $(DOCKERARGS) 
+	docker run --rm -v $(CUR_DIR)/../:/host $(IMAGE_NAME):test $(DOCKERARGS)
+
+.PHONY: xavier
+test:
+	docker build -t $(IMAGE_NAME):xavier -f Dockerfile.xavier $(DOCKERFLAGS) . 
 
 .PHONY: clean
 clean:
 	docker rmi $(IMAGE_NAME):tf1
+	docker rmi $(IMAGE_NAME):tf2
 	docker rmi $(IMAGE_NAME):test

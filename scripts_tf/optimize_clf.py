@@ -173,7 +173,7 @@ def run_inference(graph_func,
                             batch_size=batch_size,
                             input_size=input_size,
                             mode=mode)
-
+    # TODO The print of num_iterations and time statement seems to be off
     if mode == 'validation':
         for i, batch_images in dataset:
             start_time = time.time()
@@ -195,13 +195,13 @@ def run_inference(graph_func,
         for i, batch_images in dataset:
             if i >= num_warmup_iterations:
                 start_time = time.time()
-                batch_preds = list(graph_func(batch_images['image/encoded']).values())[0].numpy()
+                batch_preds = graph_func(batch_images['image/encoded'])[0].numpy()
                 iter_times.append(time.time() - start_time)
                 if i % display_every == 0:
                     print("  step %d/%d, iter_time(ms)=%.0f" %
                             (i+1, num_iterations, iter_times[-1]*1000))
             else:
-                batch_preds = list(graph_func(batch_images['image/encoded']).values())[0].numpy()
+                batch_preds = graph_func(batch_images['image/encoded'])[0].numpy()
             if i > 0 and target_duration is not None and \
                 time.time() - initial_time > target_duration:
                 break
@@ -286,7 +286,7 @@ if __name__ == '__main__':
                         'work in conjunction with --use_trt')
     parser.add_argument('--batch_size', type=int, default=1,
                         help='Number of images per batch.')
-    parser.add_argument('--minimum_segment_size', type=int, default=2,
+    parser.add_argument('--minimum_segment_size', type=int, default=100,
                         help='Minimum number of TF ops in a TRT engine.')
     parser.add_argument('--num_iterations', type=int, default=2048,
                         help='How many iterations(batches) to evaluate.'

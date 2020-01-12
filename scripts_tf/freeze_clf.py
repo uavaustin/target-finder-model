@@ -22,7 +22,7 @@ tf.flags.DEFINE_string('model_name',
 tf.flags.DEFINE_string('ckpt_dir',
                        '',
                        'Directory containing model ckpts.')
-tf.flags.DEFINE_string('output_path',
+tf.flags.DEFINE_string('output_dir',
                        'models/clf/',
                        'Output model dir.')
 FLAGS = flags.FLAGS
@@ -113,7 +113,7 @@ def find_checkpoint_in_dir(model_dir):
     return checkpoint_path
 
 
-def freeze_model(model, ckpt_dir, output_path):
+def freeze_model(model, ckpt_dir, output_dir):
     """Builds an image classification model by name
     This function builds an image classification model given a model
     name, parameter checkpoint file path, and number of classes.  This
@@ -167,7 +167,7 @@ def freeze_model(model, ckpt_dir, output_path):
             )
             
             # Save out the model for serving.
-            builder = tf.saved_model.builder.SavedModelBuilder(output_path)
+            builder = tf.saved_model.builder.SavedModelBuilder(output_dir)
             
             in_image = tf_sess.graph.get_tensor_by_name('input:0')
             inputs = {'image': tf.saved_model.utils.build_tensor_info(in_image)}
@@ -193,7 +193,7 @@ def freeze_model(model, ckpt_dir, output_path):
                 )
             builder.save()
   
-    frozen_graph_path = os.path.join(output_path, 'frozen_clf.pb')
+    frozen_graph_path = os.path.join(output_dir, 'frozen_clf.pb')
     with tf.io.gfile.GFile(frozen_graph_path, "wb") as f:
         f.write(frozen_graph.SerializeToString())
 
@@ -202,9 +202,11 @@ def freeze_model(model, ckpt_dir, output_path):
 
 if __name__ == '__main__':
 
+    assert FLAGS.model_name
     assert FLAGS.ckpt_dir
+    assert FLAGS.output_dir
 
-    if not tf.io.gfile.isdir(os.path.dirname(FLAGS.output_path)):
-        tf.gfile.MakeDirs(os.path.dirname(FLAGS.output_path))
+    if not tf.io.gfile.isdir(os.path.dirname(FLAGS.output_dir)):
+        tf.gfile.MakeDirs(os.path.dirname(FLAGS.output_dir))
 
-    freeze_model(FLAGS.model_name, FLAGS.ckpt_dir, FLAGS.output_path)
+    freeze_model(FLAGS.model_name, FLAGS.ckpt_dir, FLAGS.output_dir)
