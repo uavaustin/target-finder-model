@@ -2,8 +2,7 @@
 
 > Related scripts and models for [target-finder](https://github.com/uavaustin/target-finder).
 
-[![Actions Status | Build](https://github.com/uavaustin/target-finder-model/workflows/target-finder-model/badge.svg)](https://github.com/uavaustin/target-finder-model/actions)
-
+[![Actions Status | Build](https://github.com/uavaustin/target-finder-model/workflows/build/badge.svg)](https://github.com/uavaustin/target-finder-model/actions)
 [![Coverage Status](https://coveralls.io/repos/github/uavaustin/target-finder-model/badge.svg?branch=master)](https://coveralls.io/github/uavaustin/target-finder-model?branch=master)
 
 ## Developer Instructions
@@ -30,12 +29,26 @@ objects = model.predict(['temp.jpg'])
 
 ### Training Pre-Classifier
 ```
-python scrips_tf/train_clf.py
+python scripts_tf/train_clf.py \
+    --model_name MODEL_NAME \
+    --train_dir models/MODEL_NAME/checkpoints \
+    --records_name model_data/records
 ```
+To evaluate the model's accuracy during training, run:
+```
+python scripts_tf/eval_clf.py \ 
+    --model_name MODEL_NAME \
+    --checkpoint_path models/MODEL_NAME/checkpoints \
+    --dataset_dir model_data/records \
+    --eval_dir models/MODEL_NAME/checkpoints/eval
+
+```
+Training statistics can be visualized with `tensorboard --logdir models/MODEL_NAME/checkpoints`.
 
 ### Freeze Pre-Classifier 
+After training, freeze the classification model for inference.
 ```
-python scripts_tf/freeze_clf.py 
+python scripts_tf/freeze_clf.py \
     --model_name inception_v3 \
     --ckpt_dir models/MODEL_NAME/ckpts \
     --output_dir models/MODEL_NAME/frozen 
@@ -45,13 +58,13 @@ python scripts_tf/freeze_clf.py
 ```
 python scripts_tf/optimize_clf.py \
     --input_saved_model_dir models/MODEL_NAME/frozen  \
-    --output_saved_model_dir models/MODEL_NAME/optimizes \
+    --output_saved_model_dir models/MODEL_NAME/optimized \
     --data_dir model_data/records \
     --mode validation \
     --use_trt \
-    --precision FP16 
+    --precision FP32 \
+    --batch_size 5
 ```
-
 
 ### Training Object Detector Model
 
@@ -59,10 +72,10 @@ python scripts_tf/optimize_clf.py \
 2. Run with `MODEL_NAME` set to one of the models in `models/2`
 ```
 python path/to/models/research/object_detection/model_main.py \
-    --pipeline_config_path=models/MODEL_NAME/pipeline.config \
-    --model_dir=models/MODEL_NAME \
-    --num_train_steps=5000 \
-    --sample_1_of_n_eval_examples=1 \
+    --pipeline_config_path models/MODEL_NAME/pipeline.config \
+    --model_dir models/MODEL_NAME \
+    --num_train_steps 5000 \
+    --sample_1_of_n_eval_examples 1 \
     --alsologtostderr
 ```
 #### Freeze Model Object Detector Model
@@ -76,13 +89,15 @@ python path/to/models/research/object_detection/export_inference_graph.py \
 ```
 ### Optimize Object Detector Model
 ```
-python scripts_tf/optimize_clf.py \
+python scripts_tf/optimize_od.py \
     --input_saved_model_dir=models/MODEL_NAME/saved_model \
     --output_saved_model_dir=models/MODEL_NAME/optimized \
     --data_dir model_data/records/ \
     --use_trt \
-    --precision FP16
+    --precision FP32
 ```
+NOTE: All model training and freezing must be done with Tensorflow 1.x until the Object Detection API supports TensorFlow 2
+
 ## Repository Contents
 
 #### Model Files
@@ -99,3 +114,4 @@ python scripts_tf/optimize_clf.py \
 * `target_finder_model/` The package that will be exported to [target-finder](https://github.com/uavaustin/target-finder) when a release is created.
 
 ## Testing
+Tests can be executed by running `make test` inside `Dockerfiles`.

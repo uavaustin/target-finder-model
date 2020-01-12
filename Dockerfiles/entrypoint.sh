@@ -22,18 +22,24 @@ fi
 echo "Creating label map."
 python scripts_tf/create_label_map.py
 
-echo "Training model."
+echo "Training classification model."
 python scripts_tf/train_clf.py
 # This command will fail on CI builds without gpu ()
 if [ $? -eq 0 ]; then
     echo OK
 else
-    echo "Clf training script failed. Likely due to no gpu accessible."
+    echo "Clf training script exit. Likely due to no gpu accessible."
 fi
 
+echo "Training detection model."
 python /sources/models/research/object_detection/model_main.py \
     --pipeline_config_path=models/faster_rcnn_resnet50_coco_2018_01_28/pipeline.config \
     --model_dir=models/faster_rcnn_resnet50_coco_2018_01_28/checkpoints/ \
-    --num_train_steps=5000 \
-    --sample_1_of_n_eval_examples=1 \
-    --alsologtostderr
+    --num_train_steps=5 \
+    --sample_1_of_n_eval_examples=1 
+# This command will fail on CI builds without gpu ()
+if [ $? -eq 0 ]; then
+    echo OK
+else
+    echo "Clf training script exit. Likely due to no gpu accessible."
+fi

@@ -1,0 +1,41 @@
+FROM nvcr.io/nvidia/l4t-base:r32.2.1
+
+WORKDIR /
+
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    pkg-config \
+    python3-dev \
+    libhdf5-dev \
+    python3-h5py \
+    python3-pip \
+    python3-setuptools \
+    libfreetype6-dev \  
+    git \
+    && \
+    python3 -m pip install --no-cache-dir --upgrade pip && \
+    python3 -m pip install --no-cache-dir --upgrade setuptools && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Requirements
+RUN python3 -m pip install --no-cache-dir -U numpy grpcio absl-py py-cpuinfo psutil portpicker grpcio six mock requests gast astor termcolor Cython
+
+RUN python3 -m pip install --no-cache-dir -U pycocotools matplotlib
+
+# Install TensorFlow 2.0.0 wheel
+ARG TF_WHEEL=tensorflow-2.0.0-cp36-cp36m-linux_aarch64.whl
+RUN wget https://bintray.com/uavaustin/target-finder-assets/download_file?file_path=${TF_WHEEL} -O ${TF_WHEEL}
+
+RUN pip3 install ${TF_WHEEL} \
+  && rm ${TF_WHEEL}
+
+# TODO determine if this is necessary for TF2.0
+# Install TF-TRT
+RUN git clone https://github.com/tensorflow/tensorrt.git \
+  && cd tensorrt/tftrt/examples/object_detection \
+  && git submodule update --init \
+  && ./install_dependencies.sh \
+  && cd /tensorrt \
+  && python3 setup.py install --user
+

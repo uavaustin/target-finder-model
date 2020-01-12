@@ -9,5 +9,5 @@ absl-py
 tqdm
 pyyaml
 dataclasses
-tensorflow_hub
+numpy
 grpcio>=1.24.3

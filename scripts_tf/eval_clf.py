@@ -42,7 +42,7 @@ CLASSES = config['classes']['types']
 slim = contrib_slim
 
 tf.app.flags.DEFINE_integer(
-    'batch_size', 100, 'The number of samples in each batch.')
+    'batch_size', 10, 'The number of samples in each batch.')
 
 tf.app.flags.DEFINE_integer(
     'max_num_batches', None,
@@ -52,12 +52,12 @@ tf.app.flags.DEFINE_string(
     'master', '', 'The address of the TensorFlow master to use.')
 
 tf.app.flags.DEFINE_string(
-    'checkpoint_path', 'models/inception_v3_2016_08_28/checkpoints/',
+    'checkpoint_path', '',
     'The directory where the model was written to or an absolute path to a '
     'checkpoint file.')
 
 tf.app.flags.DEFINE_string(
-    'eval_dir', 'models/inception_v3_2016_08_28/eval',
+    'eval_dir', '',
     'Directory where the results are saved to.')
 
 tf.app.flags.DEFINE_integer(
@@ -68,7 +68,7 @@ tf.app.flags.DEFINE_string(
     'dataset_split_name', 'val', 'The name of the train/test split.')
 
 tf.app.flags.DEFINE_string(
-    'dataset_dir', 'model_data/clf_records',
+    'dataset_dir', 'model_data/records',
     'The directory where the dataset files are stored.')
 
 tf.app.flags.DEFINE_integer(
@@ -78,7 +78,7 @@ tf.app.flags.DEFINE_integer(
     'class for the ImageNet dataset.')
 
 tf.app.flags.DEFINE_string(
-    'model_name', 'inception_v3',
+    'model_name', '',
     'The name of the architecture to evaluate.')
 
 tf.app.flags.DEFINE_string(

@@ -48,3 +48,12 @@ jobs:
           asset_name:  target-finder-model-v1.0.0.tar.gz
           asset_content_type: application/zip
 
+  slack-notification:
+    - uses: 8398a7/action-slack@v2
+      with:
+        status: ${{ job.status }}
+        text: Creating release.
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
