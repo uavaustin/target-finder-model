@@ -12,47 +12,47 @@ jobs:
     name: Build Package and Create Release
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v1
-        with:
-          fetch-depth: 3
+    - name: Checkout code
+      uses: actions/checkout@v1
+      with:
+        fetch-depth: 3
 
-      - name: Create release tar
-        run: ./scripts/create-release.sh
+    - name: Create release tar
+      run: ./scripts/create-release.sh
 
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
-        with:
-          tag_name: v1.0.0
-          release_name: v1.0.0
-          draft: false
-          prerelease: true
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+      with:
+        tag_name: v1.0.0
+        release_name: v1.0.0
+        draft: false
+        prerelease: true
 
-      - name: Remove everything except the package
-        run: |
-          mv release/*.tar.gz .
-          find . -type f  ! -name "*.tar.gz*" -delete
-        shell: bash
+    - name: Remove everything except the package
+      run: |
+        mv release/*.tar.gz .
+        find . -type f  ! -name "*.tar.gz*" -delete
+      shell: bash
 
-      - name: Upload Release Asset
-        id: upload-release-asset 
-        uses: actions/upload-release-asset@v1.0.1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
-          asset_path: ./target-finder-model-v1.0.0.tar.gz
-          asset_name:  target-finder-model-v1.0.0.tar.gz
-          asset_content_type: application/zip
+    - name: Upload Release Asset
+      id: upload-release-asset 
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+        asset_path: ./target-finder-model-v1.0.0.tar.gz
+        asset_name:  target-finder-model-v1.0.0.tar.gz
+        asset_content_type: application/zip
 
-  slack-notification:
-    - uses: 8398a7/action-slack@v2
+    - name: Send slack notification.
+      uses: 8398a7/action-slack@v2
       with:
         status: ${{ job.status }}
-        text: Creating release.
+        text: Create release.
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

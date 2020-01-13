@@ -359,16 +359,16 @@ def eval_model(predictions, coco):
 	# write coco detections to file
 	tmp_dir = 'tmp_detection_results'
 	subprocess.call(['mkdir', '-p', tmp_dir])
-	print(coco_detections)
 	coco_detections_path = os.path.join(tmp_dir, 'coco_detections.json')
 	with open(coco_detections_path, 'w') as f:
 		json.dump(coco_detections, f)
+
 	cocoDt = coco.loadRes(coco_detections_path)
 	subprocess.call(['rm', '-r', tmp_dir])
 	
 	# compute coco metrics
 	eval = COCOeval(coco, cocoDt, 'bbox')
-	eval.params.imgIds = [range(0, NUM_VAL_IMAGES)]
+	eval.params.imgIds = list(range(0, NUM_VAL_IMAGES))
 
 	eval.evaluate()
 	eval.accumulate()
