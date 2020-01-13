@@ -22,7 +22,7 @@ test:
 	docker run --rm -v $(CUR_DIR)/../:/host $(IMAGE_NAME):test $(DOCKERARGS)
 
 .PHONY: xavier
-test:
+xavier:
 	docker build -t $(IMAGE_NAME):xavier -f Dockerfile.xavier $(DOCKERFLAGS) . 
 
 .PHONY: clean

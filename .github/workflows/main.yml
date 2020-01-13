@@ -4,7 +4,7 @@ on: ["push", "pull_request"]
 
 jobs:
 
-  build-tf1-image:
+  build:
     runs-on: ubuntu-latest
     steps:
 
@@ -21,8 +21,27 @@ jobs:
       working-directory: ./Dockerfiles
       run: make tf1
 
+    - name: Build target-finder-model-env:test and test code
+      working-directory: ./Dockerfiles
+      run: make test DOCKERARGS=coveralls
+
+    - name: Upload generated tf-records
+      uses: actions/upload-artifact@master
+      with:
+        name: tf-records
+        path: model_data/records
+
     - name: Push target-finder-model-env
       run: docker push uavaustin/target-finder-model-env:tf1
+
+    - name: Send slack notification.
+      uses: 8398a7/action-slack@v2
+      with:
+        status: ${{ job.status }}
+        text: Buld and test.
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
     
   build-tf2-image:
     runs-on: ubuntu-latest
@@ -43,31 +62,3 @@ jobs:
 
     - name: Push target-finder-model-env
       run: docker push uavaustin/target-finder-model-env:tf2
-
-  build-data: 
-    needs: build-tf1-image
-    runs-on: ubuntu-latest
-    name: Generate Data and Test
-    steps:
-
-    - name: Checkout
-      uses: actions/checkout@v1
-
-    - name: Build target-finder-model-env:test and test code
-      working-directory: ./Dockerfiles
-      run: make test DOCKERARGS=coveralls
-
-    - name: Upload generated tf-records
-      uses: actions/upload-artifact@master
-      with:
-        name: tf-records
-        path: model_data/records
-        
-    - name: Send slack notification.
-      uses: 8398a7/action-slack@v2
-      with:
-        status: ${{ job.status }}
-        text: Testing code.
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
-        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
