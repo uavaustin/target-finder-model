@@ -21,7 +21,7 @@ model = tfm.inference.DetectionModel()
 model.load()
 objects = model.predict(['temp.jpg'])
 ```
-#### Generate Data
+### Generate Data
 * `python scripts_generate/pull_assets.py` Download base shapes and background images
 * `python scripts_generate/create_detection_data.py` Create images for object detection training 
 * `python scripts_generate/create_clf_data.py` Create images for classification training 
@@ -39,9 +39,7 @@ To evaluate the model's accuracy during training, run:
 python scripts_tf/eval_clf.py \ 
     --model_name MODEL_NAME \
     --checkpoint_path models/MODEL_NAME/checkpoints \
-    --dataset_dir model_data/records \
     --eval_dir models/MODEL_NAME/checkpoints/eval
-
 ```
 Training statistics can be visualized with `tensorboard --logdir models/MODEL_NAME/checkpoints`.
 
@@ -78,7 +76,7 @@ python path/to/models/research/object_detection/model_main.py \
     --sample_1_of_n_eval_examples 1 \
     --alsologtostderr
 ```
-#### Freeze Model Object Detector Model
+### Freeze Model Object Detector Model
 This will create a `frozen_inference_graph.pb` that will be optimized with tensorrt.
 ```
 python path/to/models/research/object_detection/export_inference_graph.py \

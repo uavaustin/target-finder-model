@@ -1,11 +1,10 @@
 name: create-release
 
-on: 
-  # Only trigger release creation on 
-  # push to master.
+on:
   push:
-    branches:
-      - master
+    tags:
+      - 'v*'
+
 
 jobs:
   build:
@@ -15,7 +14,7 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v1
       with:
-        fetch-depth: 3
+        fetch-depth: 1
 
     - name: Create release tar
       run: ./scripts/create-release.sh
@@ -26,8 +25,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
       with:
-        tag_name: v1.0.0
-        release_name: v1.0.0
+        tag_name: ${{ github.ref }}
+        release_name: ${{ github.ref }}
         draft: false
         prerelease: true
 
@@ -43,7 +42,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ./target-finder-model-v1.0.0.tar.gz
         asset_name:  target-finder-model-v1.0.0.tar.gz
         asset_content_type: application/zip

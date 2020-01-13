@@ -4,8 +4,10 @@ Script to freeze clf model as a frozen graph and for serving
 
 import os
 import glob
+
 import tensorflow as tf
-import nets.nets_factory  # models/research/slim
+# models/research/slim
+import nets.nets_factory
 import tensorflow.contrib.slim as slim
 from preprocessing import inception_preprocessing
 
@@ -14,16 +16,15 @@ with open(os.path.join(os.path.dirname(__file__),
     import yaml
     config = yaml.safe_load(stream)
 
-
 flags = tf.app.flags
 tf.flags.DEFINE_string('model_name',
                        'inception_v3',
-                        'Model name.')
+                       'Model name.')
 tf.flags.DEFINE_string('ckpt_dir',
                        '',
                        'Directory containing model ckpts.')
 tf.flags.DEFINE_string('output_dir',
-                       'models/clf/',
+                       '',
                        'Output model dir.')
 FLAGS = flags.FLAGS
 
@@ -31,6 +32,7 @@ tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.INFO)
 
 CLF_SIZE = config['inputs']['preclf']['width']
 CLF_CLASSES = config['classes']['types']
+
 
 class NetDef(object):
     """Contains definition of a model
@@ -109,7 +111,7 @@ def find_checkpoint_in_dir(model_dir):
     # model.ckpt-257706.data-00000-of-00002 -> model.ckpt-257706
     parts = checkpoint_path.split('.')
     ckpt_index = [i for i in range(len(parts)) if 'ckpt' in parts[i]][0]
-    checkpoint_path = '.'.join(parts[:ckpt_index+1])
+    checkpoint_path = '.'.join(parts[:ckpt_index + 1])
     return checkpoint_path
 
 
@@ -125,10 +127,10 @@ def freeze_model(model, ckpt_dir, output_dir):
     returns: tensorflow.GraphDef, the TensorRT compatible frozen graph
     """
 
-    netdef = NetDef(name=model, 
-                    input_size=CLF_SIZE, 
+    netdef = NetDef(name=model,
+                    input_size=CLF_SIZE,
                     num_classes=len(CLF_CLASSES))
-                    
+
     tf_config = tf.ConfigProto()
     tf_config.gpu_options.per_process_gpu_memory_fraction = 0.5
 
@@ -165,34 +167,37 @@ def freeze_model(model, ckpt_dir, output_dir):
                 tf_sess.graph_def,
                 output_node_names=['logits', 'classes']
             )
-            
+
             # Save out the model for serving.
             builder = tf.saved_model.builder.SavedModelBuilder(output_dir)
-            
+
             in_image = tf_sess.graph.get_tensor_by_name('input:0')
-            inputs = {'image': tf.saved_model.utils.build_tensor_info(in_image)}
+            inputs = {
+                'image': tf.saved_model.utils.build_tensor_info(in_image)
+            }
 
             out_classes = tf_sess.graph.get_tensor_by_name('classes:0')
-            outputs = {'prediction': 
-                        tf.saved_model.utils.build_tensor_info(out_classes)}
+            outputs = {
+                'prediction':
+                    tf.saved_model.utils.build_tensor_info(out_classes)}
 
             signature = tf.saved_model.signature_def_utils.build_signature_def(
                 inputs=inputs,
                 outputs=outputs,
-                method_name=tf.saved_model.signature_constants.PREDICT_METHOD_NAME)
+                method_name=tf.saved_model.signature_constants.
+                PREDICT_METHOD_NAME)
 
             builder.add_meta_graph_and_variables(
-                tf_sess, 
+                tf_sess,
                 [tf.saved_model.tag_constants.SERVING],
                 signature_def_map={
                     tf.saved_model.signature_constants
-                    .DEFAULT_SERVING_SIGNATURE_DEF_KEY: 
+                    .DEFAULT_SERVING_SIGNATURE_DEF_KEY:
                     signature,
                 },
-                #legacy_init_op=legacy_init_op
-                )
+            )
             builder.save()
-  
+
     frozen_graph_path = os.path.join(output_dir, 'frozen_clf.pb')
     with tf.io.gfile.GFile(frozen_graph_path, "wb") as f:
         f.write(frozen_graph.SerializeToString())
@@ -202,9 +207,14 @@ def freeze_model(model, ckpt_dir, output_dir):
 
 if __name__ == '__main__':
 
-    assert FLAGS.model_name
-    assert FLAGS.ckpt_dir
-    assert FLAGS.output_dir
+    if not FLAGS.model_name:
+        raise ValueError("Please specify a --model_name")
+    elif not FLAGS.ckpt_dir:
+        raise ValueError("Please specify a --ckpt_dir")
+    elif not FLAGS.output_dir:
+        raise ValueError("Please specify an --output_dir")
+    else:
+        pass
 
     if not tf.io.gfile.isdir(os.path.dirname(FLAGS.output_dir)):
         tf.gfile.MakeDirs(os.path.dirname(FLAGS.output_dir))
