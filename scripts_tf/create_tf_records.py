@@ -98,7 +98,7 @@ def create_tf_example(image_path_prefix, image_dir):
     category_ids = []
 
     for idx, (obj_id, x_n, y_n, w_n, h_n) in enumerate(annotations):
-        
+
         xmin.append(x_n)
         xmax.append(x_n + w_n)
         ymin.append(y_n)

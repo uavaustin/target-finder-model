@@ -129,16 +129,15 @@ class ClfModel:
 
         if num_imgs < batch_size:
             batch_size = num_imgs
-        
+
         for idx in range(batch_size, num_imgs + batch_size, batch_size):
 
             [preds] = self.sess.run([self.tf_output], feed_dict={
                 'prefix/input:0': input_data[(idx - batch_size):idx]
             })
-            print(preds)
+            
             for i in range(len(preds)):
                 obj = DetectedObject()
-                
                 obj.class_idx = preds[i]
                 results.append(obj)
 

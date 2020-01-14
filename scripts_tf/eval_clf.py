@@ -19,17 +19,15 @@ from __future__ import division
 from __future__ import print_function
 
 import math
-# Limit TF logs
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+import os
+
 import tensorflow as tf
 from tensorflow.contrib import quantize as contrib_quantize
 from tensorflow.contrib import slim as contrib_slim
-
+# models/research/slim
 from datasets import dataset_factory
 from nets import nets_factory
 from preprocessing import preprocessing_factory
-
-import os
 
 with open(os.path.join(os.path.dirname(__file__),
           os.pardir, 'config.yaml'), 'r') as stream:
@@ -37,9 +35,11 @@ with open(os.path.join(os.path.dirname(__file__),
     config = yaml.safe_load(stream)
 
 
-CLASSES = config['classes']['types']
-
 slim = contrib_slim
+
+CLASSES = config['classes']['types']
+# num * 2 to account for targets and backgrounds
+NUM_IMGS = config['generate']['eval_batch']['images'] * 2
 
 tf.app.flags.DEFINE_integer(
     'batch_size', 10, 'The number of samples in each batch.')
@@ -71,12 +71,6 @@ tf.app.flags.DEFINE_string(
     'dataset_dir', 'model_data/records',
     'The directory where the dataset files are stored.')
 
-tf.app.flags.DEFINE_integer(
-    'labels_offset', 0,
-    'An offset for the labels in the dataset. This flag is primarily used to '
-    'evaluate the VGG and ResNet architectures which do not use a background '
-    'class for the ImageNet dataset.')
-
 tf.app.flags.DEFINE_string(
     'model_name', '',
     'The name of the architecture to evaluate.')
@@ -105,17 +99,20 @@ FLAGS = tf.app.flags.FLAGS
 
 def main(_):
 
-    if not FLAGS.dataset_dir:
-        raise ValueError(
-            'You must supply the dataset directory with --dataset_dir')
+    if not FLAGS.model_name:
+        raise ValueError("Please specify a --model_name")
+    elif not FLAGS.checkpoint_path:
+        raise ValueError("Please specify a --checkpoint_path")
+    elif not FLAGS.eval_dir:
+        raise ValueError("Please specify an --eval_dir")
+    else:
+        pass
 
     tf.logging.set_verbosity(tf.logging.INFO)
     with tf.Graph().as_default():
         tf_global_step = slim.get_or_create_global_step()
 
-        ######################
-        # Select the dataset #
-        ######################
+        # Specify which TFRecord components to parse
         keys_to_features = {
             'image/encoded': tf.FixedLenFeature(
                 (),
@@ -152,6 +149,7 @@ def main(_):
         decoder = slim.tfexample_decoder.TFExampleDecoder(
             keys_to_features, items_to_handlers
         )
+
         file_pattern = 'tfm_clf_%s.*'
         file_pattern = os.path.join(
             FLAGS.dataset_dir,
@@ -161,23 +159,19 @@ def main(_):
             data_sources=file_pattern,
             reader=tf.TFRecordReader,
             decoder=decoder,
-            num_samples=20000,  # TODO UPDATE
+            num_samples=NUM_IMGS,
             items_to_descriptions=items_to_descs,
             num_classes=len(CLASSES),
             labels_to_names=label_idx_to_name
         )
 
-        ####################
-        # Select the model #
-        ####################
+        #  Create model
         network_fn = nets_factory.get_network_fn(
             FLAGS.model_name,
-            num_classes=(dataset.num_classes - FLAGS.labels_offset),
+            num_classes=dataset.num_classes,
             is_training=False)
 
-        ##############################################################
-        # Create a dataset provider that loads data from the dataset #
-        ##############################################################
+        # Create a dataset provider to load data from the dataset
         provider = slim.dataset_data_provider.DatasetDataProvider(
             dataset,
             shuffle=False,
@@ -186,16 +180,15 @@ def main(_):
         [image, label] = provider.get(['image', 'label'])
         label -= FLAGS.labels_offset
 
-        #####################################
-        # Select the preprocessing function #
-        #####################################
+        # Select the preprocessing function
         preprocessing_name = FLAGS.preprocessing_name or FLAGS.model_name
         image_preprocessing_fn = preprocessing_factory.get_preprocessing(
             preprocessing_name,
             is_training=False,
             use_grayscale=FLAGS.use_grayscale)
 
-        eval_image_size = FLAGS.eval_image_size or network_fn.default_image_size
+        eval_image_size = \
+            FLAGS.eval_image_size or network_fn.default_image_size
 
         image = image_preprocessing_fn(image, eval_image_size, eval_image_size)
 
@@ -205,9 +198,7 @@ def main(_):
             num_threads=FLAGS.num_preprocessing_threads,
             capacity=5 * FLAGS.batch_size)
 
-        ####################
-        # Define the model #
-        ####################
+        # Define the model
         logits, _ = network_fn(images)
 
         if FLAGS.quantize:
@@ -239,7 +230,6 @@ def main(_):
             op = tf.Print(op, [value], summary_name)
             tf.add_to_collection(tf.GraphKeys.SUMMARIES, op)
 
-        # TODO(sguada) use num_epochs=1
         if FLAGS.max_num_batches:
             num_batches = FLAGS.max_num_batches
         else:

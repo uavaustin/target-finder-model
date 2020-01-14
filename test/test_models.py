@@ -50,4 +50,8 @@ def test_models():
     od_imgs = glob.glob('test/od/*.png')
 
     regions = clf_model.predict([Image.open(img) for img in clf_imgs])
+    assert len(regions) > 0
+
     out = detector_model.predict([Image.open(img) for img in od_imgs])
+    assert len(out) > 0
+    
