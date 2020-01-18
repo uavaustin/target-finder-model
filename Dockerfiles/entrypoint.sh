@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo "Running pycodestyle."
-pycodestyle --exclude=vendor --ignore=E402 target_finder_model generate scripts_tf test
+pycodestyle --exclude=vendor --ignore=E402,W503 target_finder_model generate scripts_tf test
 
 echo "Building data."
 python scripts_generate/build.py

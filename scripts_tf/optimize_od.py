@@ -298,10 +298,12 @@ def run_inference(graph_func,
                     predictions[key].append(batch_preds[key].numpy())
 
             if i.numpy() % display_every == 0:
-                print("  step %d/%d, iter_time(ms)=%.0f" %
-                      (i.numpy() + 1,
-                      NUM_VAL_IMAGES // batch_size,
-                      iter_times[-1] * 1000))
+                print(
+                    "step {}/{}, iter_time(ms)={}".format(
+                        i.numpy() + 1,
+                        NUM_VAL_IMAGES // batch_size,
+                        iter_times[-1] * 1000))
+
             if i.numpy() > 1 and target_duration is not None and \
                     time.time() - initial_time > target_duration:
                 break
@@ -315,10 +317,11 @@ def run_inference(graph_func,
                         dataset_batch['image/encoded']).values())[0].numpy()
                 iter_times.append(time.time() - start_time)
                 if i.numpy() % display_every == 0:
-                    print("  step %d/%d, iter_time(ms)=%.0f" %
-                          (i.numpy() + 1, 
-                          num_iterations, 
-                          iter_times[-1] * 1000))
+                    print(
+                        "step {}/{}, iter_time(ms)={}".format(
+                            i.numpy() + 1,
+                            num_iterations,
+                            iter_times[-1] * 1000))
             else:
                 batch_preds = list(
                     graph_func(

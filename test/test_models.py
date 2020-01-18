@@ -54,4 +54,3 @@ def test_models():
 
     out = detector_model.predict([Image.open(img) for img in od_imgs])
     assert len(out) > 0
-    

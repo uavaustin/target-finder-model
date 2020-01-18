@@ -135,7 +135,7 @@ class ClfModel:
             [preds] = self.sess.run([self.tf_output], feed_dict={
                 'prefix/input:0': input_data[(idx - batch_size):idx]
             })
-            
+
             for i in range(len(preds)):
                 obj = DetectedObject()
                 obj.class_idx = preds[i]
