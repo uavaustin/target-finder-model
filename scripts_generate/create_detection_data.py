@@ -37,7 +37,7 @@ ALPHAS = config.ALPHAS
 
 def generate_all_images(gen_type, num_gen, offset=0):
     """Generate the full sized images"""
-    images_dir = os.path.join(config.DATA_DIR, gen_type, 'images')
+    images_dir = os.path.join(config.DATA_DIR, gen_type, "images")
     os.makedirs(config.DATA_DIR, exist_ok=True)
     os.makedirs(images_dir, exist_ok=True)
 
@@ -61,22 +61,20 @@ def generate_all_images(gen_type, num_gen, offset=0):
     blurs = _random_list(range(1, 3), num_gen)
     num_targets = _random_list(range(1, MAX_SHAPES), num_gen)
 
-    crop_xs = _random_list(
-        range(0, config.FULL_SIZE[0] - config.CROP_SIZE[0]), num_gen)
-    crop_ys = _random_list(
-        range(0, config.FULL_SIZE[1] - config.CROP_SIZE[1]), num_gen)
+    crop_xs = _random_list(range(0, config.FULL_SIZE[0] - config.CROP_SIZE[0]), num_gen)
+    crop_ys = _random_list(range(0, config.FULL_SIZE[1] - config.CROP_SIZE[1]), num_gen)
 
     num_targets = 1
     shape_params = []
 
     for i in range(num_gen):
-        shape_names = _random_list(config.SHAPE_TYPES, num_targets )
+        shape_names = _random_list(config.SHAPE_TYPES, num_targets)
         bases = [random.choice(base_shapes[shape]) for shape in shape_names]
-        alphas = _random_list(config.ALPHAS, num_targets )
-        font_files = _random_list(config.ALPHA_FONTS, num_targets )
+        alphas = _random_list(config.ALPHAS, num_targets)
+        font_files = _random_list(config.ALPHA_FONTS, num_targets)
 
-        target_colors = _random_list(TARGET_COLORS, num_targets )
-        alpha_colors = _random_list(ALPHA_COLORS, num_targets )
+        target_colors = _random_list(TARGET_COLORS, num_targets)
+        alpha_colors = _random_list(ALPHA_COLORS, num_targets)
 
         # Make sure shape and alpha are different colors
         for i, target_color in enumerate(target_colors):
@@ -86,23 +84,46 @@ def generate_all_images(gen_type, num_gen, offset=0):
         target_rgbs = [random.choice(COLORS[color]) for color in target_colors]
         alpha_rgbs = [random.choice(COLORS[color]) for color in alpha_colors]
 
-        sizes = _random_list(range(40, 65), num_targets )
+        sizes = _random_list(range(40, 65), num_targets)
 
-        angles = _random_list(range(0, 360), num_targets )
+        angles = _random_list(range(0, 360), num_targets)
 
-        xs = _random_list(range(70, config.CROP_SIZE[0] - 70, 20), num_targets )
-        ys = _random_list(range(70, config.CROP_SIZE[1] - 70, 20), num_targets )
+        xs = _random_list(range(70, config.CROP_SIZE[0] - 70, 20), num_targets)
+        ys = _random_list(range(70, config.CROP_SIZE[1] - 70, 20), num_targets)
 
-        shape_params.append(list(zip(shape_names, bases, alphas,
-                                    font_files, sizes, angles,
-                                    target_colors, target_rgbs,
-                                    alpha_colors, alpha_rgbs,
-                                    xs, ys)))
+        shape_params.append(
+            list(
+                zip(
+                    shape_names,
+                    bases,
+                    alphas,
+                    font_files,
+                    sizes,
+                    angles,
+                    target_colors,
+                    target_rgbs,
+                    alpha_colors,
+                    alpha_rgbs,
+                    xs,
+                    ys,
+                )
+            )
+        )
 
     # Put everything into one large iterable so that we can split up
     # data across thread pools.
-    data = zip(numbers, backgrounds, crop_xs, crop_ys, flip_bg, mirror_bg, sharpen, 
-            blurs, shape_params, [gen_type] * num_gen)
+    data = zip(
+        numbers,
+        backgrounds,
+        crop_xs,
+        crop_ys,
+        flip_bg,
+        mirror_bg,
+        sharpen,
+        blurs,
+        shape_params,
+        [gen_type] * num_gen,
+    )
 
     random.setstate(r_state)
 
@@ -116,16 +137,28 @@ def generate_all_images(gen_type, num_gen, offset=0):
 
 def _generate_single_example(data):
     """Creates a single full image"""
-    number, background, crop_x, crop_y, flip_bg, mirror_bg, sharpen, blur, shape_params, gen_type = data
-    
-    data_path = os.path.join(config.DATA_DIR, gen_type, 'images')
-    labels_fn = os.path.join(data_path, 'ex{}.txt'.format(number))
-    img_fn = os.path.join(data_path, 'ex{}.{}'.format(number, config.IMAGE_EXT))
-   
+    (
+        number,
+        background,
+        crop_x,
+        crop_y,
+        flip_bg,
+        mirror_bg,
+        sharpen,
+        blur,
+        shape_params,
+        gen_type,
+    ) = data
+
+    data_path = os.path.join(config.DATA_DIR, gen_type, "images")
+    labels_fn = os.path.join(data_path, "ex{}.txt".format(number))
+    img_fn = os.path.join(data_path, "ex{}.{}".format(number, config.IMAGE_EXT))
+
     background = background.copy()
     background = background.crop(
-        (crop_x, crop_y, crop_x + config.CROP_SIZE[0], crop_y + config.CROP_SIZE[1]))
-    
+        (crop_x, crop_y, crop_x + config.CROP_SIZE[0], crop_y + config.CROP_SIZE[1])
+    )
+
     if flip_bg:
         background = ImageOps.flip(background)
     if mirror_bg:
@@ -133,19 +166,18 @@ def _generate_single_example(data):
 
     shape_imgs = [_create_shape(*shape_param) for shape_param in shape_params]
 
-    shape_bboxes, full_img = _add_shapes(background, shape_imgs,
-                                        shape_params, blur)
+    shape_bboxes, full_img = _add_shapes(background, shape_imgs, shape_params, blur)
 
-    if sharpen == 1: 
+    if sharpen == 1:
         full_img = full_img.filter(ImageFilter.SHARPEN)
-    
+
     full_img.resize(config.DETECTOR_SIZE)
-    
+
     full_img.save(img_fn)
 
-    with open(labels_fn, 'w') as label_file:
+    with open(labels_fn, "w") as label_file:
         for shape_bbox in shape_bboxes:
-            label_file.write('{} {} {} {} {}\n'.format(*shape_bbox))
+            label_file.write("{} {} {} {} {}\n".format(*shape_bbox))
 
 
 def _add_shapes(background, shape_imgs, shape_params, blur_radius):
@@ -174,14 +206,14 @@ def _add_shapes(background, shape_imgs, shape_params, blur_radius):
         shape_bboxes.append((CLASSES.index(shape_param[0]), x, y, w, h))
         shape_bboxes.append((CLASSES.index(shape_param[2]), x, y, w, h))
 
-    return shape_bboxes, background.convert('RGB')
+    return shape_bboxes, background.convert("RGB")
 
 
 def _get_backgrounds():
     """Get the background assets"""
     # Can be a mix of .png and .jpg
-    filenames = glob.glob(os.path.join(config.BACKGROUNDS_DIR, '*.png'))
-    filenames += glob.glob(os.path.join(config.BACKGROUNDS_DIR, '*.jpg'))
+    filenames = glob.glob(os.path.join(config.BACKGROUNDS_DIR, "*.png"))
+    filenames += glob.glob(os.path.join(config.BACKGROUNDS_DIR, "*.jpg"))
 
     return [Image.open(img).resize(config.FULL_SIZE) for img in filenames]
 
@@ -189,9 +221,7 @@ def _get_backgrounds():
 def _get_base_shapes(shape):
     """Get the base shape images for a given shapes"""
     # For now just using the first one to prevent bad alpha placement
-    base_path = os.path.join(config.BASE_SHAPES_DIR,
-                             shape,
-                             '{}-01.png'.format(shape))
+    base_path = os.path.join(config.BASE_SHAPES_DIR, shape, "{}-01.png".format(shape))
     return [Image.open(base_path)]
 
 
@@ -200,10 +230,20 @@ def _random_list(items, count):
     return [random.choice(items) for i in range(0, count)]
 
 
-def _create_shape(shape, base, alpha,
-                  font_file, size, angle,
-                  target_color, target_rgb,
-                  alpha_color, alpha_rgb, x, y):
+def _create_shape(
+    shape,
+    base,
+    alpha,
+    font_file,
+    size,
+    angle,
+    target_color,
+    target_rgb,
+    alpha_color,
+    alpha_rgb,
+    x,
+    y,
+):
     """Create a shape given all the input parameters"""
     target_rgb = _augment_color(target_rgb)
     alpha_rgb = _augment_color(alpha_rgb)
@@ -235,7 +275,7 @@ def _get_base(base, target_rgb, size):
     """Copy and recolor the base shape"""
     image = base.copy()
     image = image.resize((256, 256), 1)
-    image = image.convert('RGBA')
+    image = image.convert("RGBA")
 
     r, g, b = target_rgb
 
@@ -267,21 +307,21 @@ def _strip_image(image):
 
 def _add_alphanumeric(image, shape, alpha, alpha_rgb, font_file):
     # Adjust alphanumeric size based on the shape it will be on
-    if shape == 'star':
+    if shape == "star":
         font_multiplier = 0.14
-    if shape == 'triangle':
+    if shape == "triangle":
         font_multiplier = 0.5
-    elif shape == 'rectangle':
+    elif shape == "rectangle":
         font_multiplier = 0.72
-    elif shape == 'quarter-circle':
+    elif shape == "quarter-circle":
         font_multiplier = 0.60
-    elif shape == 'semicircle':
+    elif shape == "semicircle":
         font_multiplier = 0.55
-    elif shape == 'circle':
+    elif shape == "circle":
         font_multiplier = 0.55
-    elif shape == 'square':
+    elif shape == "square":
         font_multiplier = 0.60
-    elif shape == 'trapezoid':
+    elif shape == "trapezoid":
         font_multiplier = 0.60
     else:
         font_multiplier = 0.55
@@ -297,27 +337,27 @@ def _add_alphanumeric(image, shape, alpha, alpha_rgb, font_file):
     y = (image.height - h) / 2
 
     # Adjust centering of alphanumerics on shapes
-    if shape == 'pentagon':
+    if shape == "pentagon":
         pass
-    elif shape == 'semicircle':
+    elif shape == "semicircle":
         pass
-    elif shape == 'rectangle':
+    elif shape == "rectangle":
         pass
-    elif shape == 'trapezoid':
+    elif shape == "trapezoid":
         y -= 20
-    elif shape == 'star':
+    elif shape == "star":
         pass
-    elif shape == 'triangle':
+    elif shape == "triangle":
         x -= 24
         y += 12
-    elif shape == 'quarter-circle':
+    elif shape == "quarter-circle":
         y -= 40
         x += 14
-    elif shape == 'cross':
+    elif shape == "cross":
         y -= 25
-    elif shape == 'square':
+    elif shape == "square":
         y -= 10
-    elif shape == 'circle':
+    elif shape == "circle":
         pass
     else:
         pass
@@ -331,12 +371,8 @@ def _rotate_shape(image, shape, angle):
     return image.rotate(angle, expand=1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
-    generate_all_images('detector_train',
-                        config.NUM_IMAGES,
-                        config.NUM_OFFSET)
+    generate_all_images("detector_train", config.NUM_IMAGES, config.NUM_OFFSET)
 
-    generate_all_images('detector_val',
-                        config.NUM_VAL_IMAGES,
-                        config.NUM_VAL_OFFSET)
+    generate_all_images("detector_val", config.NUM_VAL_IMAGES, config.NUM_VAL_OFFSET)

@@ -2,3 +2,7 @@ scripts_generate/data/**/*
 scripts_generate/data
 model_data/**/*
 scripts_generate/assets
+
+*.egg
+
+.git

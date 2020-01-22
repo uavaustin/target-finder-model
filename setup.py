@@ -36,7 +36,9 @@ setup(
     packages=find_packages(),
     package_data={
         'target_finder_model': [
-            'data/*'
+            'data/**/*',
+            'data/optimized-clf/**/*',
+            'data/optimized-det/**/*'
         ]
     },
     license='MIT'

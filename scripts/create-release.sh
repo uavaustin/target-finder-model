@@ -3,13 +3,21 @@
 cd $(dirname "$0")
 
 # Download the placeholder frozen models
-model_link="https://bintray.com/uavaustin/target-finder-assets/download_file?file_path=models-v1.tar.gz"
-od_model="models-v1/models/det.pb"
-clf_model="models-v1/models/clf.pb"
+model_pkg="models-v1.tar.gz"
+model_link="https://bintray.com/uavaustin/target-finder-assets/download_file?file_path=""$model_pkg"
+od_model="../target_finder_model/data/det.pb"
+clf_model="../target_finder_model/data/clf.pb"
 config="../config.yaml"
 
-wget "$model_link" -O models-v1.tar.gz
-tar xzf models-v1.tar.gz
+if [ ! -f "$od_model" ] && [ ! -f "$cld_model" ]; then
+  echo "Downloading placeholder models."
+  wget "$model_link" -O models-v1.tar.gz
+  tar xzf models-v1.tar.gz
+  ls
+  mv models-v1/models/*.pb "../target_finder_model/data/"
+  rm -rf models-v1
+  rm "$model_pkg"
+fi
 
 # Check that the model files exist.
 [ -f "$od_model" ] || (>&2 echo "Missing Detection Model" && exit 1)
@@ -26,13 +34,12 @@ archive_name="target-finder-model-""$version"".tar.gz"
 # Create the staging directory and the target-finder folder.
 echo "Staging files"
 mkdir -p "$tf_stage_dir""/target_finder_model/data/"
+cp -r "../target_finder_model/data/" "$tf_stage_dir""/target_finder_model/"
 cp "$od_model" "$tf_stage_dir""/target_finder_model/data/"
 cp "$clf_model" "$tf_stage_dir""/target_finder_model/data/"
 cp "$config" "$tf_stage_dir""/target_finder_model/data/"
 
-# Remove the downloaded models.
-echo "Remove downloaded placeholder models."
-rm -rf models-v1*
+
 
 # Copy over python files.
 mkdir -p "$tf_stage_dir""/target_finder_model"

@@ -1,10 +1,8 @@
-opencv-python
 contextlib2
 numpy
 Pillow
 progress
 requests
 tqdm
-tensorflow-gpu>=1.14
-git+https://github.com/tensorflow/tensorrt.git
+tensorflow-gpu>=2.0.0
 pyyaml
