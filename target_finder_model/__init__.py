@@ -15,14 +15,18 @@ with open(CONFIG_FN, 'r') as stream:
     import yaml
     CONFIG = yaml.safe_load(stream)
 
-# Builtin Saved Model
-CLF_MODEL_PATH = resource_filename(__name__, os.path.join('data', 'clf.pb'))
-OD_MODEL_PATH = resource_filename(__name__, os.path.join('data', 'det.pb'))
+CLF_MODEL_PATH = resource_filename(
+    __name__, os.path.join('data', 'optimized-clf'))
+OD_MODEL_PATH = resource_filename(
+    __name__, os.path.join('data', 'optimized-det'))
 
 # Model Classes
 OD_CLASSES = CONFIG['classes']['shapes'] + CONFIG['classes']['alphas']
 
 CLF_CLASSES = CONFIG['classes']['types']
+
+DET_SIZE = (CONFIG['inputs']['detector']['width'],
+            CONFIG['inputs']['detector']['height'])
 
 # Submodules
 from . import inference

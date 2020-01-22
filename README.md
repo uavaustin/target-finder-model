@@ -67,7 +67,7 @@ python scripts_tf/optimize_clf.py \
 ### Training Object Detector Model
 
 1. In a seperate folder `git clone https://github.com/tensorflow/models.git`
-2. Run with `MODEL_NAME` set to one of the models in `models/2`
+2. Run with `MODEL_NAME` set to one of the models in `models/`
 ```
 python path/to/models/research/object_detection/model_main.py \
     --pipeline_config_path models/MODEL_NAME/pipeline.config \
@@ -113,3 +113,6 @@ NOTE: All model training and freezing must be done with Tensorflow 1.x until the
 
 ## Testing
 Tests can be executed by running `make test` inside `Dockerfiles`.
+
+## Readability 
+All Python code conforms to the [Google Python Style Guide](http://google.github.io/styleguide/pyguide.html). The code can be formatted using [Black](https://black.readthedocs.io/en/stable/).

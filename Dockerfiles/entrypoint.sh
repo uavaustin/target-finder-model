@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo "Running pycodestyle."
-pycodestyle --exclude=vendor --ignore=E402,W503 target_finder_model generate scripts_tf test
+pycodestyle --exclude=vendor --ignore=E402,W503,E501 target_finder_model generate scripts_tf test
 
 echo "Building data."
 python scripts_generate/build.py
@@ -24,11 +24,12 @@ else
 fi
 
 echo "Training detection model."
-#python /sources/models/research/object_detection/model_main.py \
+python /sources/models/research/object_detection/model_main.py \
     --pipeline_config_path=models/faster_rcnn_resnet50_coco_2018_01_28/pipeline.config \
     --model_dir=models/faster_rcnn_resnet50_coco_2018_01_28/checkpoints/ \
     --num_train_steps=5 \
     --sample_1_of_n_eval_examples=1 
+
 # This command will fail on CI builds without gpu ()
 if [ $? -eq 0 ]; then
     echo OK

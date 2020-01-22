@@ -3,13 +3,15 @@ import time
 # Limit TF logs:
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 import tensorflow as tf
+import tensorflow.python.compiler.tensorrt
+from tensorflow.python.saved_model import tag_constants
+from tensorflow.python.saved_model import signature_constants
 from pkg_resources import resource_filename
 from dataclasses import dataclass
-import nets.nets_factory
 from PIL import Image
 import numpy as np
 
-from . import OD_CLASSES, OD_MODEL_PATH, CLF_MODEL_PATH
+from . import OD_CLASSES, OD_MODEL_PATH, CLF_MODEL_PATH, DET_SIZE
 
 
 class DetectionModel:
@@ -25,15 +27,19 @@ class DetectionModel:
 
         tf_config = tf.compat.v1.ConfigProto()
         tf_config.gpu_options.allow_growth = True
-
-        frozen_graph = tf.compat.v1.GraphDef()
-        with open(self.model_path, 'rb') as f:
-            frozen_graph.ParseFromString(f.read())
-
-        tf.import_graph_def(frozen_graph, name='')
-
-        self.graph = tf.compat.v1.get_default_graph()
         self.sess = tf.compat.v1.Session(config=tf_config)
+
+        try:
+            saved_model_loaded = tf.saved_model.load(
+                self.model_path, tags=[tag_constants.SERVING])
+            self.graph = saved_model_loaded.signatures[
+                signature_constants.DEFAULT_SERVING_SIGNATURE_DEF_KEY]
+
+        except:
+            frozen_graph = tf.compat.v1.GraphDef()
+            with open(self.model_path, 'rb') as f:
+                frozen_graph.ParseFromString(f.read())
+            tf.import_graph_def(frozen_graph, name='')
 
     def predict(self, input_data, batch_size=4):
 
@@ -41,43 +47,37 @@ class DetectionModel:
             return []
         elif isinstance(input_data, list):
             # allow list of paths as input
-            input_data = np.array([np.asarray(fn) for fn in input_data])
+            input_data = np.array(
+                [np.asarray(fn) for fn in input_data], dtype=np.uint8)
         else:
             pass
 
         num_imgs, im_width, im_height, _ = input_data.shape
-
-        output_tensors = [
-            self.graph.get_tensor_by_name('num_detections:0'),
-            self.graph.get_tensor_by_name('detection_classes:0'),
-            self.graph.get_tensor_by_name('detection_boxes:0'),
-            self.graph.get_tensor_by_name('detection_scores:0')
-        ]
 
         results = []
         if num_imgs < batch_size:
             batch_size = num_imgs
 
         for idx in range(batch_size, num_imgs + batch_size, batch_size):
+            input_data = tf.convert_to_tensor(
+                input_data[(idx - batch_size):idx])
+            preds = self.graph(input_data)
 
-            [nums, obj_types, boxes, scores] = self.sess.run(
-                output_tensors,
-                feed_dict={
-                    'image_tensor:0': input_data[(idx - batch_size):idx]
-                })
-
-            for i in range(len(nums)):
+            for i in range(len(preds['detection_classes'].numpy())):
                 image_detects = []
-                for k in range(int(nums[i])):
+                for j in range(int(preds['num_detections'][i].numpy())):
                     obj = DetectedObject()
-                    obj.class_idx = int(obj_types[i][k])
+                    obj.class_idx =  \
+                        int(preds['detection_classes'][i][j].numpy())
                     obj.class_name = OD_CLASSES[obj.class_idx - 1]
-                    obj.confidence = scores[i][k]
-                    bbox = boxes[i][k]
-                    obj.x = int(bbox[0] * im_width)
-                    obj.y = int(bbox[1] * im_height)
-                    obj.width = int((bbox[3] - bbox[1]) * im_width)
-                    obj.height = int((bbox[2] - bbox[0]) * im_height)
+                    obj.confidence = \
+                        float(preds['detection_scores'][i][j].numpy())
+                    y1, x1, y2, x2 = \
+                        list(preds['detection_boxes'][i][j].numpy())
+                    obj.x = int(x1 * DET_SIZE[0])
+                    obj.y = int(y1 * DET_SIZE[1])
+                    obj.width = int((x2 - x1) * DET_SIZE[0])
+                    obj.height = int((y2 - y1) * DET_SIZE[1])
                     image_detects.append(obj)
                 results.append(image_detects)
 
@@ -94,23 +94,23 @@ class ClfModel:
 
     def load(self):
 
-        with tf.io.gfile.GFile(self.model_path, 'rb') as f:
-            graph_def = tf.compat.v1.GraphDef()
-            graph_def.ParseFromString(f.read())
-
-        # Then, we import the graph_def into a new Graph and returns it
-        with tf.Graph().as_default() as graph:
-            # The name var will prefix every op/nodes in your graph
-            # Since we load everything in a new graph, this is not needed
-            tf.import_graph_def(graph_def, name="prefix")
-
         tf_config = tf.compat.v1.ConfigProto()
         tf_config.gpu_options.allow_growth = True
+        self.sess = tf.compat.v1.Session(config=tf_config)
 
-        self.graph = tf.compat.v1.get_default_graph()
-        self.sess = tf.compat.v1.Session(graph=graph, config=tf_config)
+        try:
+            saved_model_loaded = tf.saved_model.load(
+                self.model_path, tags=[tag_constants.SERVING])
+            self.graph = saved_model_loaded.signatures[
+                signature_constants.DEFAULT_SERVING_SIGNATURE_DEF_KEY]
 
-        self.tf_output = 'prefix/logits:0'
+        except:
+            frozen_graph = tf.compat.v1.GraphDef()
+            with open(self.model_path, 'rb') as f:
+                frozen_graph.ParseFromString(f.read())
+            tf.import_graph_def(frozen_graph, name='')
+
+            self.graph = tf.compat.v1.get_default_graph()
 
     def predict(self, input_data, batch_size=40):
 
@@ -119,7 +119,8 @@ class ClfModel:
         elif isinstance(input_data, list):
             # allow list of paths as input
             input_data = np.array(
-                [np.asarray(fn) / 255 for fn in input_data])
+                [np.asarray(fn) / 255 for fn in input_data], dtype=np.float32)
+
         else:
             pass
 
@@ -131,10 +132,10 @@ class ClfModel:
             batch_size = num_imgs
 
         for idx in range(batch_size, num_imgs + batch_size, batch_size):
+            input_data = tf.convert_to_tensor(
+                input_data[(idx - batch_size):idx])
 
-            [preds] = self.sess.run([self.tf_output], feed_dict={
-                'prefix/input:0': input_data[(idx - batch_size):idx]
-            })
+            preds = (self.graph(input_data)['prediction']).numpy()
 
             for i in range(len(preds)):
                 obj = DetectedObject()
