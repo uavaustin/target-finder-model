@@ -11,7 +11,6 @@ import numpy as np
 
 from create_detection_data import _random_list, _get_backgrounds
 
-
 # Get constants from config
 CLF_WIDTH, CLF_HEIGHT = config.PRECLF_SIZE
 CROP_WIDTH, CROP_HEIGHT = config.CROP_SIZE
@@ -101,7 +100,7 @@ def _single_clf_image(data):
     )
     background.save(bkg_fn)
 
-    # Now resize image with shape
+    # Now consider the shape image
     shape = Image.open(shape_img).resize(config.PRECLF_SIZE)
     shape = _enhance_image(shape, enhancement)
     shape_fn = os.path.join(data_path, "target_{}.{}".format(number, config.IMAGE_EXT))
