@@ -40,6 +40,7 @@ jobs:
     - name: Test with tox
       run: |
         cp config.yaml target_finder_model/data 
+        
         tox
 
     - name: Push target-finder-model-env
