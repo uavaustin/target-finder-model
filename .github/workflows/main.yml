@@ -40,9 +40,7 @@ jobs:
 
     - name: Setup env for tox test
       run: | 
-        cp config.yaml target_finder_model/data 
-        ls 
-        ls target_finder_model/data 
+        cp config.yaml target_finder_model/data/config.yaml
         pip3 install -e .
       shell: bash
 
