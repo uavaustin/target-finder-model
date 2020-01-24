@@ -20,6 +20,9 @@ jobs:
     - name: Build target-finder-model-env Docker image
       working-directory: ./Dockerfiles
       run: make tf1
+    
+    - name: Push target-finder-model-env
+      run: docker push uavaustin/target-finder-model-env:tf1
 
   tox:
     runs-on: ubuntu-latest
@@ -56,10 +59,6 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-
-    - name: Push target-finder-model-env
-      run: docker push uavaustin/target-finder-model-env:tf1
-
     
   build-tf2-image:
     runs-on: ubuntu-latest
