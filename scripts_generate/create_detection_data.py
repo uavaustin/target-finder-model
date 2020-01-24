@@ -18,7 +18,8 @@ import os
 import random
 import sys
 
-from PIL import Image, ImageDraw, ImageFilter, ImageFont, ImageOps
+from PIL import Image, ImageDraw, ImageFilter, ImageFont, ImageOps, ImageFile
+
 from tqdm import tqdm
 
 import generate_config as config
@@ -111,7 +112,7 @@ def generate_all_images(gen_type, num_gen, offset=0):
         )
 
     # Put everything into one large iterable so that we can split up
-    # data across thread pools.
+    # data across thread pools.ImageFile.LOAD_TRUNCATED_IMAGES = True
     data = zip(
         numbers,
         backgrounds,

@@ -125,13 +125,4 @@ models/faster_rcnn_resnet50_coco_2018_01_28/*
 models/inception_v3/*
 model_data/records/*
 model_data/*
-target_finder_model/data/model/*
-target_finder_model/data/clf_model/*
-scripts_tf/test.py
-
-#Temp
-scripts_generate/create_detection_data_classes.py
-scripts_generate/test
-
-target_finder_model/data
-models/frozen
+target_finder_model/data/**/*
