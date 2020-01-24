@@ -26,7 +26,15 @@ OD_CLASSES = CONFIG['classes']['shapes'] + CONFIG['classes']['alphas']
 CLF_CLASSES = CONFIG['classes']['types']
 
 DET_SIZE = (CONFIG['inputs']['detector']['width'],
-            CONFIG['inputs']['detector']['height'])
+    CONFIG['inputs']['detector']['height'])
+
+CLF_SIZE = (CONFIG['inputs']['preclf']['width'],
+    CONFIG['inputs']['preclf']['height'])
+
+CROP_SIZE = (CONFIG['inputs']['cropping']['width'],
+    CONFIG['inputs']['cropping']['height'])
+
+CROP_OVERLAP = CONFIG['inputs']['cropping']['overlap']
 
 # Submodules
 from . import inference

@@ -21,15 +21,16 @@ FILE_PATH = os.path.abspath(os.path.dirname(__file__))
 def create_clf_images(gen_type, num_gen, offset=0):
     """Generate data for the classifier model"""
 
-    # Make necessary directories to save data
     save_dir = os.path.join(config.DATA_DIR, gen_type, "images")
     os.makedirs(save_dir, exist_ok=True)
 
+    # Get target images
     data_folder = "detector_" + gen_type.split("_")[1]
     images_dir = os.path.join(
         config.DATA_DIR, data_folder, "images/*" + str(config.IMAGE_EXT)
     )
     image_names = glob.glob(images_dir)
+    image_names = _random_list(image_names, num_gen)
 
     numbers = list(range(offset, offset + num_gen))
 
@@ -44,7 +45,6 @@ def create_clf_images(gen_type, num_gen, offset=0):
 
     gen_types = [gen_type] * num_gen
 
-    shape_imgs = image_names[(offset - offset) : offset]
     data = zip(
         numbers,
         backgrounds,
@@ -54,7 +54,7 @@ def create_clf_images(gen_type, num_gen, offset=0):
         mirror_bg,
         blurs,
         enhancements,
-        shape_imgs,
+        image_names,
         gen_types,
     )
 
@@ -85,6 +85,7 @@ def _single_clf_image(data):
     background = background.crop(
         (crop_x, crop_y, crop_x + config.CROP_SIZE[0], crop_y + config.CROP_SIZE[1])
     )
+
     if flip_bg:
         background = ImageOps.flip(background)
     if mirror_bg:
@@ -92,8 +93,7 @@ def _single_clf_image(data):
 
     background.filter(ImageFilter.GaussianBlur(blur))
     background = background.resize(config.PRECLF_SIZE)
-    converter = ImageEnhance.Color(background)
-    background = converter.enhance(enhancement)
+    background = _enhance_image(background, enhancement)
 
     data_path = os.path.join(config.DATA_DIR, gen_type, "images")
     bkg_fn = os.path.join(
@@ -103,13 +103,16 @@ def _single_clf_image(data):
 
     # Now resize image with shape
     shape = Image.open(shape_img).resize(config.PRECLF_SIZE)
-    converter = ImageEnhance.Color(shape)
-    shape = converter.enhance(enhancement)
-
+    shape = _enhance_image(shape, enhancement)
     shape_fn = os.path.join(data_path, "target_{}.{}".format(number, config.IMAGE_EXT))
     shape.save(shape_fn)
 
     return
+
+
+def _enhance_image(img, enhancement):
+    converter = ImageEnhance.Color(img)
+    return converter.enhance(enhancement)
 
 
 if __name__ == "__main__":
