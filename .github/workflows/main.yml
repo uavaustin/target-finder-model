@@ -39,7 +39,7 @@ jobs:
         pip install tox
     - name: Test with tox
       run: |
-        cp config.yaml target_find_model/data 
+        cp config.yaml target_finder_model/data 
         tox
 
     - name: Push target-finder-model-env
