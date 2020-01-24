@@ -38,7 +38,9 @@ jobs:
         python -m pip install --upgrade pip
         pip install tox
     - name: Test with tox
-      run: tox
+      run: |
+        cp config.yaml target_find_model/data 
+        tox
 
     - name: Push target-finder-model-env
       run: docker push uavaustin/target-finder-model-env:tf1
