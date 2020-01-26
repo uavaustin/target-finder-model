@@ -120,8 +120,8 @@ models/*/*.pb
 models/*/*.index
 models/*/*.meta
 models/*/frozen
+models/*/optimized
 models/*/model.*
-models/faster_rcnn_resnet50_coco_2018_01_28/*
 models/inception_v3/*
 model_data/records/*
 target_finder_model/data/**/*

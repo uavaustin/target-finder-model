@@ -62,8 +62,6 @@ def create_clf_images(gen_type, num_gen, offset=0):
         for i in tqdm(processes, total=num_gen):
             pass
 
-    return
-
 
 def _single_clf_image(data):
     """Crop detection image and augment clf image and save"""
@@ -105,8 +103,6 @@ def _single_clf_image(data):
     shape = _enhance_image(shape, enhancement)
     shape_fn = os.path.join(data_path, "target_{}.{}".format(number, config.IMAGE_EXT))
     shape.save(shape_fn)
-
-    return
 
 
 def _enhance_image(img, enhancement):

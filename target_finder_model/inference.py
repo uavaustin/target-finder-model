@@ -42,15 +42,13 @@ class DetectionModel:
             tf.import_graph_def(frozen_graph, name='')
 
     def predict(self, input_data, batch_size=4):
-
+        
         if len(input_data) == 0:
             return []
         elif isinstance(input_data, list):
             # allow list of paths as input
             input_data = np.array(
                 [np.asarray(fn) for fn in input_data], dtype=np.uint8)
-        else:
-            pass
 
         num_imgs, im_width, im_height, _ = input_data.shape
 
@@ -59,9 +57,10 @@ class DetectionModel:
             batch_size = num_imgs
 
         for idx in range(batch_size, num_imgs + batch_size, batch_size):
-            input_data = tf.convert_to_tensor(
+            input_data_tensor = tf.convert_to_tensor(
                 input_data[(idx - batch_size):idx])
-            preds = self.graph(input_data)
+
+            preds = self.graph(input_data_tensor)
 
             for i in range(len(preds['detection_classes'].numpy())):
                 image_detects = []

@@ -87,7 +87,7 @@ tf.app.flags.DEFINE_integer(
 
 tf.app.flags.DEFINE_integer(
     "save_interval_secs",
-    600,
+    120,
     "The frequency with which the model is saved, in seconds.",
 )
 
@@ -226,9 +226,8 @@ tf.app.flags.DEFINE_string(
 
 tf.app.flags.DEFINE_string(
     "preprocessing_name",
-    None,
-    "The name of the preprocessing to use. If left"
-    "as `None`, then the model_name flag is used.",
+    'inception',
+    "The name of the preprocessing to use.",
 )
 
 tf.app.flags.DEFINE_integer("batch_size", 32, "The number of samples in each batch.")

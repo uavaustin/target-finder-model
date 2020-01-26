@@ -15,7 +15,7 @@ echo "Creating label map."
 python scripts_tf/create_label_map.py
 
 echo "Training classification model."
-#python scripts_tf/train_clf.py
+python scripts_tf/train_clf.py
 # This command will fail on CI builds without gpu ()
 if [ $? -eq 0 ]; then
     echo OK

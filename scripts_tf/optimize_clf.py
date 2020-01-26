@@ -88,8 +88,9 @@ def get_func_from_saved_model(saved_model_dir):
     saved_model_loaded = tf.saved_model.load(
         saved_model_dir, tags=[tag_constants.SERVING]
     )
-    graph_func = saved_model_loaded.signatures[signature_constants.PREDICT_OUTPUTS]
-    graph_func = convert_to_constants.convert_variables_to_constants_v2(graph_func)
+    graph_func = saved_model_loaded.signatures[
+        signature_constants.DEFAULT_SERVING_SIGNATURE_DEF_KEY
+    ]
     return graph_func
 
 
@@ -189,7 +190,7 @@ def run_inference(
     if mode == "validation":
         for i, batch_images in dataset:
             start_time = time.time()
-            batch_preds = graph_func(batch_images["image/encoded"])[0].numpy()
+            batch_preds = graph_func(batch_images["image/encoded"])["prediction"].numpy()
             end_time = time.time()
             iter_times.append(end_time - start_time)
             if i % display_every == 0:
@@ -211,7 +212,7 @@ def run_inference(
         for i, batch_images in dataset:
             if i >= num_warmup_iterations:
                 start_time = time.time()
-                batch_preds = graph_func(batch_images["image/encoded"])[0].numpy()
+                batch_preds = graph_func(batch_images["image/encoded"])["prediction"].numpy()
                 iter_times.append(time.time() - start_time)
                 if i % display_every == 0:
                     print(
@@ -219,7 +220,7 @@ def run_inference(
                         % (i + 1, num_iterations, iter_times[-1] * 1000)
                     )
             else:
-                batch_preds = graph_func(batch_images["image/encoded"])[0].numpy()
+                batch_preds = graph_func(batch_images["image/encoded"]).numpy()
             if (
                 i > 0
                 and target_duration is not None

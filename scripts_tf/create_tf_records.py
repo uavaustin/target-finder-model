@@ -80,7 +80,7 @@ def create_tf_example(image_path_prefix, image_dir):
 
     image = Image.open(encoded_img_io)
     image_width, image_height = image.size
-
+    
     annotations = []
     has_target = 1
 
@@ -171,6 +171,7 @@ def main(_):
         FLAGS.det = True
 
     if FLAGS.det:
+        
         _create_tf_record_from_images(
             os.path.join(FLAGS.image_dir, "detector_train", "images"),
             os.path.join(FLAGS.output_dir, "tfm_train.record"),

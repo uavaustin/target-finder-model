@@ -20,7 +20,7 @@ from __future__ import print_function
 
 import math
 import os
-
+os.environ["CUDA_VISIBLE_DEVICES"]="-1"
 import tensorflow as tf
 from tensorflow.contrib import quantize as contrib_quantize
 from tensorflow.contrib import slim as contrib_slim
@@ -155,7 +155,7 @@ def main(_):
             data_sources=file_pattern,
             reader=tf.TFRecordReader,
             decoder=decoder,
-            num_samples=NUM_IMGS,
+            num_samples=50,
             items_to_descriptions=items_to_descs,
             num_classes=len(CLASSES),
             labels_to_names=label_idx_to_name,
@@ -174,7 +174,6 @@ def main(_):
             common_queue_min=FLAGS.batch_size,
         )
         [image, label] = provider.get(["image", "label"])
-        label -= FLAGS.labels_offset
 
         # Select the preprocessing function
         preprocessing_name = FLAGS.preprocessing_name or FLAGS.model_name
@@ -222,11 +221,12 @@ def main(_):
         )
 
         # Print the summaries to screen.
+        summary_ops = []
         for name, value in names_to_values.items():
             summary_name = "eval/%s" % name
             op = tf.summary.scalar(summary_name, value, collections=[])
             op = tf.Print(op, [value], summary_name)
-            tf.add_to_collection(tf.GraphKeys.SUMMARIES, op)
+            summary_ops.append(op)
 
         if FLAGS.max_num_batches:
             num_batches = FLAGS.max_num_batches
@@ -241,13 +241,14 @@ def main(_):
 
         tf.logging.info("Evaluating %s" % checkpoint_path)
 
-        slim.evaluation.evaluate_once(
-            master=FLAGS.master,
-            checkpoint_path=checkpoint_path,
+        slim.evaluation.evaluation_loop(
+            FLAGS.master,
+            FLAGS.checkpoint_path,
             logdir=FLAGS.eval_dir,
             num_evals=num_batches,
             eval_op=list(names_to_updates.values()),
-            variables_to_restore=variables_to_restore,
+            summary_op=tf.summary.merge(summary_ops),
+            eval_interval_secs=30
         )
 
 

@@ -103,6 +103,8 @@ def get_annotations(records_dir):
             "height": int(data["image/height"].numpy()),
             "width": int(data["image/width"].numpy()),
             "id": int(i.numpy()),
+            "coco_url": "n/a",
+            "date_captured": "2000-01-01 00:00:00"
         }
         images.append(img)
 
@@ -111,7 +113,7 @@ def get_annotations(records_dir):
             y1 = data["image/object/bbox/ymin"].values[j].numpy()
             x2 = data["image/object/bbox/xmax"].values[j].numpy()
             y2 = data["image/object/bbox/ymax"].values[j].numpy()
-
+            
             bbox_coco_fmt = [
                 x1 * data["image/width"].numpy(),  # x0
                 y1 * data["image/height"].numpy(),  # x1
@@ -123,7 +125,8 @@ def get_annotations(records_dir):
                 "image_id": int(i.numpy()),
                 "category_id": int(data["image/object/class/label"].values[j].numpy()),
                 "bbox": [int(coord) for coord in bbox_coco_fmt],
-                "segmentation": [],
+                "segmentation": [[str(x1), str(y1), str(x1), str(y2), str(x2), str(y2), str(x2), str(y1)]],
+                "iscrowd": 0,
             }
             coco_labels.append(coco_label)
 
@@ -360,28 +363,31 @@ def run_inference(
     return results, predictions, coco
 
 
-def eval_model(predictions, coco):
+def eval_model(predictions, coco, batch_size):
 
     coco_detections = []
     num_batches = len(predictions["detection_classes"])
     # Loop over all the image batches processed
+    img = 0
     for i in range(num_batches):
-        for j in range(int(predictions["num_detections"][i])):
-            bbox = predictions["detection_boxes"][i][0][j]
-            y1, x1, y2, x2 = list(bbox)
-            bbox_coco_fmt = [
-                x1 * image_width,  # x0
-                y1 * image_height,  # x1
-                (x2 - x1) * image_width,  # width
-                (y2 - y1) * image_height,  # height
-            ]
-            coco_detection = {
-                "image_id": int(i),
-                "category_id": int(predictions["detection_classes"][i][0][j]),
-                "bbox": [int(coord) for coord in bbox_coco_fmt],
-                "score": float(predictions["detection_scores"][i][0][j]),
-            }
-            coco_detections.append(coco_detection)
+        for j in range(int(batch_size)):
+            for k in range(int(predictions["num_detections"][i][j])):
+                bbox = predictions["detection_boxes"][i][j][k]
+                y1, x1, y2, x2 = list(bbox)
+                bbox_coco_fmt = [
+                    x1 * image_width,  # x0
+                    y1 * image_height,  # x1
+                    (x2 - x1) * image_width,  # width
+                    (y2 - y1) * image_height,  # height
+                ]
+                coco_detection = {
+                    "image_id": int(img),
+                    "category_id": int(predictions["detection_classes"][i][j][k]),
+                    "bbox": [int(coord) for coord in bbox_coco_fmt],
+                    "score": float(predictions["detection_scores"][i][j][k]),
+                }
+                coco_detections.append(coco_detection)
+            img += 1
 
     # write coco detections to file
     tmp_dir = "tmp_detection_results"
@@ -639,7 +645,7 @@ if __name__ == "__main__":
 
     print("Results:")
     if args.mode == "validation":
-        mAP = eval_model(predictions, coco)
+        mAP = eval_model(predictions, coco, args.batch_size)
         print("  mAP: %f" % mAP)
     print("  images/sec: %d" % results["images_per_sec"])
     print("  99th_percentile(ms): %.2f" % results["99th_percentile"])

@@ -172,8 +172,7 @@ def _generate_single_example(data):
     if sharpen == 1:
         full_img = full_img.filter(ImageFilter.SHARPEN)
 
-    full_img.resize(config.DETECTOR_SIZE)
-
+    full_img = full_img.resize(config.DETECTOR_SIZE)
     full_img.save(img_fn)
 
     with open(labels_fn, "w") as label_file:

@@ -3,7 +3,6 @@
 > Related scripts and models for [target-finder](https://github.com/uavaustin/target-finder).
 
 [![Actions Status | Build](https://github.com/uavaustin/target-finder-model/workflows/build/badge.svg)](https://github.com/uavaustin/target-finder-model/actions)
-[![Coverage Status](https://coveralls.io/repos/github/uavaustin/target-finder-model/badge.svg?branch=master)](https://coveralls.io/github/uavaustin/target-finder-model?branch=master)
 
 ## Developer Instructions
 
@@ -39,7 +38,7 @@ To evaluate the model's accuracy during training, run:
 python scripts_tf/eval_clf.py \ 
     --model_name MODEL_NAME \
     --checkpoint_path models/MODEL_NAME/checkpoints \
-    --eval_dir models/MODEL_NAME/checkpoints/eval
+    --eval_dir models/MODEL_NAME/eval
 ```
 Training statistics can be visualized with `tensorboard --logdir models/MODEL_NAME/checkpoints`.
 
@@ -47,12 +46,12 @@ Training statistics can be visualized with `tensorboard --logdir models/MODEL_NA
 After training, freeze the classification model for inference.
 ```
 python scripts_tf/freeze_clf.py \
-    --model_name inception_v3 \
+    --model_name MODEL_NAME \
     --ckpt_dir models/MODEL_NAME/ckpts \
     --output_dir models/MODEL_NAME/frozen 
 ```
 
-### Optimize Pre-Classifier from ckpt
+### Optimize Pre-Classifier from fozen model
 ```
 python scripts_tf/optimize_clf.py \
     --input_saved_model_dir models/MODEL_NAME/frozen  \
@@ -96,6 +95,39 @@ python scripts_tf/optimize_od.py \
 ```
 NOTE: All model training and freezing must be done with Tensorflow 1.x until the Object Detection API supports TensorFlow 2
 
+## Testing
+
+To run the tests, first install `tox`.
+
+```sh
+$ pip3 install tox
+```
+
+Now the tests can be run by simply calling:
+
+```sh
+$ tox
+```
+
+This takes care of installing the development dependencies in a Python virtual
+environment. After, it runs quick unit tests to ensure data is created and the model
+package is loading as expected.
+
+To only build the shapes, or run the unit tests, you
+can run `tox -e model` and `tox -e unit`, respectively.
+
+These tests are automatically run on Github Actions on each commit.
+
+## Releases
+
+Building the full model is managed with Github Actions(along with the testing
+above).
+
+Full builds are run on tags and the model is uploaded as a build artifact at
+the end and pushed to GitHub Releases.
+## Readability 
+All Python code conforms to the [Google Python Style Guide](http://google.github.io/styleguide/pyguide.html). The code can be formatted using [Black](https://black.readthedocs.io/en/stable/).
+
 ## Repository Contents
 
 #### Model Files
@@ -107,12 +139,7 @@ NOTE: All model training and freezing must be done with Tensorflow 1.x until the
 * `scripts_tf/` Helpful TensorFlow utilities
 
 #### Misc
-* `.circleci/` CI Config for automated builds and testing
+* `.github/workflows/` CI Config for automated builds and testing
 * `Dockerfiles/` Docker resources for creating a prebuilt ML environment
 * `target_finder_model/` The package that will be exported to [target-finder](https://github.com/uavaustin/target-finder) when a release is created.
-
-## Testing
-Tests can be executed by running `make test` inside `Dockerfiles`.
-
-## Readability 
-All Python code conforms to the [Google Python Style Guide](http://google.github.io/styleguide/pyguide.html). The code can be formatted using [Black](https://black.readthedocs.io/en/stable/).
+* `experimental` Collection of various scripts that may or may not be used in the future. Nothing outside of experimental can depend on code inside experimental.
