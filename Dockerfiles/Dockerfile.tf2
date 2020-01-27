@@ -1,0 +1,27 @@
+FROM nvcr.io/nvidia/tensorflow:19.10-py3
+ 
+WORKDIR /sources
+
+RUN apt-get update \
+    && apt-get install -y \
+	      git \
+        protobuf-compiler \ 
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements-docker.txt .
+
+RUN apt install python3-pip \
+  && pip3 install --upgrade pip 
+
+RUN pip3 install -r requirements-docker.txt \
+  && pip3 install --upgrade tf-nightly
+
+RUN /usr/bin/yes | pip3 uninstall pycocotools
+
+RUN git clone https://github.com/cocodataset/cocoapi.git \
+  && cd cocoapi/PythonAPI/ \
+  && python3 setup.py build_ext install \
+  && rm -rf build 
+  
+
+WORKDIR /host

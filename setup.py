@@ -1,11 +1,7 @@
 #!/usr/bin/env python
 
 import os
-
-try:
-    from setuptools import setup, find_packages
-except:
-    raise Exception('setuptools is required for installation')
+from setuptools import setup, find_packages
 
 
 def join(*paths):
@@ -15,7 +11,6 @@ def join(*paths):
     Returns:
         str: The normalized path.
     """
-
     return os.path.normpath(os.path.join(*paths))
 
 
@@ -27,12 +22,9 @@ def get_version():
     Returns:
         str: The current uavaustin-target-finder version.
     """
-
     with open(VERSION_PATH, 'r') as version:
         out = {}
-
         exec(version.read(), out)
-
         return out['__version__']
 
 
@@ -44,10 +36,9 @@ setup(
     packages=find_packages(),
     package_data={
         'target_finder_model': [
-            'data/preclf-test.cfg',
-            'data/yolo3detector-test.cfg',
-            'data/preclf-train_final.weights',
-            'data/yolo3detector-train_final.weights'
+            'data/**/*',
+            'data/optimized-clf/**/*',
+            'data/optimized-det/**/*'
         ]
     },
     license='MIT'

@@ -1,0 +1,13 @@
+Cython
+contextlib2
+pillow
+lxml
+jupyter
+requests
+matplotlib
+absl-py
+tqdm
+pyyaml
+dataclasses
+numpy
+grpcio>=1.24.3
