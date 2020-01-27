@@ -42,8 +42,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./target-finder-model-v1.0.0.tar.gz
-        asset_name:  target-finder-model-v1.0.0.tar.gz
+        asset_path: ./target-finder-model-${{ github.ref }}.tar.gz
+        asset_name:  target-finder-model-${{ github.ref }}.tar.gz
         asset_content_type: application/zip
 
     - name: Send slack notification.
