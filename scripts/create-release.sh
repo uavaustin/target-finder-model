@@ -13,7 +13,6 @@ if [ ! -f "$od_model" ] && [ ! -f "$cld_model" ]; then
   echo "Downloading placeholder models."
   wget "$model_link" -O models-v1.tar.gz
   tar xzf models-v1.tar.gz
-  ls
   mv models-v1/models/*.pb "../target_finder_model/data/"
   rm -rf models-v1
   rm "$model_pkg"
