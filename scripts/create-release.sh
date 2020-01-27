@@ -2,9 +2,6 @@
 
 cd $(dirname "$0")
 
-# Make sure data folder exits 
-mkdir -p "../target_finder_model/data/"
-
 # Download the placeholder frozen models
 model_pkg="models-v1.tar.gz"
 model_link="https://bintray.com/uavaustin/target-finder-assets/download_file?file_path=""$model_pkg"
