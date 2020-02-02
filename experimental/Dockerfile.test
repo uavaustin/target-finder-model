@@ -1,0 +1,11 @@
+FROM uavaustin/target-finder-model-env:tf1
+
+WORKDIR /test
+
+RUN pip3 install tox pycodestyle pytest pytest-cov coveralls
+
+COPY . .
+
+RUN chmod +x Dockerfiles/entrypoint.sh
+
+ENTRYPOINT ["/test/Dockerfiles/entrypoint.sh"]

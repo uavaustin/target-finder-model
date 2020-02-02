@@ -107,13 +107,24 @@ venv.bak/
 /release/
 
 # Shape generation directories
-/generate/assets/
-/generate/data/
+/scripts_generate/assets/
+/scripts_generate/data/
 /test/shapes/
 
 # Model
 *.weights
 bad.list
-
+models/*/saved_model
+models/*/checkpoints
+models/*/*.pb
+models/*/*.index
+models/*/*.meta
+models/*/frozen
+models/*/optimized
+models/*/model.*
+models/inception_v3/*
+model_data/records/*
+target_finder_model/data/**/*
+!target_finder_model/data/config.yaml
 # Editor
 .vscode

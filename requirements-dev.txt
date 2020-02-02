@@ -1,6 +1,9 @@
-opencv-python
+contextlib2
 numpy
 Pillow
 progress
 requests
 tqdm
+tensorflow-gpu>=2.0.0
+pyyaml
+dataclasses

@@ -2,16 +2,25 @@
 
 cd $(dirname "$0")
 
-yolo_weights_file="../target_finder_model/data/yolo3detector-train_final.weights"
-clf_weights_file="../target_finder_model/data/preclf-train_final.weights"
-yolo_cfg_file="../target_finder_model/data/yolo3detector-test.cfg"
-clf_cfg_file="../target_finder_model/data/preclf-test.cfg"
+# Download the placeholder frozen models
+model_pkg="models-v1.tar.gz"
+model_link="https://bintray.com/uavaustin/target-finder-assets/download_file?file_path=""$model_pkg"
+od_model="../target_finder_model/data/det.pb"
+clf_model="../target_finder_model/data/clf.pb"
+config="../config.yaml"
+
+if [ ! -f "$od_model" ] && [ ! -f "$cld_model" ]; then
+  echo "Downloading placeholder models."
+  wget "$model_link" -O models-v1.tar.gz
+  tar xzf models-v1.tar.gz
+  mv models-v1/models/*.pb "../target_finder_model/data/"
+  rm -rf models-v1
+  rm "$model_pkg"
+fi
 
 # Check that the model files exist.
-[ -f "$yolo_weights_file" ] || (>&2 echo "Missing Yolo Weights" && exit 1)
-[ -f "$clf_weights_file" ] || (>&2 echo "Missing Clf Weights" && exit 1)
-[ -f "$yolo_cfg_file" ] || (>&2 echo "Missing Yolo Cfg" && exit 1)
-[ -f "$clf_cfg_file" ] || (>&2 echo "Missing Clf Cfg" && exit 1)
+[ -f "$od_model" ] || (>&2 echo "Missing Detection Model" && exit 1)
+[ -f "$clf_model" ] || (>&2 echo "Missing Classification Model" && exit 1)
 
 # Find the version number to release.
 version=$(grep -o -e "'.*'" "../target_finder_model/version.py" | tr -d "'")
@@ -24,10 +33,12 @@ archive_name="target-finder-model-""$version"".tar.gz"
 # Create the staging directory and the target-finder folder.
 echo "Staging files"
 mkdir -p "$tf_stage_dir""/target_finder_model/data/"
-cp "$yolo_weights_file" "$tf_stage_dir""/target_finder_model/data/"
-cp "$clf_weights_file" "$tf_stage_dir""/target_finder_model/data/"
-cp "$yolo_cfg_file" "$tf_stage_dir""/target_finder_model/data/"
-cp "$clf_cfg_file" "$tf_stage_dir""/target_finder_model/data/"
+cp -r "../target_finder_model/data/" "$tf_stage_dir""/target_finder_model/"
+cp "$od_model" "$tf_stage_dir""/target_finder_model/data/"
+cp "$clf_model" "$tf_stage_dir""/target_finder_model/data/"
+cp "$config" "$tf_stage_dir""/target_finder_model/data/"
+
+
 
 # Copy over python files.
 mkdir -p "$tf_stage_dir""/target_finder_model"
