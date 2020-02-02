@@ -94,6 +94,11 @@ COLORS = {
 
 ALPHAS = config["classes"]["alphas"]
 
+CLASSES = []
+for shape in SHAPE_TYPES:
+    for alpha in ALPHAS:
+        CLASSES.append([shape,alpha])
+
 ALPHA_FONT_DIR = os.path.join(os.path.dirname(__file__), "vendor", "fonts")
 ALPHA_FONTS = [
     os.path.join(ALPHA_FONT_DIR, "Rajdhani", "Rajdhani-Bold.ttf"),
