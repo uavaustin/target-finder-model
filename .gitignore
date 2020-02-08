@@ -125,6 +125,6 @@ models/*/model.*
 models/inception_v3/*
 model_data/records/*
 target_finder_model/data/**/*
-!target_finder_model/data/config.yaml
+!target_finder_model/data/data.here
 # Editor
 .vscode

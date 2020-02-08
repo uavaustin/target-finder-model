@@ -1,33 +1,39 @@
 """Entrypoint for the target_finder_model library.
-
 This module contains the filenames used for target-finder so they can
 be encapsulated in a single python library that can be fetched.
 """
 
 from pkg_resources import resource_filename
+import os
 
 from .version import __version__
 
+# Config
+CONFIG_FN = resource_filename(__name__, os.path.join('data', 'config.yaml'))
+with open(CONFIG_FN, 'r') as stream:
+    import yaml
+    CONFIG = yaml.safe_load(stream)
 
-### Darknet Config
-##preclf_file = resource_filename(__name__, 'data/preclf-test.cfg')
-##yolo3_file = resource_filename(__name__, 'data/yolo3detector-test.cfg')
-##
-##preclf_weights = resource_filename(__name__,
-##                                   'data/preclf-train_final.weights')
-##yolo3_weights = resource_filename(__name__,
-##                                  'data/yolo3detector-train_final.weights')
+CLF_MODEL_PATH = resource_filename(
+    __name__, os.path.join('data', 'optimized-clf'))
+OD_MODEL_PATH = resource_filename(
+    __name__, os.path.join('data', 'optimized-det'))
 
 # Model Classes
-CLF_CLASSES = ['background', 'shape_target']
-YOLO_CLASSES = (
-    'circle,cross,pentagon,quarter-circle,rectangle,semicircle,square,star,'
-    'trapezoid,triangle'
-).split(',') + list('ABCDEFGHIJKLMNOPQRSTUVWXYZ4')
+OD_CLASSES = CONFIG['classes']['shapes'] + CONFIG['classes']['alphas']
 
-# Other Model Params (match with generate/config.py)
-FULL_SIZE = (4240, 2400)
-CROP_SIZE = (400, 400)
-CROP_OVERLAP = 100
-DETECTOR_SIZE = (608, 608)
-PRECLF_SIZE = (64, 64)
+CLF_CLASSES = CONFIG['classes']['types']
+
+DET_SIZE = (CONFIG['inputs']['detector']['width'],
+    CONFIG['inputs']['detector']['height'])
+
+CLF_SIZE = (CONFIG['inputs']['preclf']['width'],
+    CONFIG['inputs']['preclf']['height'])
+
+CROP_SIZE = (CONFIG['inputs']['cropping']['width'],
+    CONFIG['inputs']['cropping']['height'])
+
+CROP_OVERLAP = CONFIG['inputs']['cropping']['overlap']
+
+# Submodules
+from . import inference

@@ -172,10 +172,10 @@ def main(_):
 
     if FLAGS.det:
 
-        # _create_tf_record_from_images(
-        #    os.path.join(FLAGS.image_dir, "detector_train", "images"),
-        #    os.path.join(FLAGS.output_dir, "tfm_train.record"),
-        # )
+        _create_tf_record_from_images(
+            os.path.join(FLAGS.image_dir, "detector_train", "images"),
+            os.path.join(FLAGS.output_dir, "tfm_train.record"),
+        )
 
         _create_tf_record_from_images(
             os.path.join(FLAGS.image_dir, "detector_val", "images"),
@@ -183,10 +183,10 @@ def main(_):
         )
 
     if FLAGS.clf:
-        # _create_tf_record_from_images(
-        #    os.path.join(FLAGS.image_dir, "clf_train", "images"),
-        #    os.path.join(FLAGS.output_dir, "tfm_clf_train.record"),
-        # )
+        _create_tf_record_from_images(
+            os.path.join(FLAGS.image_dir, "clf_train", "images"),
+            os.path.join(FLAGS.output_dir, "tfm_clf_train.record"),
+        )
 
         _create_tf_record_from_images(
             os.path.join(FLAGS.image_dir, "clf_val", "images"),
