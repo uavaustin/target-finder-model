@@ -14,7 +14,7 @@ if __name__ == "__main__":
     try:
         NUM_IMAGES = int(os.environ["NUM_IMAGES"])
         NUM_VAL_IMAGES = int(os.environ["NUM_VAL_IMAGES"])
-        
+
     except Exception:
         config.NUM_IMAGES = 20
         config.NUM_VAL_IMAGES = 10

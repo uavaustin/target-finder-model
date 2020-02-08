@@ -225,9 +225,7 @@ tf.app.flags.DEFINE_string(
 )
 
 tf.app.flags.DEFINE_string(
-    "preprocessing_name",
-    'inception',
-    "The name of the preprocessing to use.",
+    "preprocessing_name", "inception", "The name of the preprocessing to use.",
 )
 
 tf.app.flags.DEFINE_integer("batch_size", 32, "The number of samples in each batch.")

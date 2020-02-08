@@ -1,65 +1,58 @@
-#!/bin/sh -e
+#!/bin/bash -e
 
 cd $(dirname "$0")
 
-# Download the placeholder frozen models
+# Placeholder models for release generation. Mainly CI use. 
 model_pkg="models-v1.tar.gz"
 model_link="https://bintray.com/uavaustin/target-finder-assets/download_file?file_path=""$model_pkg"
-od_model="../target_finder_model/data/det.pb"
-clf_model="../target_finder_model/data/clf.pb"
+od_model_dir="../target_finder_model/data/clf"
+clf_model_dir="../target_finder_model/data/det"
 config="../config.yaml"
 
-if [ ! -f "$od_model" ] && [ ! -f "$cld_model" ]; then
+# Check to see if model dirs exist.
+if [ ! -d "$od_mode_dir" ] && [ ! -d "$clf_model_dir" ]; then
   echo "Downloading placeholder models."
-  wget "$model_link" -O models-v1.tar.gz
+  wget -q "$model_link" -O models-v1.tar.gz
   tar xzf models-v1.tar.gz
   mv models-v1/models/*.pb "../target_finder_model/data/"
   rm -rf models-v1
   rm "$model_pkg"
+else 
+  echo "Found existing models."
 fi
-
-# Check that the model files exist.
-[ -f "$od_model" ] || (>&2 echo "Missing Detection Model" && exit 1)
-[ -f "$clf_model" ] || (>&2 echo "Missing Classification Model" && exit 1)
 
 # Find the version number to release.
 version=$(grep -o -e "'.*'" "../target_finder_model/version.py" | tr -d "'")
 
-echo "Detected version ""$version"
+echo "Detected version ""$version""."
 
-tf_stage_dir="../release/staging/target-finder-model"
+pushd ..
+tf_stage_dir="release/staging"
 archive_name="target-finder-model-""$version"".tar.gz"
 
 # Create the staging directory and the target-finder folder.
-echo "Staging files"
-mkdir -p "$tf_stage_dir""/target_finder_model/data/"
-cp -r "../target_finder_model/data/" "$tf_stage_dir""/target_finder_model/"
-cp "$od_model" "$tf_stage_dir""/target_finder_model/data/"
-cp "$clf_model" "$tf_stage_dir""/target_finder_model/data/"
-cp "$config" "$tf_stage_dir""/target_finder_model/data/"
-
-
+echo "Staging files."
 
 # Copy over python files.
 mkdir -p "$tf_stage_dir""/target_finder_model"
-find "../target_finder_model/" -name "*.py" -exec cp "{}" \
+find "target_finder_model/" -name "*.py" -exec cp "{}" \
   "$tf_stage_dir/target_finder_model/" \;
-
+# Copy model dirs
+cp -r "target_finder_model/data" "$tf_stage_dir/target_finder_model/"
 # Copy over configuration and informational files.
-cp ../README.md ../LICENSE \
-  ../setup.py "$tf_stage_dir"
+cp "README.md" "LICENSE" "setup.py" "$tf_stage_dir"
 
 # Compress the directory.
-echo "Creating archive"
+echo "Creating archive."
+pushd "release"
 
-cd "../release/staging"
-tar -czvf "$archive_name" "target-finder-model"
-mv "$archive_name" ..
+tar -C "staging" -czf "$archive_name" .
 
-echo "\033[32mCreated target-finder-model release" \
+echo -e "\033[32mCreated target-finder-model release" \
   "(""$archive_name"")\033[0m"
 
 # Remove the staging directory.
 echo "Removing staging files"
-cd ..
 rm -rf staging
+popd
+popd

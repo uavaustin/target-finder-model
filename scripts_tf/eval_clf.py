@@ -20,7 +20,8 @@ from __future__ import print_function
 
 import math
 import os
-os.environ["CUDA_VISIBLE_DEVICES"]="-1"
+
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 import tensorflow as tf
 from tensorflow.contrib import quantize as contrib_quantize
 from tensorflow.contrib import slim as contrib_slim
@@ -248,7 +249,7 @@ def main(_):
             num_evals=num_batches,
             eval_op=list(names_to_updates.values()),
             summary_op=tf.summary.merge(summary_ops),
-            eval_interval_secs=30
+            eval_interval_secs=30,
         )
 
 

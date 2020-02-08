@@ -190,7 +190,9 @@ def run_inference(
     if mode == "validation":
         for i, batch_images in dataset:
             start_time = time.time()
-            batch_preds = graph_func(batch_images["image/encoded"])["prediction"].numpy()
+            batch_preds = graph_func(batch_images["image/encoded"])[
+                "prediction"
+            ].numpy()
             end_time = time.time()
             iter_times.append(end_time - start_time)
             if i % display_every == 0:
@@ -212,7 +214,9 @@ def run_inference(
         for i, batch_images in dataset:
             if i >= num_warmup_iterations:
                 start_time = time.time()
-                batch_preds = graph_func(batch_images["image/encoded"])["prediction"].numpy()
+                batch_preds = graph_func(batch_images["image/encoded"])[
+                    "prediction"
+                ].numpy()
                 iter_times.append(time.time() - start_time)
                 if i % display_every == 0:
                     print(
