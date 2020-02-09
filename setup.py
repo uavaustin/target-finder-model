@@ -34,9 +34,19 @@ setup(
     author='UAV Austin',
     url='https://github.com/uavaustin/target-finder-model',
     packages=find_packages(),
+    install_requires=[
+        "numpy==1.18.1",
+        "pyyaml==5.3",
+        "dataclasses==0.7",
+        "Pillow==7.0.0",
+    ],
     package_data={
         'target_finder_model': [
-            'data/**/*'
+            'data/config.yaml',
+            'data/det/saved_model.pb',
+            'data/clf/saved_model.pb',
+            'data/clf/variables/variables.data-00000-of-00001',
+            'data/clf/variables/variables.index'
         ]
     },
     license='MIT'

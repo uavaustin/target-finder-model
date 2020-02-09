@@ -63,6 +63,8 @@ python scripts_tf/optimize_clf.py \
     --batch_size 5
 ```
 
+When optimizing on the Xavier, use `--calib_data_dir` and `--precision INT8`.
+
 ### Training Object Detector Model
 
 1. In a seperate folder `git clone https://github.com/tensorflow/models.git`
@@ -93,7 +95,9 @@ python scripts_tf/optimize_od.py \
     --use_trt \
     --precision FP32
 ```
-NOTE: All model training and freezing must be done with Tensorflow 1.x until the Object Detection API supports TensorFlow 2
+When optimizing on the Xavier, use `--calib_data_dir` and `--precision INT8`.
+
+**NOTE**: All model training and freezing must be done with Tensorflow 1.x until the Object Detection API supports TensorFlow 2
 
 ## Testing
 

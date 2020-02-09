@@ -85,7 +85,7 @@ def generate_all_images(gen_type, num_gen, offset=0):
         target_rgbs = [random.choice(COLORS[color]) for color in target_colors]
         alpha_rgbs = [random.choice(COLORS[color]) for color in alpha_colors]
 
-        sizes = _random_list(range(40, 65), num_targets)
+        sizes = _random_list(range(35, 65), num_targets)
 
         angles = _random_list(range(0, 360), num_targets)
 
@@ -270,7 +270,7 @@ def _augment_color(color_rgb):
     b = max(min(b + random.randint(-10, 11), 255), 1)
     return (r, g, b)
 
-
+200000
 def _get_base(base, target_rgb, size):
     """Copy and recolor the base shape"""
     image = base.copy()
@@ -372,7 +372,7 @@ def _rotate_shape(image, shape, angle):
 
 
 if __name__ == "__main__":
-
-    generate_all_images("detector_train", config.NUM_IMAGES, config.NUM_OFFSET)
-
-    generate_all_images("detector_val", config.NUM_VAL_IMAGES, config.NUM_VAL_OFFSET)
+    if config.NUM_IMAGES != 0:
+        generate_all_images("detector_train", config.NUM_IMAGES, config.NUM_OFFSET)
+    if config.NUM_VAL_IMAGES != 0:
+        generate_all_images("detector_val", config.NUM_VAL_IMAGES, config.NUM_VAL_OFFSET)

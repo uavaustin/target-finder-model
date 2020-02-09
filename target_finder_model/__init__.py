@@ -15,9 +15,9 @@ with open(CONFIG_FN, 'r') as stream:
     CONFIG = yaml.safe_load(stream)
 
 CLF_MODEL_PATH = resource_filename(
-    __name__, os.path.join('data', 'optimized-clf'))
+    __name__, os.path.join('data', 'clf'))
 OD_MODEL_PATH = resource_filename(
-    __name__, os.path.join('data', 'optimized-det'))
+    __name__, os.path.join('data', 'det'))
 
 # Model Classes
 OD_CLASSES = CONFIG['classes']['shapes'] + CONFIG['classes']['alphas']

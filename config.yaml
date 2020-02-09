@@ -48,15 +48,15 @@ inputs:
   cropping:
     width: 300
     height: 300
-    overlap: 100
+    overlap: 75
   detector:
-    width: 608
-    height: 608
+    width: 600
+    height: 600
   preclf:
     width: 299
     height: 299
 generate:
-  backgrounds_version: v2
+  backgrounds_version: v4
   base_shapes_version: v1
   download_base_url: https://bintray.com/uavaustin/target-finder-assets/download_file?file_path=
   max_shapes_per_image: 2
@@ -64,8 +64,8 @@ generate:
   delete_on_convert: false
   train_batch:
     offset: 0
-    images: 20
+    images: 200000
   eval_batch:
     offset: 0
-    images: 5
+    images: 2000
   img_ext: jpeg

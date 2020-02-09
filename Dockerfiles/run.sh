@@ -5,4 +5,4 @@ sudo docker run --runtime=nvidia -ti --net=host --ipc=host -e DISPLAY=$DISPLAY \
 -v $PWD:/host \
 uavaustin/target-finder-model-env:tf1 /bin/bash
 
-xhost -
+xhost -"local:docker@"

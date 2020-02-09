@@ -125,19 +125,10 @@ def get_annotations(records_dir):
                 "image_id": int(i.numpy()),
                 "category_id": int(data["image/object/class/label"].values[j].numpy()),
                 "bbox": [int(coord) for coord in bbox_coco_fmt],
-                "segmentation": [
-                    [
-                        str(x1),
-                        str(y1),
-                        str(x1),
-                        str(y2),
-                        str(x2),
-                        str(y2),
-                        str(x2),
-                        str(y1),
-                    ]
-                ],
                 "iscrowd": 0,
+                "area": float(
+                    (x2 - x1) * data["image/width"].numpy() *  
+                    (y2 - y1) * data["image/height"].numpy()),
             }
             coco_labels.append(coco_label)
 

@@ -111,6 +111,9 @@ venv.bak/
 /scripts_generate/data/
 /test/shapes/
 
+# Config
+config.yaml
+
 # Model
 *.weights
 bad.list
@@ -126,5 +129,6 @@ models/inception_v3/*
 model_data/records/*
 target_finder_model/data/**/*
 !target_finder_model/data/data.here
+
 # Editor
 .vscode
