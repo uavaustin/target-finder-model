@@ -124,7 +124,7 @@ These tests are automatically run on Github Actions on each commit.
 
 ## Releases
 
-Building the full model is managed with Github Actions(along with the testing
+Building the full model is managed with Github Actions (along with the testing
 above).
 
 Full builds are run on tags and the model is uploaded as a build artifact at
