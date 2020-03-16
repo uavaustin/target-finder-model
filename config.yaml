@@ -64,8 +64,8 @@ generate:
   delete_on_convert: false
   train_batch:
     offset: 0
-    images: 10
+    images: 10000
   eval_batch:
     offset: 0
-    images: 5
+    images: 2000
   img_ext: png
