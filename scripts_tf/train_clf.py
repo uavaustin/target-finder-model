@@ -6,11 +6,12 @@ Check here for a list of prebuilt Keras models:
 https://keras.io/applications/.
 """
 
-from typing import Tuple
+from typing import Tuple, List
 import pathlib 
 import os 
 
 import tensorflow as tf 
+import numpy as np
 
 with pathlib.Path("config.yaml").open("r") as f:
     import yaml
@@ -20,9 +21,10 @@ CLASSES = {}
 for idx, item in enumerate(config["classes"]["types"]):
     CLASSES[item] = idx
 
+IMG_DIM = 160
 IMG_SHAPE = (
-    config["inputs"]["preclf"]["width"], 
-    config["inputs"]["preclf"]["height"], 
+    IMG_DIM, 
+    IMG_DIM, 
     3
 )
 
@@ -37,19 +39,12 @@ AUTOTUNE = tf.data.experimental.AUTOTUNE
 
 def process_file(file_path) -> Tuple[tf.Tensor, int]:
     """Function that takes path to image and preprocesses it."""
-
     img = tf.io.read_file(file_path)
     # Expand animations because png has alpha channel
     img = tf.image.decode_image(img, expand_animations=False)
     img = tf.image.convert_image_dtype(img, tf.float32)
     img = (img / 127.5) - 1
-    img = tf.image.resize(
-            img, 
-            [
-                config["inputs"]["preclf"]["width"], 
-                config["inputs"]["preclf"]["height"]
-            ]
-        )
+    img = tf.image.resize(img, [IMG_DIM, IMG_DIM])
 
     return img, file_path
 
@@ -73,31 +68,20 @@ def create_model() -> tf.keras.models.Model:
     Add a classification head after the convolutional layers.
     """
     base_model = tf.keras.applications.MobileNetV2(
-        input_shape=IMG_SHAPE, include_top=False, weights='imagenet')
+        input_shape=IMG_SHAPE, include_top=False)
 
     base_model.trainable = True  # We want to train the classifier's params.
     # Use the global pooling to take any [N, M] matrix to [1, 1]
     global_pooling = tf.keras.layers.GlobalAveragePooling2D()
     # Take the output of the layer above and linear layer to output classes
-    prediction_layer = tf.keras.layers.Dense(NUM_CLASSES)
+    prediction_layer = tf.keras.layers.Dense(2)
 
     model = tf.keras.Sequential([
         base_model,
         global_pooling,
         prediction_layer,
-        tf.keras.layers.Softmax()
     ])    
-
-    # Compile the model. Use non-logits because these are softmax outputs
-    model.compile(
-        optimizer=tf.keras.optimizers.SGD(
-            learning_rate=1e-3,
-            momentum=0.9,
-            nesterov=True,
-        ),
-        loss=tf.keras.losses.BinaryCrossentropy(from_logits=False)
-    )
-
+    
     return model
 
 
@@ -105,23 +89,27 @@ def path_to_classes(y: tf.Tensor) -> tf.Tensor:
     """Converts tensor of paths to tensor of class ids."""
     y = [pathlib.Path(path.decode()) for path in y.numpy()]
     y = [path.name.split('_')[0] for path in y]
-    y = tf.convert_to_tensor(
-        [[0, 1] if int(CLASSES[name]) == 0 else [1, 0] for name in y]
-        )
+    
+    #y = tf.convert_to_tensor(
+    #        [[0, 1] if int(CLASSES[name]) == 0 else [1, 0] for name in y]
+    #    )
+    
+    y = tf.convert_to_tensor([int(CLASSES[name]) for name in y])
+
     return y
 
-def loss(model, x, y, loss_fn, training):
-    # training=training is needed only if there are layers with different
-    # behavior during training versus inference (e.g. Dropout).
+
+def loss(model, x: tf.Tensor, y: tf.Tensor, training: bool):
+    # https://www.tensorflow.org/api_docs/python/tf/nn/sparse_softmax_cross_entropy_with_logits
     y_ = model(x, training=training)
-    y = path_to_classes(y)
-    return loss_fn(y_true=y, y_pred=y_), y
+    return tf.nn.sparse_softmax_cross_entropy_with_logits(y, y_)
 
 
-def grad(model, inputs, targets, loss_fn):
+def grad(model, inputs: tf.Tensor, targets: tf.Tensor):
+    """Use the GradientTape method to calculate gradients of model."""
     with tf.GradientTape() as tape:
-        loss_value, y = loss(model, inputs, targets, loss_fn, training=True)
-    return loss_value, y, tape.gradient(loss_value, model.trainable_variables)
+        loss_value = loss(model, inputs, targets, training=True)
+    return loss_value, tape.gradient(loss_value, model.trainable_variables)
 
 
 def train() -> None:
@@ -131,29 +119,31 @@ def train() -> None:
     # Get the training and eval sets
     train_ds, eval_ds = create_datasets()
 
-    # Loss function
-    loss_fn = tf.keras.losses.BinaryCrossentropy(from_logits=False)
     # Optimizer, choosing stochastic grad descent with momentum
-    optimizer = tf.keras.optimizers.SGD(learning_rate=0.01, momentum=0.9)
+    optimizer = tf.keras.optimizers.SGD(learning_rate=1e-1)
     
     # Training loop
     for epoch in range(200):
+        # Create the metrics
         epoch_loss_avg = tf.keras.metrics.Mean()      
-        epoch_accuracy = tf.keras.metrics.BinaryAccuracy()
+        test_accuracy = tf.keras.metrics.Accuracy()
         
         # Train
         for idx, (x, y) in enumerate(train_ds):
-            loss_value, y, grads = grad(model, x, y, loss_fn)
+            y = path_to_classes(y)
+            loss_value, grads = grad(model, x, y)
             optimizer.apply_gradients(zip(grads, model.trainable_variables))
             epoch_loss_avg(loss_value)  # Add current batch loss
+            
             if idx % 100 == 0:
-                print(f"Epoch {epoch}: Loss: {epoch_loss_avg.result()}.")
+                # Evaluate
+                for x, y, in eval_ds:
+                    logits = model(x, training=False)
+                    print(tf.nn.softmax(logits))
+                    predictions = tf.argmax(tf.nn.softmax(logits), axis=1, output_type=tf.int32)
+                    test_accuracy(predictions, tf.argmax(path_to_classes(y), axis=1))
 
-        # Evaluate
-        for x, y, in eval_ds:
-            epoch_accuracy(path_to_classes(y), model(x, training=False))
-
-        print(f"Eval Accuracy: {epoch_accuracy.result()}.")
+                print(f"Epoch {epoch}: Loss: {epoch_loss_avg.result()}: Eval Accuracy: {test_accuracy.result()}.")
         
     return None
 
