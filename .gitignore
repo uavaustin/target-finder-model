@@ -113,7 +113,6 @@ venv.bak/
 
 # Model
 *.weights
-bad.list
 models/*/saved_model
 models/*/checkpoints
 models/*/*.pb
@@ -126,5 +125,6 @@ models/inception_v3/*
 model_data/records/*
 target_finder_model/data/**/*
 !target_finder_model/data/config.yaml
+
 # Editor
 .vscode

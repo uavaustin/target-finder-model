@@ -104,7 +104,7 @@ def get_annotations(records_dir):
             "width": int(data["image/width"].numpy()),
             "id": int(i.numpy()),
             "coco_url": "n/a",
-            "date_captured": "2000-01-01 00:00:00"
+            "date_captured": "2000-01-01 00:00:00",
         }
         images.append(img)
 
@@ -113,7 +113,7 @@ def get_annotations(records_dir):
             y1 = data["image/object/bbox/ymin"].values[j].numpy()
             x2 = data["image/object/bbox/xmax"].values[j].numpy()
             y2 = data["image/object/bbox/ymax"].values[j].numpy()
-            
+
             bbox_coco_fmt = [
                 x1 * data["image/width"].numpy(),  # x0
                 y1 * data["image/height"].numpy(),  # x1
@@ -125,7 +125,18 @@ def get_annotations(records_dir):
                 "image_id": int(i.numpy()),
                 "category_id": int(data["image/object/class/label"].values[j].numpy()),
                 "bbox": [int(coord) for coord in bbox_coco_fmt],
-                "segmentation": [[str(x1), str(y1), str(x1), str(y2), str(x2), str(y2), str(x2), str(y1)]],
+                "segmentation": [
+                    [
+                        str(x1),
+                        str(y1),
+                        str(x1),
+                        str(y2),
+                        str(x2),
+                        str(y2),
+                        str(x2),
+                        str(y1),
+                    ]
+                ],
                 "iscrowd": 0,
             }
             coco_labels.append(coco_label)

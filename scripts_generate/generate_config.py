@@ -2,13 +2,10 @@
 Contains configuration settings for generation.
 """
 
-import os
+import pathlib
 import yaml
 
-with open(
-    os.path.join(os.path.dirname(__file__), os.pardir, "config.yaml"), "r"
-) as stream:
-
+with pathlib.Path("config.yaml").open("r") as stream:
     config = yaml.safe_load(stream)
 
 
@@ -18,18 +15,15 @@ BASE_SHAPES_VERSION = config["generate"]["base_shapes_version"]
 
 DOWNLOAD_BASE = config["generate"]["download_base_url"]
 
-BACKGROUNDS_URL = DOWNLOAD_BASE + "backgrounds-" + BACKGROUNDS_VERSION + ".tar.gz"
-BASE_SHAPES_URL = DOWNLOAD_BASE + "base-shapes-" + BASE_SHAPES_VERSION + ".tar.gz"
+BACKGROUNDS_URL = f"{DOWNLOAD_BASE}backgrounds-{BACKGROUNDS_VERSION}.tar.gz"
+BASE_SHAPES_URL = f"{DOWNLOAD_BASE}base-shapes-{BASE_SHAPES_VERSION}.tar.gz"
 
-ASSETS_DIR = os.environ.get(
-    "ASSETS_DIR", os.path.join(os.path.dirname(__file__), "assets")
-)
+ASSETS_DIR = pathlib.Path(__file__).parent / "assets"
 
-BACKGROUNDS_DIR = os.path.join(ASSETS_DIR, "backgrounds-" + BACKGROUNDS_VERSION)
-BASE_SHAPES_DIR = os.path.join(ASSETS_DIR, "base-shapes-" + BASE_SHAPES_VERSION)
+BACKGROUNDS_DIR = ASSETS_DIR / f"backgrounds-{BACKGROUNDS_VERSION}"
+BASE_SHAPES_DIR = ASSETS_DIR / f"base-shapes-{BASE_SHAPES_VERSION}"
 
-
-DATA_DIR = os.environ.get("DATA_DIR", os.path.join(os.path.dirname(__file__), "data"))
+DATA_DIR = pathlib.Path(__file__).parent / "data"
 
 # [Number of Images]
 # Generate num - offset images
@@ -75,7 +69,7 @@ ALPHA_COLORS = [
 ]
 
 COLORS = {
-    "white": [(250, 250, 250)],
+    "white": [(240, 239, 233)],
     "black": [(5, 5, 5)],
     "gray": [(128, 128, 128)],
     "red": [(188, 60, 60), (255, 80, 80), (255, 0, 0), (154, 0, 0)],
@@ -94,14 +88,14 @@ COLORS = {
 
 ALPHAS = config["classes"]["alphas"]
 
-ALPHA_FONT_DIR = os.path.join(os.path.dirname(__file__), "vendor", "fonts")
+ALPHA_FONT_DIR = pathlib.Path(__file__).parent / "vendor" / "fonts"
 ALPHA_FONTS = [
-    os.path.join(ALPHA_FONT_DIR, "Rajdhani", "Rajdhani-Bold.ttf"),
-    os.path.join(ALPHA_FONT_DIR, "Gudea", "Gudea-Bold.ttf"),
-    os.path.join(ALPHA_FONT_DIR, "Inconsolata", "Inconsolata-Bold.ttf"),
-    os.path.join(ALPHA_FONT_DIR, "Open_Sans", "OpenSans-Bold.ttf"),
-    os.path.join(ALPHA_FONT_DIR, "Open_Sans", "OpenSans-SemiBold.ttf"),
-    os.path.join(ALPHA_FONT_DIR, "News_Cycle", "NewsCycle-Bold.ttf"),
+    ALPHA_FONT_DIR / "Rajdhani" / "Rajdhani-Bold.ttf",
+    ALPHA_FONT_DIR / "Gudea" / "Gudea-Bold.ttf",
+    ALPHA_FONT_DIR / "Inconsolata" / "Inconsolata-Bold.ttf",
+    ALPHA_FONT_DIR / "Open_Sans" / "OpenSans-Bold.ttf",
+    ALPHA_FONT_DIR / "Open_Sans" / "OpenSans-SemiBold.ttf",
+    ALPHA_FONT_DIR / "News_Cycle" / "NewsCycle-Bold.ttf",
 ]
 
 OD_CLASSES = SHAPE_TYPES + ALPHAS
@@ -124,8 +118,6 @@ PRECLF_SIZE = (
     config["inputs"]["preclf"]["width"],
     config["inputs"]["preclf"]["height"],
 )
-
-# [Darknet Models]
 
 # Whether to delete full image data when they are converted
 DELETE_ON_CONVERT = config["generate"]["delete_on_convert"]

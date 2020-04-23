@@ -1,46 +1,51 @@
 #!/usr/bin/env python3
+"""Script that will take detection data and copy it for cld-data."""
 
+import glob
+import pathlib
 from tqdm import tqdm
-from PIL import Image, ImageFilter, ImageOps, ImageEnhance
 import multiprocessing
 import random
-import generate_config as config
-import glob
-import os
+
+from PIL import Image, ImageEnhance, ImageOps, ImageFilter
 import numpy as np
 
-from create_detection_data import _random_list, _get_backgrounds
+import generate_config as config
+from create_detection_data import random_list, get_backgrounds
 
 # Get constants from config
 CLF_WIDTH, CLF_HEIGHT = config.PRECLF_SIZE
 CROP_WIDTH, CROP_HEIGHT = config.CROP_SIZE
-FILE_PATH = os.path.abspath(os.path.dirname(__file__))
+FILE_PATH = pathlib.Path(__file__)
 
 
-def create_clf_images(gen_type, num_gen, offset=0):
-    """Generate data for the classifier model"""
+def create_clf_images(gen_type: str, num_gen: int, offset: int = 0) -> None:
+    """Generate data for the classifier model."""
 
-    save_dir = os.path.join(config.DATA_DIR, gen_type, "images")
-    os.makedirs(save_dir, exist_ok=True)
+    bkg_save_dir = config.DATA_DIR / gen_type / "background"
+    target_save_dir = config.DATA_DIR / gen_type / "target"
+
+    # Make these dirs
+    bkg_save_dir.mkdir(parents=True, exist_ok=True)
+    target_save_dir.mkdir(parents=True, exist_ok=True)
 
     # Get target images
     data_folder = "detector_" + gen_type.split("_")[1]
-    images_dir = os.path.join(
-        config.DATA_DIR, data_folder, "images/*" + str(config.IMAGE_EXT)
-    )
-    image_names = glob.glob(images_dir)
-    image_names = _random_list(image_names, num_gen)
+    images_dir = config.DATA_DIR / data_folder / "images"
+
+    image_names = list(images_dir.glob(f"*{config.IMAGE_EXT}"))
+    image_names = random_list(image_names, num_gen)
 
     numbers = list(range(offset, offset + num_gen))
 
     # Get random crops and augmentations for background
-    backgrounds = _random_list(_get_backgrounds(), num_gen)
-    flip_bg = _random_list([False, True], num_gen)
-    mirror_bg = _random_list([False, True], num_gen)
-    blurs = _random_list(range(1, 3), num_gen)
-    enhancements = _random_list(np.linspace(0.5, 2, 5), num_gen)
-    crop_xs = _random_list(range(0, config.FULL_SIZE[0] - config.CROP_SIZE[0]), num_gen)
-    crop_ys = _random_list(range(0, config.FULL_SIZE[1] - config.CROP_SIZE[1]), num_gen)
+    backgrounds = random_list(get_backgrounds(), num_gen)
+    flip_bg = random_list([False, True], num_gen)
+    mirror_bg = random_list([False, True], num_gen)
+    blurs = random_list(range(1, 3), num_gen)
+    enhancements = random_list(np.linspace(0.5, 2, 5), num_gen)
+    crop_xs = random_list(range(0, config.FULL_SIZE[0] - config.CROP_SIZE[0]), num_gen)
+    crop_ys = random_list(range(0, config.FULL_SIZE[1] - config.CROP_SIZE[1]), num_gen)
 
     gen_types = [gen_type] * num_gen
 
@@ -62,8 +67,10 @@ def create_clf_images(gen_type, num_gen, offset=0):
         for i in tqdm(processes, total=num_gen):
             pass
 
+    return None
 
-def _single_clf_image(data):
+
+def _single_clf_image(data) -> None:
     """Crop detection image and augment clf image and save"""
     (
         number,
@@ -90,22 +97,22 @@ def _single_clf_image(data):
 
     background.filter(ImageFilter.GaussianBlur(blur))
     background = background.resize(config.PRECLF_SIZE)
-    background = _enhance_image(background, enhancement)
+    background = enhance_image(background, enhancement)
 
-    data_path = os.path.join(config.DATA_DIR, gen_type, "images")
-    bkg_fn = os.path.join(
-        data_path, "background_{}.{}".format(number, config.IMAGE_EXT)
-    )
+    data_path = config.DATA_DIR / gen_type
+    bkg_fn = data_path / "background" / f"background{number}.{config.IMAGE_EXT}"
     background.save(bkg_fn)
 
     # Now consider the shape image
     shape = Image.open(shape_img).resize(config.PRECLF_SIZE)
-    shape = _enhance_image(shape, enhancement)
-    shape_fn = os.path.join(data_path, "target_{}.{}".format(number, config.IMAGE_EXT))
+    shape = enhance_image(shape, enhancement)
+    shape_fn = data_path / "target" / f"target{number}.{config.IMAGE_EXT}"
     shape.save(shape_fn)
 
+    return None
 
-def _enhance_image(img, enhancement):
+
+def enhance_image(img, enhancement):
     converter = ImageEnhance.Color(img)
     return converter.enhance(enhancement)
 

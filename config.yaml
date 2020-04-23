@@ -53,10 +53,10 @@ inputs:
     width: 608
     height: 608
   preclf:
-    width: 299
-    height: 299
+    width: 100
+    height: 100
 generate:
-  backgrounds_version: v2
+  backgrounds_version: v4
   base_shapes_version: v1
   download_base_url: https://bintray.com/uavaustin/target-finder-assets/download_file?file_path=
   max_shapes_per_image: 2
@@ -64,8 +64,8 @@ generate:
   delete_on_convert: false
   train_batch:
     offset: 0
-    images: 10000
+    images: 50000
   eval_batch:
     offset: 0
-    images: 2000
+    images: 5000
   img_ext: png

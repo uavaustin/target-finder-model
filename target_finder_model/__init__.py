@@ -10,31 +10,33 @@ import os
 from .version import __version__
 
 # Config
-CONFIG_FN = resource_filename(__name__, os.path.join('data', 'config.yaml'))
-with open(CONFIG_FN, 'r') as stream:
+CONFIG_FN = resource_filename(__name__, os.path.join("data", "config.yaml"))
+with open(CONFIG_FN, "r") as stream:
     import yaml
+
     CONFIG = yaml.safe_load(stream)
 
-CLF_MODEL_PATH = resource_filename(
-    __name__, os.path.join('data', 'optimized-clf'))
-OD_MODEL_PATH = resource_filename(
-    __name__, os.path.join('data', 'optimized-det'))
+CLF_MODEL_PATH = resource_filename(__name__, os.path.join("data", "clf"))
+OD_MODEL_PATH = resource_filename(__name__, os.path.join("data", "det"))
 
 # Model Classes
-OD_CLASSES = CONFIG['classes']['shapes'] + CONFIG['classes']['alphas']
+OD_CLASSES = CONFIG["classes"]["shapes"] + CONFIG["classes"]["alphas"]
 
-CLF_CLASSES = CONFIG['classes']['types']
+CLF_CLASSES = CONFIG["classes"]["types"]
 
-DET_SIZE = (CONFIG['inputs']['detector']['width'],
-    CONFIG['inputs']['detector']['height'])
+DET_SIZE = (
+    CONFIG["inputs"]["detector"]["width"],
+    CONFIG["inputs"]["detector"]["height"],
+)
 
-CLF_SIZE = (CONFIG['inputs']['preclf']['width'],
-    CONFIG['inputs']['preclf']['height'])
+CLF_SIZE = (CONFIG["inputs"]["preclf"]["width"], CONFIG["inputs"]["preclf"]["height"])
 
-CROP_SIZE = (CONFIG['inputs']['cropping']['width'],
-    CONFIG['inputs']['cropping']['height'])
+CROP_SIZE = (
+    CONFIG["inputs"]["cropping"]["width"],
+    CONFIG["inputs"]["cropping"]["height"],
+)
 
-CROP_OVERLAP = CONFIG['inputs']['cropping']['overlap']
+CROP_OVERLAP = CONFIG["inputs"]["cropping"]["overlap"]
 
 # Submodules
 from . import inference

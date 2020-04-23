@@ -14,7 +14,7 @@ def join(*paths):
     return os.path.normpath(os.path.join(*paths))
 
 
-VERSION_PATH = join(__file__, '..', 'target_finder_model', 'version.py')
+VERSION_PATH = join(__file__, "..", "target_finder_model", "version.py")
 
 
 def get_version():
@@ -22,24 +22,24 @@ def get_version():
     Returns:
         str: The current uavaustin-target-finder version.
     """
-    with open(VERSION_PATH, 'r') as version:
+    with open(VERSION_PATH, "r") as version:
         out = {}
         exec(version.read(), out)
-        return out['__version__']
+        return out["__version__"]
 
 
 setup(
-    name='target-finder-model',
+    name="target-finder-model",
     version=get_version(),
-    author='UAV Austin',
-    url='https://github.com/uavaustin/target-finder-model',
+    author="UAV Austin",
+    url="https://github.com/uavaustin/target-finder-model",
     packages=find_packages(),
     package_data={
-        'target_finder_model': [
-            'data/**/*',
-            'data/optimized-clf/**/*',
-            'data/optimized-det/**/*'
+        "target_finder_model": [
+            "data/**/*",
+            "data/optimized-clf/**/*",
+            "data/optimized-det/**/*",
         ]
     },
-    license='MIT'
+    license="MIT",
 )
