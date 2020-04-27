@@ -28,39 +28,16 @@ objects = model.predict(['temp.jpg'])
 
 ### Training Pre-Classifier
 ```
-python scripts_tf/train_clf.py \
-    --model_name MODEL_NAME \
-    --train_dir models/MODEL_NAME/checkpoints \
-    --records_name model_data/records
-```
-To evaluate the model's accuracy during training, run:
-```
-python scripts_tf/eval_clf.py \ 
-    --model_name MODEL_NAME \
-    --checkpoint_path models/MODEL_NAME/checkpoints \
-    --eval_dir models/MODEL_NAME/eval
-```
-Training statistics can be visualized with `tensorboard --logdir models/MODEL_NAME/checkpoints`.
-
-### Freeze Pre-Classifier 
-After training, freeze the classification model for inference.
-```
-python scripts_tf/freeze_clf.py \
-    --model_name MODEL_NAME \
-    --ckpt_dir models/MODEL_NAME/ckpts \
-    --output_dir models/MODEL_NAME/frozen 
+PYTHONPATH=$(pwd) scripts_tf/train_clf.py 
 ```
 
 ### Optimize Pre-Classifier from fozen model
 ```
-python scripts_tf/optimize_clf.py \
-    --input_saved_model_dir models/MODEL_NAME/frozen  \
-    --output_saved_model_dir models/MODEL_NAME/optimized \
+PYTHONPATH=$(pwd) scripts_tf/optimize_clf.py \
+    --input_model_dir target_finder_model/data/clf \
+    --output_model_dir /optimized_clf \
     --data_dir model_data/records \
-    --mode validation \
-    --use_trt \
-    --precision FP32 \
-    --batch_size 5
+    --num_iterations 500
 ```
 
 ### Training Object Detector Model

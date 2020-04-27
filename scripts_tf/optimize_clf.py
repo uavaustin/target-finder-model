@@ -272,7 +272,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--classifcation_score",
         type=float,
-        default=0.4,
+        default=0.1,
         help="Confidence threshold during the benchmark.",
     )
     args = parser.parse_args()
@@ -326,6 +326,6 @@ if __name__ == "__main__":
         classifcation_score=args.classifcation_score,
     )
 
-    print(f"  accuracy: {results['accuracy'].numpy() * 100}")
-    print(f"  images/sec: {results['images_per_sec']}")
-    print(f"  total_time(s): {results['total_time']}")
+    print(f"  accuracy: {results['accuracy'].numpy() * 100:.3}")
+    print(f"  images/sec: {results['images_per_sec']:.3}")
+    print(f"  total_time(s): {results['total_time']:.3}")

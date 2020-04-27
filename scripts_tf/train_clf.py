@@ -26,19 +26,20 @@ IMG_SHAPE = [
 ]
 
 NUM_CLASSES = len(config["classes"]["types"])
-BATCH_SIZE = 64
+BATCH_SIZE = 512
 DATA_DIR = pathlib.Path("scripts_generate/data")
 IMG_EXT = config["generate"]["img_ext"]
 MODEL_SAVE_DIR = pathlib.Path("~/runs").expanduser() / "MobileNetV2"
 
 
+# Create the preprocessing functions
+def normalize_and_resize(img: tf.Tensor) -> tf.Tensor:
+    # This function is specific to mobilnetV2
+    return tf.keras.applications.mobilenet_v2.preprocess_input(img)
+
+
 def create_datasets() -> tf.data.Dataset:
     """Create the train and eval datasets using keras API."""
-
-    # Create the preprocessing functions
-    def normalize_and_resize(img: tf.Tensor) -> tf.Tensor:
-        # This function is specific to mobilnetV2
-        return tf.keras.applications.mobilenet_v2.preprocess_input(img)
 
     preprocess_fn = tf.keras.preprocessing.image.ImageDataGenerator(
         rotation_range=180,
@@ -55,12 +56,13 @@ def create_datasets() -> tf.data.Dataset:
         shuffle=True,
         class_mode="binary",
         seed=42,
+
     )
     eval_ds = preprocess_fn.flow_from_directory(
         DATA_DIR / "clf_val",
         batch_size=BATCH_SIZE,
         target_size=tuple(IMG_SHAPE[:2]),
-        shuffle=False,
+        shuffle=True,
         class_mode="binary",
         seed=42,
     )
@@ -80,7 +82,7 @@ def create_model() -> tf.keras.models.Model:
     # Use the global pooling to take any [N, M] matrix to [1, 1]
     global_pooling = tf.keras.layers.GlobalAveragePooling2D()
     # Take the output of the layer above and linear layer to output classes
-    prediction_layer = tf.keras.layers.Dense(1, activation="sigmoid")
+    prediction_layer = tf.keras.layers.Dense(1, activation="sigmoid", kernel_initializer="normal")
     # Add these layers on top of the model now
     model = tf.keras.Sequential([base_model, global_pooling, prediction_layer,])
 
@@ -96,44 +98,47 @@ def train(run_dir: pathlib.Path) -> None:
     model = create_model()
 
     model.compile(
-        optimizer=tf.keras.optimizers.SGD(
-            lr=1e-1, decay=1e-4, momentum=0.9, nesterov=True
+        optimizer=tf.keras.optimizers.RMSprop(
+            lr=1e-3, decay=1e-4, momentum=0.9
         ),
-        loss="binary_crossentropy",
+        loss=tf.keras.losses.BinaryCrossentropy(from_logits=True),
         metrics=["accuracy"],
     )
 
     # Get the training and eval sets
     train_ds, eval_ds = create_datasets()
+
     # Create a Callback to monitor validation accuracy
     callback = tf.keras.callbacks.EarlyStopping(
         monitor="val_accuracy",
         min_delta=0.001,
-        verbose=1,
         restore_best_weights=True,
         patience=4,
     )
     cp_callback = tf.keras.callbacks.ModelCheckpoint(
         filepath=str(run_dir / "checkpoints" / "ckpts"),
         save_weights_only=True,
-        verbose=1,
     )
 
     # TODO(alex) Use this history for plotting or TensorBoard logging
     history = model.fit(
         train_ds,
-        epochs=300,
+        epochs=100,
         validation_data=eval_ds,
-        use_multiprocessing=True,
-        shuffle=False,
-        validation_steps=100,
+        workers=4,
         callbacks=[callback, cp_callback],
+        steps_per_epoch=100,
+        validation_steps=20,
     )
 
-    save_dir = run_dir / "saved_model"
+    save_dir = run_dir / "saved_model" 
     model.save(str(save_dir), save_format="tf")
+
+    return save_dir
 
 
 if __name__ == "__main__":
+    # TODO(alex) add some cmd line args 
     run_dir = MODEL_SAVE_DIR / datetime.now().isoformat(" ")
-    train(run_dir)
+    save_dir = train(run_dir)
+    print(f"Saved model to {save_dir}.")
